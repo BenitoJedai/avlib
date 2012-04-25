@@ -1,0 +1,7 @@
+syntax: glob
+AVLib/obj/Debug
+TestApps/DrawRectTestApp/bin
+TestApps/DrawRectTestApp/obj
+TestApps/WinFormAnimation/bin/Debug
+TestApps/WinFormAnimation/obj
+_ReSharper.AVLib
