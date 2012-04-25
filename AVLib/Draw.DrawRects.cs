@@ -29,8 +29,10 @@ namespace AVLib.Draw.DrawRects
 
         private Point m_pos;
         private Size m_size;
-        private Rectangle m_rect;
         private RectAlignment m_alignment;
+        private bool m_Transparent; //todo: make property
+
+        private Rectangle m_rect;
         private Rectangle m_freeRect;
         private Rectangle m_clipRect;
         private DrawRect m_Parent;
@@ -39,10 +41,12 @@ namespace AVLib.Draw.DrawRects
         private RectPainters m_painters = new RectPainters();
         private Graphics m_graf;
         private Image m_Image;
+
         private int m_paint_disabled = 0;
         private bool m_needPaint = false;
+        private Region m_needPaintRegion = new Region();
+
         private bool m_inAlign = false;
-        private Region m_invalidateRegion = new Region();
         private bool m_needInvalidate = false;
         private bool m_fullValidate = false;
         private int m_BorderSize = 0;
@@ -55,12 +59,6 @@ namespace AVLib.Draw.DrawRects
         private Bitmap m_ParentBuffer = null;
         private bool m_ParentBufferAvailable = false;
         private Graphics m_ParentBufferGraf = null;
-        private object lockObject = new object();
-
-        private object LockObject()
-        {
-            return (m_Image == null) ? lockObject : (object)m_Image;
-        }
 
         #region Constructors
 
@@ -75,6 +73,7 @@ namespace AVLib.Draw.DrawRects
             m_rect = new Rectangle(pos.X, pos.Y, width, height);
             m_freeRect = m_rect;
             m_clipRect = m_rect;
+            m_invalidateRegion = new Region();
         }
 
         protected DrawRect()
@@ -112,9 +111,9 @@ namespace AVLib.Draw.DrawRects
         #region Public
 
         public delegate void OnPaintHandler(DrawRect rect);
-        public delegate void OnValidateHandler(Region rect);
+
         public event OnPaintHandler OnPaint;
-        public event OnValidateHandler OnInvalidate;
+
 
         public Point Pos
         {
@@ -351,11 +350,6 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
-        public void Invalidate()
-        {
-            if (DoPaint()) DoInvalidate(Rect);
-        }
-
         private void RecreateParentBuffer()
         {
             bool doCreate = false;
@@ -382,21 +376,7 @@ namespace AVLib.Draw.DrawRects
             RecreateParentBuffer();
             if (m_ParentBufferAvailable)
             {
-                lock (LockObject())
-                {
-                    m_ParentBufferGraf.DrawImage(m_Image, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), m_rect, GraphicsUnit.Pixel);
-                }
-            }
-        }
-
-        private void PaintParentBuffer()
-        {
-            if (m_ParentBufferAvailable)
-            {
-                lock (LockObject())
-                {
-                    m_graf.DrawImage(m_ParentBuffer, m_rect, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), GraphicsUnit.Pixel);
-                }
+                m_ParentBufferGraf.DrawImage(m_Image, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), m_rect, GraphicsUnit.Pixel);
             }
         }
 
@@ -414,14 +394,11 @@ namespace AVLib.Draw.DrawRects
                     m_needPaint = false;
                     if (OnPaint != null) OnPaint(this);
 
-                    lock (LockObject())
-                    {
-                        var old = m_graf.Clip;
-                        m_graf.Clip = new Region(m_clipRect);
-                        if (m_UserParentBuffer) PaintParentBuffer();
-                        m_painters.Paint(this, m_graf);
-                        m_graf.Clip = old;
-                    }
+                    var old = m_graf.Clip;
+                    m_graf.Clip = new Region(m_clipRect);
+                    if (m_UserParentBuffer) PaintParentBuffer();
+                    m_painters.Paint(this, m_graf);
+                    m_graf.Clip = old;
                 }
 
                 if (m_childs != null)
@@ -451,6 +428,224 @@ namespace AVLib.Draw.DrawRects
             m_paint_disabled--;
             if (m_paint_disabled == 0 && m_needPaint) Paint();
         }
+
+        #endregion
+
+        #region Painting and alligning
+
+        /*=============== Paint and aligning rules ====================
+         * public Paint(Graphics gr) should
+         *  - get clip region
+         *  - from top child to lower child: (create transparent info stack)
+         *    - if not transparent: 
+         *      - paint it in clip region
+         *      - exclude child rect from clip region
+         *    - if transparent: 
+         *      - remmeber info in stack, inculude child and its region, wich intersects with clip region 
+         * - paint self in remaining region
+         * - for each info in stack: paint transparent child in their remembered regions
+         * 
+         * protected InvalidateRegin(oldRect, item) shold:
+         *  - return if oldRect = item.Rect
+         *  - call Invalidate for freed rect
+         *  - if (item.FullValidate*) call Invalidate item.Rect
+         *  - else:
+         *    - call Invalidate for new added retion
+         *    - calc max(item.border_size, item.invalidate_border) region and Invalidate it
+         * 
+         * On resize:
+         *  - if not is TOP rect:
+         *    - call parent to realign child
+         *  - else
+         *    - Disable invalidating (remember invalidate regios mode)
+         *    - realign childs *
+         *    - call InvalidateRegion(OldRect, this)
+         *    - Enable invalidating
+         *  
+         * Realign childs:
+         *  - return if aligning disabled (need force realign after enabling)
+         *  - realign with call to InvalidateRegion(oldRect, child) for each
+         *  - if child rect changed call realign child for each child
+         *  
+         * On visible/hide:
+         *  - call parent to realign child
+         *  
+         * On visible property change:
+         *  - create update region
+         *  - call parent to remove overlaps from this region
+         *    - parent shold remove top not transparent childs rect from this region
+         *    - parent shold call parent ... up to top for removes all overlaped rects
+         *  - If region not empty - invalidate it
+        --------------------------------------------------*/
+
+        //--- Paint --------------------------------------
+
+        private struct PaintStackInfo
+        {
+            public DrawRect child;
+            public Region childRegion;
+        }
+        public void Paint(Graphics gr)
+        {
+            Region paintReg = gr.Clip.Clone();
+            Stack<PaintStackInfo> transparentInfo;
+            if (Count > 0)
+            {
+                transparentInfo = new Stack<PaintStackInfo>();
+                for (int i = m_childs.Count - 1; i >= 0; i--)
+                {
+                    if (paintReg.IsVisible(m_childs[i].Child.Rect))
+                    {
+                        if (m_childs[i].Child.m_Transparent)
+                        {
+                            PaintStackInfo stackInfo = new PaintStackInfo();
+                            stackInfo.child = m_childs[i].Child;
+                            stackInfo.childRegion = paintReg.Clone();
+                            stackInfo.childRegion.Intersect(m_childs[i].Child.Rect);
+                            transparentInfo.Push(stackInfo);
+                        }
+                        else
+                        {
+                            gr.Clip = paintReg.Clone();
+                            gr.Clip.Intersect(m_childs[i].Child.Rect);
+                            m_childs[i].Child.Paint(gr);
+                            paintReg.Exclude(m_childs[i].Child.Rect);
+                        }
+                    }
+                }
+                if (paintReg.IsVisible(Rect))
+                {
+                    gr.Clip = paintReg;
+                    m_painters.Paint(this, gr);
+                }
+                while (transparentInfo.Count > 0)
+                {
+                    var info = transparentInfo.Pop();
+                    gr.Clip = info.childRegion;
+                    info.child.Paint(gr);
+                }
+            }
+        }
+
+        //------------------------------------------------
+
+        //--- Invalidation logic:-------------------------
+
+        private readonly Region m_invalidateRegion = null; //only for TOPmost rect, child rect should call parent
+        private Region InvalidateRegion
+        {
+            get
+            {
+                if (m_Parent != null)
+                    return m_Parent.InvalidateRegion;
+                return m_invalidateRegion;
+            }
+        }
+        private int m_InvalidateDisabled = 0; //only for TOPmost rect, child rect should call parent
+        private int InvalidateDisabled
+        {
+            get
+            {
+                if (m_Parent != null)
+                    return m_Parent.InvalidateDisabled;
+                return m_InvalidateDisabled;
+            }
+            set
+            {
+                if (m_Parent != null)
+                    m_Parent.InvalidateDisabled = value;
+                else
+                    m_InvalidateDisabled = value;
+            }
+        }
+        public void DisableInvalidate()
+        {
+            InvalidateDisabled++;
+        }
+        public void EnableInvalidate()
+        {
+            InvalidateDisabled--;
+            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+        }
+        private void InvalidateIfNeeded()
+        {
+            if (m_Parent != null)
+            {
+                m_Parent.InvalidateIfNeeded();
+                return;
+            }
+
+            if (OnInvalidate != null)
+            {
+                if (InvalidateRegion.IsVisible(Rect))
+                {
+                    InvalidateRegion.Intersect(Rect);
+                    OnInvalidate(InvalidateRegion);
+                }
+            }
+            InvalidateRegion.MakeEmpty();
+        }
+        public delegate void OnValidateHandler(Region rect);
+        public event OnValidateHandler OnInvalidate;
+        public void Invalidate()
+        {
+            InvalidateRegion.Union(Rect);
+            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+        }
+        public void Invalidate(Rectangle invalidateRect)
+        {
+            InvalidateRegion.Union(invalidateRect);
+            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+        }
+        public void Invalidate(Region invalidateRegion)
+        {
+            InvalidateRegion.Union(invalidateRegion);
+            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+        }
+
+        //------------------------------------------
+
+        //----- Align logic ------------------------
+
+        private int m_AlignDisabled = 0; //only for TOPmost rect, child rect should call parent
+        private int AlignDisabled
+        {
+            get
+            {
+                if (m_Parent != null) return m_Parent.AlignDisabled;
+                return m_AlignDisabled;
+            }
+            set
+            {
+                if (m_Parent != null)
+                    m_Parent.AlignDisabled = value;
+                else
+                    m_AlignDisabled = value;
+            }
+        }
+        public void DisableAlign()
+        {
+            AlignDisabled++;
+        }
+        public void EnableAlign()
+        {
+            AlignDisabled--;
+            if (m_Parent == null && AlignDisabled <= 0)
+            {
+                //TODO: force realign
+            }
+        }
+
+        //------------------------------------------
+
+        private void PaintParentBuffer()
+        {
+            if (m_ParentBufferAvailable)
+            {
+                m_graf.DrawImage(m_ParentBuffer, m_rect, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), GraphicsUnit.Pixel);
+            }
+        }
+
 
         #endregion
 
