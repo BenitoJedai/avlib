@@ -38,12 +38,14 @@ namespace AVLib.Controls
 
         private void m_mainRect_OnChildMoved(object sender)
         {
-            m_mainRect.MouseChild(m_mainRect.LastMousePos);
+            var r = m_mainRect.MouseChild(m_mainRect.LastMousePos);
+            while (r != null)
+                r = r.MouseChild(m_mainRect.LastMousePos);
         }
 
         private void DrawControl_Resize(object sender, EventArgs e)
         {
-            m_mainRect.Rect = new Rectangle(0, 0, Width, Height);
+            m_mainRect.Size = new Size(Width, Height);
         }
 
         private delegate void InvalidateHandler(Region rect);

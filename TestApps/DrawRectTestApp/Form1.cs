@@ -97,6 +97,21 @@ namespace DrawRectTestApp
             {
                 var r2 = backRect.Add(RectAlignment.Fill, 0);
                 r2.Painters[0].FillRect(Color.Green.BrightColor(60));
+
+                var locationRect = (ControlRect)r2.Add(new Point(70, 100), 80, 80);
+                locationRect.Transparent = true;
+                locationRect.BorderSize = 2;
+                locationRect.Painters[0].FillRect(Color.Red.BrightColor(40).Transparent(40));
+                locationRect.Painters[0].DrawRectangle(Color.Navy, 2);
+                locationRect.MouseEnter += (s, args) =>
+                                               {
+                                                   s.AnimeCancel();
+                                                   s.Anime(true).Change("ContainerRect", new Rectangle(170, 100, 150, 150));
+                                               };
+                locationRect.MouseLeave += (s, args) =>
+                                               {
+                                                   s.AnimeQueue().Wait(Speed.Slow).Change("ContainerRect", new Rectangle(70, 100, 80, 80));
+                                               };
             }
 
             mouseRect = (ControlRect)rect.Add(new Point(80, 20), 60, 60);
@@ -137,21 +152,6 @@ namespace DrawRectTestApp
                                             ((ControlRect)s).Painters["transparent"].Anime().ChangeInc("Color", Color.Green.Transparent(40), Speed.Medium);
                                             s.Anime().ChangeDec("Size", new Size(80, 80), Speed.Medium);
                                         };
-
-            var locationRect = (ControlRect)rect.Add(new Point(100, 150), 80, 80);
-            locationRect.Transparent = true;
-            locationRect.BorderSize = 2;
-            locationRect.Painters[0].FillRect(Color.Red.BrightColor(40).Transparent(40));
-            locationRect.Painters[0].DrawRectangle(Color.Navy, 2);
-            locationRect.MouseEnter += (s, args) =>
-                                           {
-                                               s.AnimeCancel();
-                                               s.Anime(true).Change("Rect", new Rectangle(200, 150, 150,  150));
-                                           };
-            locationRect.MouseLeave += (s, args) =>
-                                           {
-                                               s.AnimeQueue().Wait(Speed.Slow).Change("Rect", new Rectangle(100, 150, 80, 80));
-                                           };
 
             rect.Invalidate();
         }

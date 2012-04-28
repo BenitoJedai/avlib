@@ -148,23 +148,39 @@ namespace AVLib.Draw.DrawRects
             get { return m_rect; }
             set
             {
-                m_pos = value.Location;
-                if (m_Parent != null) m_pos.Offset(Offset);
-                m_size = value.Size;
-                DoRectChanged(true);
+                if (m_rect != value)
+                {
+                    var old = m_rect;
+                    m_rect = value;
+                    this.InvalidateChildRect(old, this);
+                }
             }
         }
 
-        public Point GetOffset(Point offset)
+        public Rectangle ContainerRect
         {
-            if (m_Parent == null) return offset;
-            offset.Offset(-m_Parent.m_BorderSize, -m_Parent.m_BorderSize);
-            return m_Parent.GetOffset(offset);
+            get
+            {
+                var res = m_rect;
+                res.Offset(ContainerOffset);
+                return res;
+            }
+            set
+            {
+                var of = ContainerOffset;
+                value.Offset(-of.X, -of.Y);
+                Rect = value;
+            }
         }
 
-        public Point Offset
+        public Point ContainerOffset
         {
-            get { return GetOffset(new Point(0, 0)); }
+            get
+            {
+                var p = new Point(0, 0);
+                if (m_Parent != null) p.Offset(-m_Parent.Rect.X - m_Parent.m_BorderSize, -m_Parent.Rect.Y - m_Parent.m_BorderSize); ;
+                return p;
+            }
         }
 
         public int BorderSize
@@ -408,15 +424,15 @@ namespace AVLib.Draw.DrawRects
                             PaintStackInfo stackInfo = new PaintStackInfo();
                             stackInfo.child = m_childs[i].Child;
                             stackInfo.childRegion = paintReg.Clone();
-                            stackInfo.childRegion.Intersect(m_childs[i].Child.m_clipReg);
+                            stackInfo.childRegion.Intersect(m_childs[i].Child.ClipReg);
                             transparentInfo.Push(stackInfo);
                         }
                         else
                         {
                             gr.Clip = paintReg.Clone();
-                            gr.Clip.Intersect(m_childs[i].Child.m_clipReg);
+                            gr.Clip.Intersect(m_childs[i].Child.ClipReg);
                             m_childs[i].Child.Paint(gr);
-                            paintReg.Exclude(m_childs[i].Child.m_clipReg);
+                            paintReg.Exclude(m_childs[i].Child.ClipReg);
                         }
                     }
                 }
@@ -434,6 +450,17 @@ namespace AVLib.Draw.DrawRects
                     gr.Clip = info.childRegion;
                     info.child.Paint(gr);
                 }
+            }
+        }
+
+        private Region ClipReg
+        {
+            get
+            {
+                m_clipReg.MakeEmpty();
+                m_clipReg.Union(m_rect);
+                if (m_Parent != null) m_clipReg.Intersect(m_Parent.RectWithoutBorder());
+                return m_clipReg;
             }
         }
 
@@ -623,10 +650,6 @@ namespace AVLib.Draw.DrawRects
                 }
             }
 
-            child.Child.m_clipReg.MakeEmpty();
-            child.Child.m_clipReg.Union(child.Child.m_rect);
-            child.Child.m_clipReg.Intersect(RectWithoutBorder());
-
             if (child.Child.Visible)
             {
                 switch (child.Child.m_alignment)
@@ -663,7 +686,7 @@ namespace AVLib.Draw.DrawRects
             {
                 m_control.Location = m_rect.Location;
                 m_control.Size = m_rect.Size;
-                var contrlR = m_clipReg.Clone();
+                var contrlR = ClipReg.Clone();
                 contrlR.Translate(-m_rect.X, -m_rect.Y);
                 m_control.Region = contrlR;
             }
@@ -684,7 +707,7 @@ namespace AVLib.Draw.DrawRects
             {
                 var contrlR = m_control.Region == null ? null : m_control.Region.Clone();
                 if (contrlR == null)
-                    contrlR = m_clipReg.Clone();
+                    contrlR = ClipReg.Clone();
                 else
                     contrlR.Translate(m_rect.X, m_rect.Y);
 
@@ -714,7 +737,7 @@ namespace AVLib.Draw.DrawRects
             for (int i = fromIndex; i < Count; i++)
             {
                 aligned = DoAlign(m_childs[i]);
-                this.ClipChildControl(m_childs[i].Child.m_clipReg, i - 1);
+                this.ClipChildControl(m_childs[i].Child.ClipReg, i - 1);
             }
             EnableInvalidate();
         }
