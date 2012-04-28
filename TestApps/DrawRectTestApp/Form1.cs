@@ -119,7 +119,7 @@ namespace DrawRectTestApp
                                                 };
 
             transparentRect = (ControlRect)rect.Add(new Point(40, 40), 80, 80);
-            transparentRect.UserParentBuffer = true;
+            transparentRect.Transparent = true;
             transparentRect.BorderSize = 2;
             transparentRect.Painters[0].FillRect(Color.Green.Transparent(40), "transparent");
             transparentRect.Painters[0].DrawRectangle(Color.Yellow, 2);
@@ -138,7 +138,7 @@ namespace DrawRectTestApp
                                             s.Anime().ChangeDec("Height", 80, Speed.Medium).ChangeDec("Width", 80, Speed.Medium);
                                         };
 
-            rect.Paint();
+            rect.Invalidate();
         }
 
         private void button2_Click(object sender, EventArgs e)

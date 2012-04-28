@@ -34,31 +34,18 @@ namespace AVLib.Draw.DrawRects
 
         private Rectangle m_rect;
         private Rectangle m_freeRect;
-        private Rectangle m_clipRect;
+        private Region m_clipReg = new Region();
         private DrawRect m_Parent;
         private int m_ParentIndex;
         private List<DrawRectChild> m_childs = null;
         private RectPainters m_painters = new RectPainters();
-        private Graphics m_graf;
-        private Image m_Image;
 
-        private int m_paint_disabled = 0;
-        private bool m_needPaint = false;
-        private Region m_needPaintRegion = new Region();
-
-        private bool m_inAlign = false;
-        private bool m_needInvalidate = false;
         private bool m_fullValidate = false;
         private int m_BorderSize = 0;
         private int m_InvalidateBorder = 0;
         private Control m_control = null;
         private bool m_Visible = true;
         private Control m_LockControl = null;
-
-        private bool m_UserParentBuffer = false;
-        private Bitmap m_ParentBuffer = null;
-        private bool m_ParentBufferAvailable = false;
-        private Graphics m_ParentBufferGraf = null;
 
         #region Constructors
 
@@ -72,11 +59,10 @@ namespace AVLib.Draw.DrawRects
             m_size = new Size(width, height);
             m_rect = new Rectangle(pos.X, pos.Y, width, height);
             m_freeRect = m_rect;
-            m_clipRect = m_rect;
             m_invalidateRegion = new Region();
         }
 
-        protected DrawRect()
+        public DrawRect()
         {
             m_painters.Changed += new ChangedHandler(m_painters_Changed);
         }
@@ -110,11 +96,6 @@ namespace AVLib.Draw.DrawRects
 
         #region Public
 
-        public delegate void OnPaintHandler(DrawRect rect);
-
-        public event OnPaintHandler OnPaint;
-
-
         public Point Pos
         {
             get { return m_pos; }
@@ -123,7 +104,7 @@ namespace AVLib.Draw.DrawRects
                 if (m_pos != value)
                 {
                     m_pos = value;
-                    DoRectChanged(true);
+                    DoRectChanged(false);
                 }
             }
         }
@@ -137,8 +118,10 @@ namespace AVLib.Draw.DrawRects
                 {
                     Rectangle old = new Rectangle(new Point(0, 0), m_size);
                     m_size = value;
+                    DisableInvalidate();
                     DoRectChanged(true);
                     if (m_Parent == null) InvalidateChildRect(old, this);
+                    EnableInvalidate();
                 }
             }
         }
@@ -151,19 +134,9 @@ namespace AVLib.Draw.DrawRects
                 if (m_BorderSize != value)
                 {
                     m_BorderSize = Math.Max(0, value);
-                    DoRectChanged(false);
-                    DoInvalidate(Rect);
+                    DoRectChanged(true);
+                    Invalidate(Rect);
                 }
-            }
-        }
-
-        public bool UserParentBuffer
-        {
-            get { return m_UserParentBuffer; }
-            set
-            {
-                m_UserParentBuffer = value;
-                DoRectChanged(true);
             }
         }
 
@@ -181,7 +154,7 @@ namespace AVLib.Draw.DrawRects
                 if (m_alignment != value)
                 {
                     m_alignment = value;
-                    DoRectChanged(false);
+                    DoRectChanged(true);
                 }
             }
         }
@@ -216,8 +189,34 @@ namespace AVLib.Draw.DrawRects
                 {
                     m_Visible = value;
                     if (m_control != null) m_control.Visible = m_Visible;
-                    DoRectChanged(true);
-                    DoInvalidate(m_rect);
+                    if (m_Visible || m_alignment != RectAlignment.Absolute) DoRectChanged(true);
+                    Invalidate(m_rect);
+                }
+            }
+        }
+
+        public bool Transparent
+        {
+            get { return m_Transparent; }
+            set
+            {
+                if (m_Transparent != value)
+                {
+                    m_Transparent = value;
+                    Invalidate();
+                }
+            }
+        }
+
+        public bool FullValidate
+        {
+            get { return m_fullValidate; }
+            set
+            {
+                if (m_fullValidate != value)
+                {
+                    m_fullValidate = value;
+                    Invalidate();
                 }
             }
         }
@@ -251,41 +250,10 @@ namespace AVLib.Draw.DrawRects
             get { return m_childs == null ? null : m_childs[index].Child; }
         }
 
-        public Graphics Graf
-        {
-            get { return m_graf; }
-            set
-            {
-                var needInvalidate = (m_graf == null);
-                m_graf = value;
-                BeginAlign();
-                if (m_childs != null)
-                {
-                    foreach (var child in m_childs)
-                        child.Child.Graf = m_graf;
-                }
-                if (needInvalidate) DoInvalidate(Rect);
-                EndAlign();
-            }
-        }
-
-        public Image Image
-        {
-            get { return m_Image; }
-            set
-            {
-                m_Image = value;
-                if (m_childs != null)
-                {
-                    foreach (var child in m_childs)
-                        child.Child.Image = m_Image;
-                }
-            }
-        }
-
         public void Clear()
         {
             m_childs = null;
+            Invalidate();
         }
 
         public RectPainters Painters
@@ -304,129 +272,37 @@ namespace AVLib.Draw.DrawRects
             return null;
         }
 
-        private void DoInvalidate(Rectangle rect)
+        public void Add(DrawRect rect)
         {
-            if (m_Parent != null)
-                m_Parent.DoInvalidate(rect);
-            else
-            {
-                if (OnInvalidate != null)
-                {
-                    if (m_inAlign)
-                    {
-                        m_needInvalidate = true;
-                        m_invalidateRegion.Union(rect);
-                    }
-                    else
-                        OnInvalidate(new Region(rect));
-                }
-            }
+            if (m_childs == null) m_childs = new List<DrawRectChild>();
+
+            DrawRectChild child = new DrawRectChild();
+            child.Child = rect;
+            rect.m_LockControl = m_LockControl;
+            rect.Painters.control = m_LockControl;
+            rect.m_Parent = this;
+            rect.m_ParentIndex = m_childs.Count;
+            m_childs.Add(child);
+            DoAlign(child);
         }
 
-        private void DoInvalidate(Region region)
+        public DrawRect Add(Point pos, int width, int height)
         {
-            if (m_Parent != null)
-                m_Parent.DoInvalidate(region);
-            else
-            {
-                if (OnInvalidate != null)
-                    OnInvalidate(region);
-            }
+            DrawRect res = CreateInstance();
+            res.m_pos = pos;
+            res.m_size = new Size(width, height);
+            res.m_alignment = RectAlignment.Absolute;
+            Add(res);
+            return res;
         }
 
-        private void BeginAlign()
+        public DrawRect Add(RectAlignment alignment, int size)
         {
-            m_inAlign = true;
-        }
-
-        private void EndAlign()
-        {
-            m_inAlign = false;
-            if (m_needInvalidate)
-            {
-                m_needInvalidate = false;
-                DoInvalidate(m_invalidateRegion);
-                m_invalidateRegion.MakeEmpty();
-            }
-        }
-
-        private void RecreateParentBuffer()
-        {
-            bool doCreate = false;
-            if (m_ParentBuffer == null) doCreate = true;
-            else
-            {
-                if (m_ParentBuffer.Width < m_rect.Width || m_ParentBuffer.Height < m_rect.Height) doCreate = true;
-                else
-                    m_ParentBufferAvailable = true;
-            }
-
-            if (doCreate && m_rect.Width > 0 && m_rect.Height > 0)
-            {
-                m_ParentBuffer = new Bitmap(m_rect.Width, m_rect.Height);
-                m_ParentBufferGraf = Graphics.FromImage(m_ParentBuffer);
-                m_ParentBufferAvailable = true;
-            }
-        }
-
-        private void RemBuffer()
-        {
-            m_ParentBufferAvailable = false;
-            if (!m_UserParentBuffer || m_graf == null || m_Image == null) return;
-            RecreateParentBuffer();
-            if (m_ParentBufferAvailable)
-            {
-                m_ParentBufferGraf.DrawImage(m_Image, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), m_rect, GraphicsUnit.Pixel);
-            }
-        }
-
-        public void Paint()
-        {
-            Paint(-1, false);
-        }
-
-        private void Paint(int fromIndex, bool skipRaiseParentPaint)
-        {
-            if (m_graf != null && m_Visible)
-            {
-                if (fromIndex < 0)
-                {
-                    m_needPaint = false;
-                    if (OnPaint != null) OnPaint(this);
-
-                    var old = m_graf.Clip;
-                    m_graf.Clip = new Region(m_clipRect);
-                    if (m_UserParentBuffer) PaintParentBuffer();
-                    m_painters.Paint(this, m_graf);
-                    m_graf.Clip = old;
-                }
-
-                if (m_childs != null)
-                {
-                    for (int i = Math.Max(0, fromIndex); i < m_childs.Count; i++)
-                    {
-                        if (fromIndex < 0) m_childs[i].Child.RemBuffer();
-                        m_childs[i].Child.DoPaint(true);
-                        if (fromIndex >= 0) m_childs[i].Child.DoInvalidate(m_childs[i].Child.Rect);
-                    }
-                }
-
-                if (fromIndex < 0 && !skipRaiseParentPaint && m_Parent != null)
-                {
-                    m_Parent.Paint(-1, false);
-                }
-            }
-        }
-
-        public void DisablePainting()
-        {
-            m_paint_disabled++;
-        }
-
-        public void EnablePainting()
-        {
-            m_paint_disabled--;
-            if (m_paint_disabled == 0 && m_needPaint) Paint();
+            DrawRect res = CreateInstance();
+            res.m_size = new Size(size, size);
+            res.m_alignment = alignment;
+            Add(res);
+            return res;
         }
 
         #endregion
@@ -487,37 +363,41 @@ namespace AVLib.Draw.DrawRects
         }
         public void Paint(Graphics gr)
         {
+            if (!m_Visible) return;
+
             Region paintReg = gr.Clip.Clone();
-            Stack<PaintStackInfo> transparentInfo;
+            Stack<PaintStackInfo> transparentInfo = new Stack<PaintStackInfo>();
             if (Count > 0)
             {
-                transparentInfo = new Stack<PaintStackInfo>();
                 for (int i = m_childs.Count - 1; i >= 0; i--)
                 {
-                    if (paintReg.IsVisible(m_childs[i].Child.Rect))
+                    if (m_childs[i].Child.Visible && paintReg.IsVisible(m_childs[i].Child.Rect))
                     {
                         if (m_childs[i].Child.m_Transparent)
                         {
                             PaintStackInfo stackInfo = new PaintStackInfo();
                             stackInfo.child = m_childs[i].Child;
                             stackInfo.childRegion = paintReg.Clone();
-                            stackInfo.childRegion.Intersect(m_childs[i].Child.Rect);
+                            stackInfo.childRegion.Intersect(m_childs[i].Child.m_clipReg);
                             transparentInfo.Push(stackInfo);
                         }
                         else
                         {
                             gr.Clip = paintReg.Clone();
-                            gr.Clip.Intersect(m_childs[i].Child.Rect);
+                            gr.Clip.Intersect(m_childs[i].Child.m_clipReg);
                             m_childs[i].Child.Paint(gr);
-                            paintReg.Exclude(m_childs[i].Child.Rect);
+                            paintReg.Exclude(m_childs[i].Child.m_clipReg);
                         }
                     }
                 }
-                if (paintReg.IsVisible(Rect))
-                {
-                    gr.Clip = paintReg;
-                    m_painters.Paint(this, gr);
-                }
+            }
+            if (paintReg.IsVisible(Rect))
+            {
+                gr.Clip = paintReg;
+                m_painters.Paint(this, gr);
+            }
+            if (Count > 0)
+            {
                 while (transparentInfo.Count > 0)
                 {
                     var info = transparentInfo.Pop();
@@ -602,6 +482,14 @@ namespace AVLib.Draw.DrawRects
             InvalidateRegion.Union(invalidateRegion);
             if (InvalidateDisabled <= 0) InvalidateIfNeeded();
         }
+        public void PreInvalidate(Rectangle invalidateRect)
+        {
+            InvalidateRegion.Union(invalidateRect);
+        }
+        public void PreInvalidate(Region invalidateRegion)
+        {
+            InvalidateRegion.Union(invalidateRegion);
+        }
 
         //------------------------------------------
 
@@ -631,107 +519,45 @@ namespace AVLib.Draw.DrawRects
         {
             AlignDisabled--;
             if (m_Parent == null && AlignDisabled <= 0)
-            {
-                //TODO: force realign
-            }
-        }
-
-        //------------------------------------------
-
-        private void PaintParentBuffer()
-        {
-            if (m_ParentBufferAvailable)
-            {
-                m_graf.DrawImage(m_ParentBuffer, m_rect, new Rectangle(new Point(0, 0), new Size(m_rect.Width, m_rect.Height)), GraphicsUnit.Pixel);
-            }
-        }
-
-
-        #endregion
-
-        protected bool DoPaint()
-        {
-            return DoPaint(false);
-        }
-
-        private bool DoPaint(bool skipRaiseParentPaint)
-        {
-            if (m_paint_disabled > 0 || (m_Parent != null && m_Parent.m_paint_disabled > 0))
-            {
-                m_needPaint = true;
-                return false;
-            }
-
-            Paint(-1, skipRaiseParentPaint);
-            return true;
-        }
-
-        private Rectangle RectWithoutBorder()
-        {
-            int n = Math.Max(m_InvalidateBorder, m_BorderSize);
-            return new Rectangle(m_rect.X + n, m_rect.Y + n, m_rect.Width - 2 * n, m_rect.Height - 2 * n);
-        }
-
-        private void DoRectChanged(bool isRect)
-        {
-            if (m_Parent != null)
-                m_Parent.RealignChilds(m_ParentIndex, isRect);
-            else
-            {
-                var old = m_rect;
-                m_rect = new Rectangle(m_pos, m_size);
-                m_clipRect = m_rect;
-                m_freeRect = RectWithoutBorder();
                 RealignChilds();
-                InvalidateChildRect(old, this);
-            }
-            DoPaint();
-        }
-
-        private void FixNegativeSize(ref Rectangle rect)
-        {
-            if (rect.Width < 0) rect.Width = 0;
-            if (rect.Height < 0) rect.Height = 0;
         }
 
         private void InvalidateChildRect(Rectangle oldRect, DrawRect rect)
         {
+            if (oldRect == rect.Rect) return;
             if (oldRect.Location != rect.Rect.Location)
             {
-                DoInvalidate(oldRect);
-                DoInvalidate(rect.Rect);
+                PreInvalidate(oldRect);
+                Invalidate(rect.Rect);
                 return;
             }
+            int borderSize = Math.Max(rect.m_BorderSize, rect.m_InvalidateBorder);
+            if (rect.Rect.Width < oldRect.Width)
+                Invalidate(new Rectangle(rect.Rect.Right - borderSize, rect.Rect.Top, oldRect.Width - rect.Width + borderSize, rect.Rect.Height));
+            if (rect.Rect.Height < oldRect.Height)
+                Invalidate(new Rectangle(rect.Rect.X, rect.Rect.Bottom - borderSize, rect.Rect.Width, oldRect.Height - rect.Height + borderSize));
             if (rect.m_fullValidate)
             {
-                DoInvalidate(rect.Rect);
+                Invalidate(rect.Rect);
                 return;
             }
             if (rect.Rect.Width > oldRect.Width)
             {
-                DoInvalidate(new Rectangle(oldRect.Right - rect.m_BorderSize, oldRect.Y, rect.Rect.Width - oldRect.Width + rect.m_BorderSize, rect.Rect.Height));
-            }
-            else
-            {
-                if (rect.Rect.Width < oldRect.Width)
-                    DoInvalidate(new Rectangle(rect.Rect.Right - rect.m_BorderSize, rect.Rect.Top, oldRect.Width - rect.Width + rect.m_BorderSize, rect.Rect.Height));
+                Invalidate(new Rectangle(oldRect.Right - borderSize, oldRect.Y,
+                                           rect.Rect.Width - oldRect.Width + borderSize, rect.Rect.Height));
             }
             if (rect.Rect.Height > oldRect.Height)
             {
-                DoInvalidate(new Rectangle(oldRect.X, oldRect.Bottom - rect.m_BorderSize, rect.Rect.Width, rect.Rect.Height - oldRect.Height + rect.m_BorderSize));
-            }
-            else
-            {
-                if (rect.Rect.Height < oldRect.Height)
-                    DoInvalidate(new Rectangle(rect.Rect.X, rect.Rect.Bottom - rect.m_BorderSize, rect.Rect.Width, oldRect.Height - rect.Height + rect.m_BorderSize));
+                Invalidate(new Rectangle(oldRect.X, oldRect.Bottom - borderSize, rect.Rect.Width,
+                                           rect.Rect.Height - oldRect.Height + borderSize));
             }
         }
 
         private bool DoAlign(DrawRectChild child)
         {
+            DisableInvalidate();
+
             child.RectForChild = m_freeRect;
-            child.Child.m_clipRect = m_freeRect;
-            child.Child.DisablePainting();
             var oldRect = child.Child.Rect;
             if (child.Child.Visible)
             {
@@ -745,40 +571,57 @@ namespace AVLib.Draw.DrawRects
                     case RectAlignment.Left:
                         child.Child.m_rect = new Rectangle(m_freeRect.Location,
                                                            new Size(child.Child.Width, m_freeRect.Height));
-                        m_freeRect = new Rectangle(m_freeRect.X + child.Child.m_rect.Width, m_freeRect.Y,
-                                                   m_freeRect.Width - child.Child.Width, m_freeRect.Height);
-                        FixNegativeSize(ref m_freeRect);
                         break;
                     case RectAlignment.Right:
                         child.Child.m_rect = new Rectangle(m_freeRect.Left + m_freeRect.Width - child.Child.Width,
                                                            m_freeRect.Y, child.Child.Width, m_freeRect.Height);
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width - child.Child.Width, m_freeRect.Height));
-                        FixNegativeSize(ref m_freeRect);
                         break;
                     case RectAlignment.Top:
                         child.Child.m_rect = new Rectangle(m_freeRect.Location,
                                                            new Size(m_freeRect.Width, child.Child.Height));
-                        m_freeRect = new Rectangle(m_freeRect.X, m_freeRect.Y + child.Child.Height, m_freeRect.Width,
-                                                   m_freeRect.Height - child.Child.Height);
-                        FixNegativeSize(ref m_freeRect);
                         break;
                     case RectAlignment.Bottom:
                         child.Child.m_rect = new Rectangle(m_freeRect.X,
                                                            m_freeRect.Y + m_freeRect.Height - child.Child.Height,
                                                            m_freeRect.Width, child.Child.Height);
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width, m_freeRect.Height - child.Child.Height));
-                        FixNegativeSize(ref m_freeRect);
                         break;
                     case RectAlignment.Fill:
                         child.Child.m_rect = m_freeRect;
                         break;
                 }
             }
+
+            child.Child.m_clipReg.MakeEmpty();
+            child.Child.m_clipReg.Union(child.Child.m_rect);
+            child.Child.m_clipReg.Intersect(RectWithoutBorder());
+
+            if (child.Child.Visible)
+            {
+                switch (child.Child.m_alignment)
+                {
+                    case RectAlignment.Left:
+                        m_freeRect = new Rectangle(m_freeRect.X + child.Child.m_rect.Width, m_freeRect.Y,
+                                                   m_freeRect.Width - child.Child.Width, m_freeRect.Height);
+                        break;
+                    case RectAlignment.Right:
+                        m_freeRect = new Rectangle(m_freeRect.Location,
+                                                   new Size(m_freeRect.Width - child.Child.Width, m_freeRect.Height));
+                        break;
+                    case RectAlignment.Top:
+                        m_freeRect = new Rectangle(m_freeRect.X, m_freeRect.Y + child.Child.Height, m_freeRect.Width,
+                                                   m_freeRect.Height - child.Child.Height);
+                        break;
+                    case RectAlignment.Bottom:
+                        m_freeRect = new Rectangle(m_freeRect.Location,
+                                                   new Size(m_freeRect.Width, m_freeRect.Height - child.Child.Height));
+                        break;
+                }
+            }
+
             child.Child.RealignChilds();
-            child.Child.EnablePainting();
             InvalidateChildRect(oldRect, child.Child);
+
+            EnableInvalidate();
             return oldRect != child.Child.Rect;
         }
 
@@ -788,87 +631,89 @@ namespace AVLib.Draw.DrawRects
             {
                 m_control.Location = m_rect.Location;
                 m_control.Size = m_rect.Size;
+                var contrlR = m_clipReg.Clone();
+                contrlR.Translate(-m_rect.X, -m_rect.Y);
+                m_control.Region = contrlR;
             }
+        }
+
+        private void ClipChildControl(Region region, int upTo)
+        {
+            if (Count > 0)
+            {
+                for (int i = 0; i < Math.Min(upTo + 1, m_childs.Count); i++)
+                    m_childs[i].Child.ClipControl(region);
+            }
+        }
+
+        private void ClipControl(Region region)
+        {
+            if (m_control != null && region.IsVisible(m_rect))
+            {
+                var contrlR = m_control.Region == null ? null : m_control.Region.Clone();
+                if (contrlR == null)
+                    contrlR = m_clipReg.Clone();
+                else
+                    contrlR.Translate(m_rect.X, m_rect.Y);
+
+                contrlR.Exclude(region);
+                contrlR.Translate(-m_rect.X, -m_rect.Y);
+                m_control.Region = contrlR;
+            }
+
+            ClipChildControl(region, Count - 1);
         }
 
         private void RealignChilds()
         {
             AlignControl();
-            RealignChilds(0, false);
+            RealignChilds(0);
         }
 
-        private void RealignChilds(int fromIndex, bool repaint)
+        private void RealignChilds(int fromIndex)
         {
-            BeginAlign();
-            try
-            {
-                DisablePainting();
-                if (fromIndex == 0)
-                    m_freeRect = RectWithoutBorder();
-                else
-                    m_freeRect = m_childs[fromIndex].RectForChild;
+            DisableInvalidate();
+            if (fromIndex == 0)
+                m_freeRect = RectWithoutBorder();
+            else
+                m_freeRect = m_childs[fromIndex].RectForChild;
 
-                bool aligned = false;
-                for (int i = fromIndex; i < Count; i++)
-                {
-                    aligned = DoAlign(m_childs[i]);
-                }
-                EnablePainting();
-                if (aligned)
-                    Invalidate();
-                else
-                    if (repaint) DoPaint();
-            }
-            finally
+            bool aligned = false;
+            for (int i = fromIndex; i < Count; i++)
             {
-                EndAlign();
+                aligned = DoAlign(m_childs[i]);
+                this.ClipChildControl(m_childs[i].Child.m_clipReg, i - 1);
+            }
+            EnableInvalidate();
+        }
+
+        //------------------------------------------
+
+        #endregion
+
+        private Rectangle RectWithoutBorder()
+        {
+            int n = m_BorderSize;
+            return new Rectangle(m_rect.X + n, m_rect.Y + n, m_rect.Width - 2 * n, m_rect.Height - 2 * n);
+        }
+
+        private void DoRectChanged(bool isRect)
+        {
+            if (m_Parent != null)
+                m_Parent.RealignChilds(m_ParentIndex);
+            else
+            {
+                var old = m_rect;
+                m_rect = new Rectangle(m_pos, m_size);
+                m_freeRect = RectWithoutBorder();
+                if (isRect) RealignChilds();
+                InvalidateChildRect(old, this);
             }
         }
 
         protected virtual DrawRect CreateInstance()
         {
             return new DrawRect();
-        }
-
-        private void Add(DrawRect rect)
-        {
-            if (m_childs == null) m_childs = new List<DrawRectChild>();
-
-            DrawRectChild child = new DrawRectChild();
-            child.Child = rect;
-            rect.m_LockControl = m_LockControl;
-            rect.Painters.control = m_LockControl;
-            rect.m_Parent = this;
-            rect.m_ParentIndex = m_childs.Count;
-            rect.Graf = m_graf;
-            rect.Image = m_Image;
-            m_childs.Add(child);
-            DoAlign(child);
-        }
-
-        public DrawRect Add(Point pos, int width, int height)
-        {
-            DrawRect res = CreateInstance();
-            res.m_pos = pos;
-            res.m_size = new Size(width, height);
-            res.m_alignment = RectAlignment.Absolute;
-            Add(res);
-            return res;
-        }
-
-        public DrawRect Add(RectAlignment alignment, int size)
-        {
-            return Add(alignment, size, false);
-        }
-
-        public DrawRect Add(RectAlignment alignment, int size, bool fullValidate)
-        {
-            DrawRect res = CreateInstance();
-            res.m_size = new Size(size, size);
-            res.m_alignment = alignment;
-            res.m_fullValidate = fullValidate;
-            Add(res);
-            return res;
         }
     }
 
@@ -881,12 +726,27 @@ namespace AVLib.Draw.DrawRects
         bool InvokeRequired();
         object Invoke(Delegate method, params Object[] args);
         object Invoke(Delegate method);
+        bool Enabled { get; set; }
     }
 
     public abstract class RectPainter : IRectPainter
     {
+        private bool m_Enabled;
+
         internal Control control;
         public string Name { get; set; }
+        public bool Enabled
+        {
+            get { return m_Enabled; }
+            set
+            {
+                if (m_Enabled != value)
+                {
+                    m_Enabled = value;
+                    DoChange();
+                }
+            }
+        }
 
         public event ChangedHandler Changed;
         public void DoChange()

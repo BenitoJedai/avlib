@@ -12,6 +12,9 @@ namespace AVLib.Animations
             internal int queueLevel = 0;
             internal object queueOwner = null;
             internal bool isQueue = false;
+            internal int time = AnimationControler.GetSpeedTime(Speed.Fast);
+            internal Speed speed = Speed.Fast;
+            internal SpeedMode speedMode = SpeedMode.Normal;
 
             public ObjectQueue(object ctrl, int queueLevel, object queueOwner, bool isQueue)
             {

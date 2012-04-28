@@ -13,7 +13,6 @@ namespace AVLib.Controls
 {
     public partial class DrawControl : Control
     {
-        private Bitmap m_paintMap;
         private ControlRect m_mainRect;
         private object lockObject = new object();
 
@@ -29,11 +28,16 @@ namespace AVLib.Controls
 
             m_mainRect = new ControlRect(this, new Point(0, 0), Width, Height);
             m_mainRect.Painters[0].FillRect(SystemColors.Control);
-
             this.Resize += new EventHandler(DrawControl_Resize);
+
             m_mainRect.OnInvalidate += new DrawRect.OnValidateHandler(m_mainRect_OnInvalidate);
 
             InitializeRects();
+        }
+
+        private void DrawControl_Resize(object sender, EventArgs e)
+        {
+            m_mainRect.Rect = new Rectangle(0, 0, Width, Height);
         }
 
         private delegate void InvalidateHandler(Region rect);
@@ -45,42 +49,6 @@ namespace AVLib.Controls
                 Invalidate(rect);
         }
 
-        private object LockObject()
-        {
-            return (m_paintMap == null) ? lockObject : (object)m_paintMap;
-        }
-
-        private void RecreateDrawMap()
-        {
-            if (ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
-            {
-                lock (LockObject())
-                {
-                    if (m_paintMap == null || m_paintMap.Width < ClientRectangle.Width || m_paintMap.Height < ClientRectangle.Height)
-                    {
-                        m_paintMap = new Bitmap(ClientRectangle.Width, ClientRectangle.Height);
-                        m_mainRect.Image = m_paintMap;
-                        m_mainRect.Graf = Graphics.FromImage(m_paintMap);
-                    }
-                    else
-                    {
-                        if (m_mainRect.Graf == null)
-                            m_mainRect.Graf = Graphics.FromImage(m_paintMap);
-                    }
-                }
-                m_mainRect.Size = new Size(ClientRectangle.Width, ClientRectangle.Height);
-            }
-            else
-            {
-                m_mainRect.Graf = null;
-            }
-        }
-
-        private void DrawControl_Resize(object sender, EventArgs e)
-        {
-            RecreateDrawMap();
-        }
-
         protected virtual void InitializeRects()
         {
             
@@ -88,12 +56,7 @@ namespace AVLib.Controls
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            if (m_paintMap == null) RecreateDrawMap();
-            if (m_paintMap != null)
-                lock (m_paintMap)
-                {
-                    pe.Graphics.DrawImage(m_paintMap, 0, 0);
-                }
+            this.m_mainRect.Paint(pe.Graphics);
         }
 
         protected override void OnPaintBackground(PaintEventArgs pevent)

@@ -39,8 +39,8 @@ namespace AVLib.Animations
             protected override void CloneTo(AnimationControler.BaseThreadParam clon)
             {
                 base.CloneTo(clon);
-                ((SizeThreadParam) clon).size = size;
-                ((SizeThreadParam) clon).speedMode = speedMode;
+                ((SizeThreadParam)clon).size = size;
+                ((SizeThreadParam)clon).speedMode = speedMode;
             }
         }
 
@@ -54,7 +54,7 @@ namespace AVLib.Animations
             protected override void CloneTo(AnimationControler.BaseThreadParam clon)
             {
                 base.CloneTo(clon);
-                ((HiglightThreadParam) clon).HiglightPercent = HiglightPercent;
+                ((HiglightThreadParam)clon).HiglightPercent = HiglightPercent;
             }
         }
 
@@ -69,8 +69,8 @@ namespace AVLib.Animations
             protected override void CloneTo(AnimationControler.BaseThreadParam clon)
             {
                 base.CloneTo(clon);
-                ((ColorThreadParam) clon).color = color;
-                ((ColorThreadParam) clon).speedMode = speedMode;
+                ((ColorThreadParam)clon).color = color;
+                ((ColorThreadParam)clon).speedMode = speedMode;
             }
         }
 
@@ -112,6 +112,7 @@ namespace AVLib.Animations
                 StepProcesor procesor = new StepProcesor(iterations, td.time);
                 bool up = changeSize > 0;
                 int newHeight = currHeight;
+                int prevHeight = currHeight;
 
                 procesor.Start((d) =>
                 {
@@ -122,7 +123,9 @@ namespace AVLib.Animations
                         d.Cancel = true;
                         return;
                     }
-                    SetObjectProperty(td.control, td.PropertyName, newHeight);
+                    if (newHeight != prevHeight)
+                        SetObjectProperty(td.control, td.PropertyName, newHeight);
+                    prevHeight = newHeight;
                 });
 
                 if (newHeight != td.size)
@@ -154,6 +157,7 @@ namespace AVLib.Animations
                 StepProcesor procesor = new StepProcesor(iterations, td.time);
 
                 Color newColor = controlColor;
+                Color prevColor = controlColor;
                 procesor.Start((d) =>
                                    {
                                        if (td.animatorState.Canceled)
@@ -162,7 +166,9 @@ namespace AVLib.Animations
                                            return;
                                        }
                                        newColor = controlColor.MergeColor(td.color, cacl.NextSize);
-                                       SetObjectProperty(td.control, td.PropertyName, newColor);
+                                       if (newColor != prevColor)
+                                           SetObjectProperty(td.control, td.PropertyName, newColor);
+                                       prevColor = newColor;
                                    });
 
                 if (newColor != td.color)
