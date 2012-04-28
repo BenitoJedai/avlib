@@ -18,6 +18,7 @@ namespace AVLib.Animations
             public int time;
             public string PropertyName;
             public int QueueLevel = 0;
+            public bool CompleteIfCancel;
             internal FinalCallback finalCallback;
 
             public object Clone()

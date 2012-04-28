@@ -4,10 +4,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AVLib.Animations;
 
 namespace AVLib.Draw.DrawRects
 {
-    public class ControlRect : DrawRect
+    public class ControlRect : DrawRect, IDisposable
     {
         public event MouseEventHandler MouseMove;
         public event EventHandler MouseEnter;
@@ -24,6 +25,10 @@ namespace AVLib.Draw.DrawRects
 
         private bool m_enabled = true;
         private ControlRect m_lastMouseControl = null;
+        private static readonly Point InvalidPoint = new Point(-1, -1);
+        private Point m_lastMousePos = InvalidPoint;
+
+        public Point LastMousePos { get { return m_lastMousePos; } set { m_lastMousePos = value; } }
 
         public bool Enabled
         {
@@ -63,13 +68,19 @@ namespace AVLib.Draw.DrawRects
 
         public ControlRect MouseChild(Point pt)
         {
-            var ch = GetChildControlEt(pt);
+            ControlRect ch;
+            if (pt.X < 0 || pt.Y < 0)
+                ch = null;
+            else
+                ch = GetChildControlEt(pt);
+
             if (ch != m_lastMouseControl)
             {
                 if (m_lastMouseControl != null) m_lastMouseControl.OnMouseLeave(new EventArgs());
                 if (ch != null) ch.OnMouseEnter(new EventArgs());
             }
             m_lastMouseControl = ch;
+            m_lastMousePos = pt;
             return ch;
         }
 
@@ -100,6 +111,7 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
+            m_lastMousePos = InvalidPoint;
             if (MouseLeave != null) MouseLeave(this, e);
         }
 
@@ -154,6 +166,11 @@ namespace AVLib.Draw.DrawRects
             var ch = MouseChild(e.Location);
             if (MouseWheel != null) MouseWheel(this, e);
             if (ch != null) ch.OnMouseWheel(e);
+        }
+
+        public void Dispose()
+        {
+            ControlController.RemoveControl(this);
         }
     }
 }

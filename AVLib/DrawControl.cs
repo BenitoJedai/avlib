@@ -31,8 +31,14 @@ namespace AVLib.Controls
             this.Resize += new EventHandler(DrawControl_Resize);
 
             m_mainRect.OnInvalidate += new DrawRect.OnValidateHandler(m_mainRect_OnInvalidate);
+            m_mainRect.OnChildMoved += new DrawRect.NotifyHandler(m_mainRect_OnChildMoved);
 
             InitializeRects();
+        }
+
+        private void m_mainRect_OnChildMoved(object sender)
+        {
+            m_mainRect.MouseChild(m_mainRect.LastMousePos);
         }
 
         private void DrawControl_Resize(object sender, EventArgs e)

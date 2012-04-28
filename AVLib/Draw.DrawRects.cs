@@ -32,7 +32,19 @@ namespace AVLib.Draw.DrawRects
         private RectAlignment m_alignment;
         private bool m_Transparent; //todo: make property
 
-        private Rectangle m_rect;
+        private Rectangle m_rect_internal;
+        private Rectangle m_rect
+        {
+            get { return m_rect_internal; }
+            set
+            {
+                if (m_rect_internal != value)
+                {
+                    m_rect_internal = value;
+                    ChildMoved(this);
+                }
+            }
+        }
         private Rectangle m_freeRect;
         private Region m_clipReg = new Region();
         private DrawRect m_Parent;
@@ -67,6 +79,15 @@ namespace AVLib.Draw.DrawRects
             m_painters.Changed += new ChangedHandler(m_painters_Changed);
         }
 
+        public delegate void NotifyHandler(object sender);
+        public event NotifyHandler OnChildMoved;
+        public void ChildMoved(object sender)
+        {
+            if (m_Parent != null)
+                m_Parent.ChildMoved(this);
+            else
+                if (OnChildMoved != null) OnChildMoved(this);
+        }
 
         private delegate void MethodHandler();
         private void m_painters_Changed()
@@ -116,14 +137,34 @@ namespace AVLib.Draw.DrawRects
             {
                 if (m_size != value)
                 {
-                    Rectangle old = new Rectangle(new Point(0, 0), m_size);
                     m_size = value;
-                    DisableInvalidate();
                     DoRectChanged(true);
-                    if (m_Parent == null) InvalidateChildRect(old, this);
-                    EnableInvalidate();
                 }
             }
+        }
+
+        public Rectangle Rect
+        {
+            get { return m_rect; }
+            set
+            {
+                m_pos = value.Location;
+                if (m_Parent != null) m_pos.Offset(Offset);
+                m_size = value.Size;
+                DoRectChanged(true);
+            }
+        }
+
+        public Point GetOffset(Point offset)
+        {
+            if (m_Parent == null) return offset;
+            offset.Offset(-m_Parent.m_BorderSize, -m_Parent.m_BorderSize);
+            return m_Parent.GetOffset(offset);
+        }
+
+        public Point Offset
+        {
+            get { return GetOffset(new Point(0, 0)); }
         }
 
         public int BorderSize
@@ -156,17 +197,6 @@ namespace AVLib.Draw.DrawRects
                     m_alignment = value;
                     DoRectChanged(true);
                 }
-            }
-        }
-
-        public Rectangle Rect
-        {
-            get { return m_rect; }
-            set
-            {
-                m_pos = value.Location;
-                m_size = value.Size;
-                DoRectChanged(true);
             }
         }
 
@@ -532,10 +562,14 @@ namespace AVLib.Draw.DrawRects
                 return;
             }
             int borderSize = Math.Max(rect.m_BorderSize, rect.m_InvalidateBorder);
+            int maxHeight = Math.Min(rect.Rect.Height, oldRect.Height);
+            int maxWidth = Math.Max(rect.Rect.Width, oldRect.Width);
+
             if (rect.Rect.Width < oldRect.Width)
-                Invalidate(new Rectangle(rect.Rect.Right - borderSize, rect.Rect.Top, oldRect.Width - rect.Width + borderSize, rect.Rect.Height));
+                Invalidate(new Rectangle(rect.Rect.Right - borderSize, rect.Rect.Top, oldRect.Width - rect.Width + borderSize, maxHeight));
             if (rect.Rect.Height < oldRect.Height)
-                Invalidate(new Rectangle(rect.Rect.X, rect.Rect.Bottom - borderSize, rect.Rect.Width, oldRect.Height - rect.Height + borderSize));
+                Invalidate(new Rectangle(rect.Rect.X, rect.Rect.Bottom - borderSize, maxWidth, oldRect.Height - rect.Height + borderSize));
+
             if (rect.m_fullValidate)
             {
                 Invalidate(rect.Rect);
@@ -543,13 +577,11 @@ namespace AVLib.Draw.DrawRects
             }
             if (rect.Rect.Width > oldRect.Width)
             {
-                Invalidate(new Rectangle(oldRect.Right - borderSize, oldRect.Y,
-                                           rect.Rect.Width - oldRect.Width + borderSize, rect.Rect.Height));
+                Invalidate(new Rectangle(oldRect.Right - borderSize, oldRect.Y, rect.Rect.Width - oldRect.Width + borderSize, maxHeight));
             }
             if (rect.Rect.Height > oldRect.Height)
             {
-                Invalidate(new Rectangle(oldRect.X, oldRect.Bottom - borderSize, rect.Rect.Width,
-                                           rect.Rect.Height - oldRect.Height + borderSize));
+                Invalidate(new Rectangle(oldRect.X, oldRect.Bottom - borderSize, maxWidth, rect.Rect.Height - oldRect.Height + borderSize));
             }
         }
 
@@ -564,8 +596,8 @@ namespace AVLib.Draw.DrawRects
                 switch (child.Child.m_alignment)
                 {
                     case RectAlignment.Absolute:
-                        child.Child.m_rect = new Rectangle(m_freeRect.X + child.Child.m_pos.X,
-                                                           m_freeRect.Y + child.Child.m_pos.Y, child.Child.Size.Width,
+                        child.Child.m_rect = new Rectangle(m_rect.X + m_BorderSize + child.Child.m_pos.X,
+                                                           m_rect.Y + m_BorderSize + child.Child.m_pos.Y, child.Child.Size.Width,
                                                            child.Child.Size.Height);
                         break;
                     case RectAlignment.Left:

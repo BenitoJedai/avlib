@@ -13,8 +13,9 @@ namespace AVLib.Animations
             internal object queueOwner = null;
             internal bool isQueue = false;
             internal int time = AnimationControler.GetSpeedTime(Speed.Fast);
-            internal Speed speed = Speed.Fast;
-            internal SpeedMode speedMode = SpeedMode.Normal;
+            internal Speed Speed{set { time = AnimationControler.GetSpeedTime(value); }}
+            internal SpeedMode SpeedMode = SpeedMode.Normal;
+            internal bool CompleteIfCancel = false;
 
             public ObjectQueue(object ctrl, int queueLevel, object queueOwner, bool isQueue)
             {
@@ -49,9 +50,99 @@ namespace AVLib.Animations
             return new ObjectQueue(ctrl, -1, null, false);
         }
 
+        public static ObjectQueue Anime(this object ctrl, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, false){CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, int time)
+        {
+            return new ObjectQueue(ctrl, -1, null, false){time = time};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, int time, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { time = time, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, int time, SpeedMode speedMode)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { time = time, SpeedMode = speedMode};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, Speed speed)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { Speed = speed };
+        }
+
+        public static ObjectQueue Anime(this object ctrl, Speed speed, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { Speed = speed, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, Speed speed, SpeedMode speedMode)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { Speed = speed, SpeedMode = speedMode};
+        }
+
+        public static ObjectQueue Anime(this object ctrl, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, false) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
         public static ObjectQueue AnimeQueue(this object ctrl)
         {
             return new ObjectQueue(ctrl, -1, null, true);
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, true){CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, int time)
+        {
+            return new ObjectQueue(ctrl, -1, null, true){time = time};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, int time, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { time = time, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, int time, SpeedMode speedMode)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { time = time, SpeedMode = speedMode};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, Speed speed)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { Speed = speed};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, Speed speed, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { Speed = speed, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, Speed speed, SpeedMode speedMode)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { Speed = speed, SpeedMode = speedMode};
+        }
+
+        public static ObjectQueue AnimeQueue(this object ctrl, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ObjectQueue(ctrl, -1, null, true) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
         }
 
         public static ControlQueue Anime(this Control ctrl)
@@ -59,9 +150,99 @@ namespace AVLib.Animations
             return new ControlQueue(ctrl, -1, null, false);
         }
 
+        public static ControlQueue Anime(this Control ctrl, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, false){CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, int time)
+        {
+            return new ControlQueue(ctrl, -1, null, false){time = time};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, int time, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { time = time, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, int time, SpeedMode speedMode)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { time = time, SpeedMode = speedMode};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, Speed speed)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { Speed = speed};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, Speed speed, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { Speed = speed, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, Speed speed, SpeedMode speedMode)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { Speed = speed, SpeedMode = speedMode};
+        }
+
+        public static ControlQueue Anime(this Control ctrl, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, false) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
         public static ControlQueue AnimeQueue(this Control ctrl)
         {
             return new ControlQueue(ctrl, -1, null, true);
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, true){CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, int time)
+        {
+            return new ControlQueue(ctrl, -1, null, true){time = time};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, int time, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { time = time, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, int time, SpeedMode speedMode)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { time = time, SpeedMode = speedMode};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, Speed speed)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { Speed = speed};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, Speed speed, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { Speed = speed, CompleteIfCancel = CompleteIfCancel};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, Speed speed, SpeedMode speedMode)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { Speed = speed, SpeedMode = speedMode};
+        }
+
+        public static ControlQueue AnimeQueue(this Control ctrl, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new ControlQueue(ctrl, -1, null, true) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel};
         }
 
         #region Wait
@@ -91,61 +272,88 @@ namespace AVLib.Animations
             return ctrlQ;
         }
 
+
+
+        public static ObjectQueue Wait(this ObjectQueue ctrlQ, int time)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeWaitPacket(time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            return ctrlQ;
+        }
+
+        public static ObjectQueue Wait(this ObjectQueue ctrlQ, Speed speed)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeWaitPacket(AnimationControler.GetSpeedTime(speed), true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            return ctrlQ;
+        }
+
+
+        public static ObjectQueue Wait(this ObjectQueue ctrlQ, int time, AnimationControler.FinalCallback finalCallback)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeWaitPacket(time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            return ctrlQ;
+        }
+
+        public static ObjectQueue Wait(this ObjectQueue ctrlQ, Speed speed, AnimationControler.FinalCallback finalCallback)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeWaitPacket(AnimationControler.GetSpeedTime(speed), true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            return ctrlQ;
+        }
+
         #endregion
 
         #region Height
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -153,55 +361,55 @@ namespace AVLib.Animations
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Height(this ControlQueue ctrlQ, int height, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightInc(this ControlQueue ctrlQ, int height, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue HeightDec(this ControlQueue ctrlQ, int height, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Height", height, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -211,55 +419,55 @@ namespace AVLib.Animations
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -268,55 +476,55 @@ namespace AVLib.Animations
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Width(this ControlQueue ctrlQ, int width, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthInc(this ControlQueue ctrlQ, int width, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue WidthDec(this ControlQueue ctrlQ, int width, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket("Width", width, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -333,13 +541,25 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int) (object) value, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             }
             return UnsuportedType();
         }
@@ -348,12 +568,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int) (object) value, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -363,12 +598,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -378,12 +628,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -393,12 +658,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -408,12 +688,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -423,12 +718,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -438,12 +748,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -453,12 +778,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -470,12 +810,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -485,12 +840,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -500,12 +870,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -515,12 +900,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -530,12 +930,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -545,12 +960,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -560,12 +990,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -575,12 +1020,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -590,12 +1050,27 @@ namespace AVLib.Animations
         {
             if (typeof(T) == typeof(int))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeIntPropPacket(propName, (int)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             if (typeof(T) == typeof(Color))
             {
-                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket(propName, (Color)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Point))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimePointPropPacket(propName, (Point)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Size))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeSizePropPacket(propName, (Size)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
+                return ctrlQ;
+            }
+            if (typeof(T) == typeof(Rectangle))
+            {
+                ctrlQ.ProcessPacket(AnimationUtils.AnimeRectPropPacket(propName, (Rectangle)(object)value, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
                 return ctrlQ;
             }
             return UnsuportedType();
@@ -619,7 +1094,7 @@ namespace AVLib.Animations
 
         public static ControlQueue Highlight(this ControlQueue ctrlQ, int highlightPercent)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightPacket(highlightPercent, AnimationControler.GetSpeedTime(Speed.Fast), true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightPacket(highlightPercent, ctrlQ.time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
             return ctrlQ;
         }
 
@@ -638,7 +1113,7 @@ namespace AVLib.Animations
 
         public static ControlQueue Highlight(this ControlQueue ctrlQ, int highlightPercent, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightPacket(highlightPercent, AnimationControler.GetSpeedTime(Speed.Fast), true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightPacket(highlightPercent, ctrlQ.time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
             return ctrlQ;
         }
 
@@ -660,7 +1135,7 @@ namespace AVLib.Animations
 
         public static ControlQueue HighlightForecolor(this ControlQueue ctrlQ, int highlightPercent)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightForecolorPacket(highlightPercent, AnimationControler.GetSpeedTime(Speed.Fast), true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightForecolorPacket(highlightPercent, ctrlQ.time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
             return ctrlQ;
         }
 
@@ -679,7 +1154,7 @@ namespace AVLib.Animations
 
         public static ControlQueue HighlightForecolor(this ControlQueue ctrlQ, int highlightPercent, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightForecolorPacket(highlightPercent, AnimationControler.GetSpeedTime(Speed.Fast), true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeHighlightForecolorPacket(highlightPercent, ctrlQ.time, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
             return ctrlQ;
         }
 
@@ -689,55 +1164,55 @@ namespace AVLib.Animations
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -745,55 +1220,55 @@ namespace AVLib.Animations
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue Color(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorInc(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ColorDec(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("BackColor", color, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -803,55 +1278,55 @@ namespace AVLib.Animations
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color, int time)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color, Speed speed)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
@@ -859,58 +1334,60 @@ namespace AVLib.Animations
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColor(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Normal, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, ctrlQ.SpeedMode, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorInc(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, SpeedMode.Inc, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color, int time, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color, Speed speed, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(speed), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         public static ControlQueue ForeColorDec(this ControlQueue ctrlQ, Color color, AnimationControler.FinalCallback finalCallback)
         {
-            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, AnimationControler.GetSpeedTime(Speed.Fast), SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeColorPropPacket("ForeColor", color, ctrlQ.time, SpeedMode.Dec, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback, ctrlQ.CompleteIfCancel));
             return ctrlQ;
         }
 
         #endregion
     }
+
+
 }

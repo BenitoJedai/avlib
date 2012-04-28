@@ -43,7 +43,8 @@
   <ItemGroup>
     <Compile Include="Animation.Controller.cs" />
     <Compile Include="Animation.cs" />
-    <Compile Include="Animation.ExtControls.cs" />
+    <Compile Include="Animation.Controller.ControlController.cs" />
+    <Compile Include="Animation.Externals.Controls.cs" />
     <Compile Include="Animation.Externals.cs" />
     <Compile Include="Animation.Internal.cs" />
     <Compile Include="ColorUtils.cs" />

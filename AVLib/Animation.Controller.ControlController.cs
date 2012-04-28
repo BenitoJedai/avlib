@@ -32,55 +32,6 @@ namespace AVLib.Animations
         Disabled
     }
 
-    public class ControlEventQueue : AnimationExternals.ControlQueue
-    {
-        private AnimeEvent animeEvent;
-        public ControlEventQueue(Control ctrl, AnimeEvent animeEvent, int queueLevel, object queueOwner, bool isQueue) : base(ctrl, queueLevel, queueOwner, isQueue)
-        {
-            this.animeEvent = animeEvent;
-        }
-
-        private EventQueue eventQueue = null;
-        private void InitQueue()
-        {
-            if (eventQueue != null) return;
-            eventQueue = ControlController.GetEventThreads(ctrl, animeEvent).NewQueue();
-            if (eventQueue.IsNew) ControlController.SetHandler(ctrl, animeEvent);
-        }
-        internal override void ProcessPacket(AnimationControler.AnimePacket packet)
-        {
-            InitQueue();
-            eventQueue.Add(packet);
-            if (isQueue) queueLevel++;
-        }
-    }
-
-    public class AnimeCollectorEventQueue : AnimationExternals.ControlQueue
-    {
-        private AnimeCollector animeCollector;
-        private AnimeEvent animeEvent;
-
-        public AnimeCollectorEventQueue(AnimeCollector collector, AnimeEvent animeEvent, int queueLevel, object queueOwner, bool isQueue)
-            : base(null, queueLevel, queueOwner, isQueue)
-        {
-            this.animeEvent = animeEvent;
-            this.animeCollector = collector;
-        }
-
-        private EventQueue eventQueue = null;
-        private void InitQueue()
-        {
-            if (eventQueue != null) return;
-            eventQueue = ControlController.GetEventThreads(animeCollector, animeEvent).NewQueue();
-        }
-        internal override void ProcessPacket(AnimationControler.AnimePacket packet)
-        {
-            InitQueue();
-            eventQueue.Add(packet);
-            if (isQueue) queueLevel++;
-        }
-    }
-
     public class AnimeCollector
     {
         public void ApplyToControl(Control ctrl)
@@ -200,7 +151,7 @@ namespace AVLib.Animations
         }
     }
 
-    internal static class ControlController
+    public static class ControlController
     {
         private static Dictionary<object, ControllData> controlsData = new Dictionary<object, ControllData>();
         private static Dictionary<AnimeCollector, ControllData> animeCollectors = new Dictionary<AnimeCollector, ControllData>();
@@ -219,7 +170,7 @@ namespace AVLib.Animations
             return null;
         }
 
-        public static ControllData GetControlData(object control)
+        internal static ControllData GetControlData(object control)
         {
             lock (controlsData)
             {
@@ -233,7 +184,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static ControllData GetCollectorData(AnimeCollector collector)
+        internal static ControllData GetCollectorData(AnimeCollector collector)
         {
             lock (animeCollectors)
             {
@@ -247,7 +198,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static EventQueueThreads FindEventThreads(Control control, AnimeEvent animeEvent)
+        internal static EventQueueThreads FindEventThreads(Control control, AnimeEvent animeEvent)
         {
             lock (controlsData)
             {
@@ -258,7 +209,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static EventQueueThreads FindEventThreads(AnimeCollector collector, AnimeEvent animeEvent)
+        internal static EventQueueThreads FindEventThreads(AnimeCollector collector, AnimeEvent animeEvent)
         {
             lock (animeCollectors)
             {
@@ -269,7 +220,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static EventQueueThreads GetEventThreads(object control, AnimeEvent animeEvent)
+        internal static EventQueueThreads GetEventThreads(object control, AnimeEvent animeEvent)
         {
             lock (controlsData)
             {
@@ -283,7 +234,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static EventQueueThreads GetEventThreads(AnimeCollector collector, AnimeEvent animeEvent)
+        internal static EventQueueThreads GetEventThreads(AnimeCollector collector, AnimeEvent animeEvent)
         {
             lock (animeCollectors)
             {
@@ -298,6 +249,15 @@ namespace AVLib.Animations
             {
                 if (controlsData.ContainsKey((Control)sender))
                     controlsData.Remove((Control) sender);
+            }
+        }
+
+        public static void RemoveControl(object control)
+        {
+            lock (controlsData)
+            {
+                if (controlsData.ContainsKey(control))
+                    controlsData.Remove(control);
             }
         }
 
@@ -509,259 +469,6 @@ namespace AVLib.Animations
         private static void ctrlClick(object sender, EventArgs args)
         {
             Execute((Control)sender, AnimeEvent.Click);
-        }
-
-        #endregion
-    }
-
-    public class AnimeEventSelector
-    {
-        internal Control ctrl;
-        internal bool isQueue;
-        public AnimeEventSelector(Control ctrl, bool isQueue)
-        {
-            this.ctrl = ctrl;
-            this.isQueue = isQueue;
-        }
-    }
-
-    public class AnimeEventCollector
-    {
-        internal AnimeCollector collector;
-        internal bool isQueue;
-        public AnimeEventCollector(AnimeCollector collector, bool isQueue)
-        {
-            this.collector = collector;
-            this.isQueue = isQueue;
-        }
-    }
-
-    public static class AnimeControlExternals
-    {
-        #region Control
-
-        public static AnimeEventSelector AnimeEvent(this Control control)
-        {
-            return new AnimeEventSelector(control, false);
-        }
-
-        public static AnimeEventSelector AnimeEventQueue(this Control control)
-        {
-            return new AnimeEventSelector(control, true);
-        }
-
-        public static ControlEventQueue MouseEnter(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.MouseEnter, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue MouseLeave(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.MouseLeave, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Click(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Click, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue MouseDown(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.MouseDonw, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue MouseUp(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.MouseUp, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue DoubleClick(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.DoubleClick, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue DragEnter(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.DragEnter, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue DragLeave(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.DragLeave, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue DragDrop(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.DragDrop, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Enter(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Enter, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Leave(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Leave, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue GotFocus(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.GotFocus, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue KeyDown(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.KeyDown, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue KeyUp(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.KeyUp, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue LostFocus(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.LostFocus, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue MouseWheel(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.MouseWheel, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue TextChanged(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.TextChanged, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Visible(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Visible, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Enabled(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Enabled, -1, null, selector.isQueue);
-        }
-
-        public static ControlEventQueue Disabled(this AnimeEventSelector selector)
-        {
-            return new ControlEventQueue(selector.ctrl, Animations.AnimeEvent.Disabled, -1, null, selector.isQueue);
-        }
-
-        #endregion
-
-        #region Collector
-
-        public static AnimeEventCollector AnimeEvent(this AnimeCollector collector)
-        {
-            return new AnimeEventCollector(collector, false);
-        }
-
-        public static AnimeEventCollector AnimeEventQueue(this AnimeCollector collector)
-        {
-            return new AnimeEventCollector(collector, true);
-        }
-
-        public static AnimeCollectorEventQueue MouseEnter(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.MouseEnter, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue MouseLeave(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.MouseLeave, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Click(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Click, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue MouseDown(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.MouseDonw, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue MouseUp(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.MouseUp, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue DoubleClick(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.DoubleClick, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue DragEnter(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.DragEnter, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue DragLeave(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.DragLeave, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue DragDrop(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.DragDrop, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Enter(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Enter, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Leave(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Leave, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue GotFocus(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.GotFocus, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue KeyDown(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.KeyDown, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue KeyUp(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.KeyUp, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue LostFocus(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.LostFocus, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue MouseWheel(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.MouseWheel, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue TextChanged(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.TextChanged, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Visible(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Visible, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Enabled(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Enabled, -1, null, collector.isQueue);
-        }
-
-        public static AnimeCollectorEventQueue Disabled(this AnimeEventCollector collector)
-        {
-            return new AnimeCollectorEventQueue(collector.collector, Animations.AnimeEvent.Disabled, -1, null, collector.isQueue);
         }
 
         #endregion

@@ -16,7 +16,7 @@ namespace AVLib.Animations
         private const double DecKoef = 2.5;
         private const double IncKoef = (double)1/DecKoef;
 
-        private int sizeChange;
+        private readonly int sizeChange;
         private SpeedMode speedMode;
         private int iterations;
 
@@ -41,6 +41,8 @@ namespace AVLib.Animations
             {
                 int n = (int)current;
                 CalcNext();
+                if (sizeChange > 0 && n > sizeChange) n = sizeChange;
+                if (sizeChange < 0 && n < sizeChange) n = sizeChange;
                 return n;
             }
         }

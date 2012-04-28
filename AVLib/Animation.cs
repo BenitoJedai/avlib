@@ -28,19 +28,19 @@ namespace AVLib.Animations
 
     public static class AnimationUtils
     {
-        private class SizeThreadParam : AnimationControler.BaseThreadParam
+        private class IntValueThreadParam : AnimationControler.BaseThreadParam
         {
-            public int size;
+            public int value;
             public SpeedMode speedMode;
             protected override AnimationControler.BaseThreadParam CreateClon()
             {
-                return new SizeThreadParam();
+                return new IntValueThreadParam();
             }
             protected override void CloneTo(AnimationControler.BaseThreadParam clon)
             {
                 base.CloneTo(clon);
-                ((SizeThreadParam)clon).size = size;
-                ((SizeThreadParam)clon).speedMode = speedMode;
+                ((IntValueThreadParam)clon).value = value;
+                ((IntValueThreadParam)clon).speedMode = speedMode;
             }
         }
 
@@ -74,6 +74,54 @@ namespace AVLib.Animations
             }
         }
 
+        private class LocationThreadParam : AnimationControler.BaseThreadParam
+        {
+            public Point location;
+            public SpeedMode speedMode;
+            protected override AnimationControler.BaseThreadParam CreateClon()
+            {
+                return new LocationThreadParam();
+            }
+            protected override void CloneTo(AnimationControler.BaseThreadParam clon)
+            {
+                base.CloneTo(clon);
+                ((LocationThreadParam)clon).location = location;
+                ((LocationThreadParam)clon).speedMode = speedMode;
+            }
+        }
+
+        private class SizeThreadParam : AnimationControler.BaseThreadParam
+        {
+            public Size size;
+            public SpeedMode speedMode;
+            protected override AnimationControler.BaseThreadParam CreateClon()
+            {
+                return new SizeThreadParam();
+            }
+            protected override void CloneTo(AnimationControler.BaseThreadParam clon)
+            {
+                base.CloneTo(clon);
+                ((SizeThreadParam)clon).size = size;
+                ((SizeThreadParam)clon).speedMode = speedMode;
+            }
+        }
+
+        private class RectThreadParam : AnimationControler.BaseThreadParam
+        {
+            public Rectangle rect;
+            public SpeedMode speedMode;
+            protected override AnimationControler.BaseThreadParam CreateClon()
+            {
+                return new RectThreadParam();
+            }
+            protected override void CloneTo(AnimationControler.BaseThreadParam clon)
+            {
+                base.CloneTo(clon);
+                ((RectThreadParam)clon).rect = rect;
+                ((RectThreadParam)clon).speedMode = speedMode;
+            }
+        }
+
         private delegate void SetObjectPropertyDelegate(object ctrl, string path, object value);
         private static void SetPropertyForObject(object ctrl, string path, object value)
         {
@@ -100,14 +148,14 @@ namespace AVLib.Animations
             ctrl.SetProperty(path, value);
         }
 
-        private static void SetIntProperty(object sizeThreadParam)
+        private static void SetIntProperty(object intThreadParam)
         {
-            SizeThreadParam td = (SizeThreadParam)sizeThreadParam;
+            IntValueThreadParam td = (IntValueThreadParam)intThreadParam;
             try
             {
                 int iterations = AnimationControler.GetIterations(td.time);
                 int currHeight = (int)td.control.GetProperty(td.PropertyName);
-                int changeSize = td.size - currHeight;
+                int changeSize = td.value - currHeight;
                 SizeCalculator cacl = new SizeCalculator(changeSize, td.speedMode, iterations);
                 StepProcesor procesor = new StepProcesor(iterations, td.time);
                 bool up = changeSize > 0;
@@ -117,7 +165,7 @@ namespace AVLib.Animations
                 procesor.Start((d) =>
                 {
                     newHeight = currHeight + cacl.NextSize;
-                    if (up && newHeight > td.size || !up && newHeight < td.size) newHeight = td.size;
+                    if (up && newHeight > td.value || !up && newHeight < td.value) newHeight = td.value;
                     if (td.animatorState.Canceled)
                     {
                         d.Cancel = true;
@@ -128,12 +176,154 @@ namespace AVLib.Animations
                     prevHeight = newHeight;
                 });
 
-                if (newHeight != td.size)
+                if (newHeight != td.value)
                 {
                     try
                     {
-                        if (td.animatorState.Canceled) return;
+                        if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
+                        SetObjectProperty(td.control, td.PropertyName, td.value);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+            }
+            finally
+            {
+                td.controlState.AnimatorEnd(td.animatorState);
+            }
+        }
+
+        private static void SetPointProperty(object pointThreadParam)
+        {
+            LocationThreadParam td = (LocationThreadParam)pointThreadParam;
+            try
+            {
+                int iterations = AnimationControler.GetIterations(td.time);
+                Point currPos = (Point)td.control.GetProperty(td.PropertyName);
+                int changeX = td.location.X - currPos.X;
+                int changeY = td.location.Y - currPos.Y;
+                SizeCalculator calcX = new SizeCalculator(changeX, td.speedMode, iterations);
+                SizeCalculator calcY = new SizeCalculator(changeY, td.speedMode, iterations);
+                StepProcesor procesor = new StepProcesor(iterations, td.time);
+                Point newPos = currPos;
+                Point prevPos = currPos;
+
+                procesor.Start((d) =>
+                {
+                    newPos = new Point(currPos.X + calcX.NextSize, currPos.Y + calcY.NextSize);
+                    if (td.animatorState.Canceled)
+                    {
+                        d.Cancel = true;
+                        return;
+                    }
+                    if (newPos != prevPos)
+                        SetObjectProperty(td.control, td.PropertyName, newPos);
+                    prevPos = newPos;
+                });
+
+                if (newPos != td.location)
+                {
+                    try
+                    {
+                        if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
+                        SetObjectProperty(td.control, td.PropertyName, td.location);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+            }
+            finally
+            {
+                td.controlState.AnimatorEnd(td.animatorState);
+            }
+        }
+
+        private static void SetSizeProperty(object sizeThreadParam)
+        {
+            SizeThreadParam td = (SizeThreadParam)sizeThreadParam;
+            try
+            {
+                int iterations = AnimationControler.GetIterations(td.time);
+                Size currSize = (Size)td.control.GetProperty(td.PropertyName);
+                int changeX = td.size.Width - currSize.Width;
+                int changeY = td.size.Height - currSize.Height;
+                SizeCalculator calcX = new SizeCalculator(changeX, td.speedMode, iterations);
+                SizeCalculator calcY = new SizeCalculator(changeY, td.speedMode, iterations);
+                StepProcesor procesor = new StepProcesor(iterations, td.time);
+                Size newSize = currSize;
+                Size prevSize = currSize;
+
+                procesor.Start((d) =>
+                {
+                    newSize = new Size(currSize.Width + calcX.NextSize, currSize.Height + calcY.NextSize);
+                    if (td.animatorState.Canceled)
+                    {
+                        d.Cancel = true;
+                        return;
+                    }
+                    if (newSize != prevSize)
+                        SetObjectProperty(td.control, td.PropertyName, newSize);
+                    prevSize = newSize;
+                });
+
+                if (newSize != td.size)
+                {
+                    try
+                    {
+                        if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
                         SetObjectProperty(td.control, td.PropertyName, td.size);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+            }
+            finally
+            {
+                td.controlState.AnimatorEnd(td.animatorState);
+            }
+        }
+
+        private static void SetRectProperty(object rectThreadParam)
+        {
+            RectThreadParam td = (RectThreadParam)rectThreadParam;
+            try
+            {
+                int iterations = AnimationControler.GetIterations(td.time);
+                Rectangle currRect = (Rectangle)td.control.GetProperty(td.PropertyName);
+                int changeX = td.rect.X - currRect.X;
+                int changeY = td.rect.Y - currRect.Y;
+                int changeW = td.rect.Width - currRect.Width;
+                int changeH = td.rect.Height - currRect.Height;
+                SizeCalculator calcX = new SizeCalculator(changeX, td.speedMode, iterations);
+                SizeCalculator calcY = new SizeCalculator(changeY, td.speedMode, iterations);
+                SizeCalculator calcW = new SizeCalculator(changeW, td.speedMode, iterations);
+                SizeCalculator calcH = new SizeCalculator(changeH, td.speedMode, iterations);
+                StepProcesor procesor = new StepProcesor(iterations, td.time);
+                Rectangle newRect = currRect;
+                Rectangle prevRect = currRect;
+
+                procesor.Start((d) =>
+                                   {
+                                       newRect = new Rectangle(currRect.X + calcX.NextSize, currRect.Y + calcY.NextSize, currRect.Width + calcW.NextSize, currRect.Height + calcH.NextSize);
+                                       if (td.animatorState.Canceled)
+                                       {
+                                           d.Cancel = true;
+                                           return;
+                                       }
+                                       if (newRect != prevRect)
+                                           SetObjectProperty(td.control, td.PropertyName, newRect);
+                                       prevRect = newRect;
+                                   });
+
+                if (newRect != td.rect)
+                {
+                    try
+                    {
+                        if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
+                        SetObjectProperty(td.control, td.PropertyName, td.rect);
                     }
                     catch (Exception e)
                     {
@@ -175,7 +365,7 @@ namespace AVLib.Animations
                 {
                     try
                     {
-                        if (td.animatorState.Canceled) return;
+                        if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
                         SetObjectProperty(td.control, td.PropertyName, td.color);
                     }
                     catch (Exception ex)
@@ -275,10 +465,10 @@ namespace AVLib.Animations
             return AnimationControler.ProcessPacket(ctrl, AnimeWaitPacket(time, queue, queueLevel, queueOwner, finalCallback));
         }
 
-        internal static AnimationControler.AnimePacket AnimeIntPropPacket(string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        internal static AnimationControler.AnimePacket AnimeIntPropPacket(string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            SizeThreadParam sizeParam = new SizeThreadParam();
-            sizeParam.size = height;
+            IntValueThreadParam sizeParam = new IntValueThreadParam() { CompleteIfCancel = CompleteIfCancel };
+            sizeParam.value = height;
             sizeParam.time = time;
             sizeParam.PropertyName = propName;
             sizeParam.speedMode = speedMode;
@@ -287,14 +477,65 @@ namespace AVLib.Animations
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetIntProperty, threadParam = sizeParam };
         }
 
-        public static object AnimeIntProp(object ctrl, string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        public static object AnimeIntProp(object ctrl, string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeIntPropPacket(propName, height, time, speedMode, queue, queueLevel, queueOwner, finalCallback));
+            return AnimationControler.ProcessPacket(ctrl, AnimeIntPropPacket(propName, height, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimeColorPropPacket(string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        internal static AnimationControler.AnimePacket AnimePointPropPacket(string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            ColorThreadParam colorParam = new ColorThreadParam();
+            LocationThreadParam sizeParam = new LocationThreadParam() { CompleteIfCancel = CompleteIfCancel };
+            sizeParam.location = point;
+            sizeParam.time = time;
+            sizeParam.PropertyName = propName;
+            sizeParam.speedMode = speedMode;
+            sizeParam.QueueLevel = queueLevel;
+            sizeParam.finalCallback = finalCallback;
+            return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetPointProperty, threadParam = sizeParam };
+        }
+
+        public static object AnimePointProp(object ctrl, string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            return AnimationControler.ProcessPacket(ctrl, AnimePointPropPacket(propName, point, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+        }
+
+        internal static AnimationControler.AnimePacket AnimeSizePropPacket(string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            SizeThreadParam sizeParam = new SizeThreadParam() { CompleteIfCancel = CompleteIfCancel };
+            sizeParam.size = size;
+            sizeParam.time = time;
+            sizeParam.PropertyName = propName;
+            sizeParam.speedMode = speedMode;
+            sizeParam.QueueLevel = queueLevel;
+            sizeParam.finalCallback = finalCallback;
+            return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetSizeProperty, threadParam = sizeParam };
+        }
+
+        public static object AnimeSizeProp(object ctrl, string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            return AnimationControler.ProcessPacket(ctrl, AnimeSizePropPacket(propName, size, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+        }
+
+        internal static AnimationControler.AnimePacket AnimeRectPropPacket(string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            RectThreadParam sizeParam = new RectThreadParam() { CompleteIfCancel = CompleteIfCancel };
+            sizeParam.rect = rect;
+            sizeParam.time = time;
+            sizeParam.PropertyName = propName;
+            sizeParam.speedMode = speedMode;
+            sizeParam.QueueLevel = queueLevel;
+            sizeParam.finalCallback = finalCallback;
+            return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetRectProperty, threadParam = sizeParam };
+        }
+
+        public static object AnimeRectProp(object ctrl, string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            return AnimationControler.ProcessPacket(ctrl, AnimeRectPropPacket(propName, rect, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+        }
+
+        internal static AnimationControler.AnimePacket AnimeColorPropPacket(string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            ColorThreadParam colorParam = new ColorThreadParam(){CompleteIfCancel = CompleteIfCancel};
             colorParam.color = color;
             colorParam.time = time;
             colorParam.PropertyName = propName;
@@ -304,9 +545,9 @@ namespace AVLib.Animations
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetColorProperty, threadParam = colorParam };
         }
 
-        public static object AnimeColorProp(object ctrl, string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        public static object AnimeColorProp(object ctrl, string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeColorPropPacket(propName, color, time, speedMode, queue, queueLevel, queueOwner, finalCallback));
+            return AnimationControler.ProcessPacket(ctrl, AnimeColorPropPacket(propName, color, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
         internal static AnimationControler.AnimePacket AnimeHighlightPacket(int highlightPercent, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)

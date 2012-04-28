@@ -108,14 +108,14 @@ namespace DrawRectTestApp
                                                     ((ControlRect)s).Painters["r1"].AnimeCancel();
                                                     s.AnimeCancel();
                                                     ((ControlRect)s).Painters["r1"].Anime().ChangeDec("Color", Color.Aqua, Speed.Medium);
-                                                    s.Anime().ChangeDec("Height", 180, Speed.Medium).ChangeDec("Width", 180, Speed.Medium);
+                                                    s.Anime().ChangeDec("Size", new Size(180, 180), Speed.Medium);
                                                 };
             mouseRect.MouseLeave += (s, args) =>
                                                 {
                                                     ((ControlRect)s).Painters["r1"].AnimeCancel();
                                                     s.AnimeCancel();
                                                     ((ControlRect)s).Painters["r1"].Anime().ChangeInc("Color", Color.Blue, Speed.Medium);
-                                                    s.Anime().ChangeDec("Height", 60, Speed.Medium).ChangeDec("Width", 60, Speed.Medium);
+                                                    s.Anime().ChangeDec("Size", new Size(60, 60), Speed.Medium);
                                                 };
 
             transparentRect = (ControlRect)rect.Add(new Point(40, 40), 80, 80);
@@ -128,15 +128,30 @@ namespace DrawRectTestApp
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
                                             s.AnimeCancel();
                                             ((ControlRect)s).Painters["transparent"].Anime().ChangeDec("Color", Color.Yellow.Transparent(40), Speed.Medium);
-                                            s.Anime().ChangeDec("Height", 160, Speed.Medium).ChangeDec("Width", 160, Speed.Medium);
+                                            s.Anime().ChangeDec("Size", new Size(160, 160), Speed.Medium);
                                         };
             transparentRect.MouseLeave += (s, args) =>
                                         {
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
                                             s.AnimeCancel();
                                             ((ControlRect)s).Painters["transparent"].Anime().ChangeInc("Color", Color.Green.Transparent(40), Speed.Medium);
-                                            s.Anime().ChangeDec("Height", 80, Speed.Medium).ChangeDec("Width", 80, Speed.Medium);
+                                            s.Anime().ChangeDec("Size", new Size(80, 80), Speed.Medium);
                                         };
+
+            var locationRect = (ControlRect)rect.Add(new Point(100, 150), 80, 80);
+            locationRect.Transparent = true;
+            locationRect.BorderSize = 2;
+            locationRect.Painters[0].FillRect(Color.Red.BrightColor(40).Transparent(40));
+            locationRect.Painters[0].DrawRectangle(Color.Navy, 2);
+            locationRect.MouseEnter += (s, args) =>
+                                           {
+                                               s.AnimeCancel();
+                                               s.Anime(true).Change("Rect", new Rectangle(200, 150, 150,  150));
+                                           };
+            locationRect.MouseLeave += (s, args) =>
+                                           {
+                                               s.AnimeQueue().Wait(Speed.Slow).Change("Rect", new Rectangle(100, 150, 80, 80));
+                                           };
 
             rect.Invalidate();
         }
