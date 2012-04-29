@@ -45,6 +45,11 @@ namespace AVLib.Animations
             AnimationUtils.AnimeCancel(ctrl);
         }
 
+        public static void AnimeForce(this object ctrl)
+        {
+            AnimationUtils.AnimeForce(ctrl);
+        }
+
         public static ObjectQueue Anime(this object ctrl)
         {
             return new ObjectQueue(ctrl, -1, null, false);

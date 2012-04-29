@@ -735,7 +735,7 @@ namespace AVLib.Draw.DrawRects
             if (!m_AnimeChildAlign && child.Child.AnimeAlign && oldRect != newRect)
             {
                 child.Child.AnimeCancel();
-                child.Child.Anime(true).Rect(newRect, (d) => { child.Child.RealignChilds(force); });
+                child.Child.Anime().RectDec(newRect, (d) => { child.Child.RealignChilds(force); });
             }
             else
             {

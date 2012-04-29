@@ -83,7 +83,7 @@ namespace AVLib.Animations
             {
                 Animators.Add(animatorState);
             }
-            public void Cancel()
+            public void Cancel(bool forceComplete)
             {
                 lock (this)
                 {
@@ -100,6 +100,7 @@ namespace AVLib.Animations
                         }
                         else
                         {
+                            if (forceComplete) Animators[i].QueueMethodParam.CompleteIfCancel = true;
                             Animators[i].Canceled = true;
                             canceled++;
                         }
@@ -334,20 +335,20 @@ namespace AVLib.Animations
         {
             if (packet.cancel)
             {
-                Cancel(control);
+                Cancel(control, false);
                 return null;
             }
             if (packet.isQueue) return Queue(control, packet.method, packet.threadParam, packet.queueOwner);
             return Execute(control, packet.method, packet.threadParam);
         }
 
-        internal static void Cancel(object control)
+        internal static void Cancel(object control, bool forceComplete)
         {
             if (control == null) return;
             lock (animeControls)
             {
                 ControlState controlState = GetControlState(control);
-                controlState.Cancel();
+                controlState.Cancel(forceComplete);
             }
         }
 

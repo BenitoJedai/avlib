@@ -582,7 +582,12 @@ namespace AVLib.Animations
 
         public static void AnimeCancel(object ctrl)
         {
-            AnimationControler.Cancel(ctrl);
+            AnimationControler.Cancel(ctrl, false);
+        }
+
+        public static void AnimeForce(object ctrl)
+        {
+            AnimationControler.Cancel(ctrl, true);
         }
 
     }
