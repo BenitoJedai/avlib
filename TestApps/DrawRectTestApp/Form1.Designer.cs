@@ -37,11 +37,15 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.TestControl = new AVLib.Controls.DrawControl();
+            this.e_topHeight = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.e_topHeight);
             this.panel1.Controls.Add(this.button3);
             this.panel1.Controls.Add(this.btEnterLeave);
             this.panel1.Controls.Add(this.checkBox3);
@@ -50,9 +54,9 @@
             this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(416, 0);
+            this.panel1.Location = new System.Drawing.Point(446, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(122, 310);
+            this.panel1.Size = new System.Drawing.Size(122, 354);
             this.panel1.TabIndex = 3;
             // 
             // button3
@@ -138,15 +142,32 @@
             this.TestControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TestControl.Location = new System.Drawing.Point(0, 0);
             this.TestControl.Name = "TestControl";
-            this.TestControl.Size = new System.Drawing.Size(416, 310);
+            this.TestControl.Size = new System.Drawing.Size(446, 354);
             this.TestControl.TabIndex = 4;
             this.TestControl.Text = "drawControl1";
+            // 
+            // e_topHeight
+            // 
+            this.e_topHeight.Location = new System.Drawing.Point(10, 300);
+            this.e_topHeight.Name = "e_topHeight";
+            this.e_topHeight.Size = new System.Drawing.Size(100, 20);
+            this.e_topHeight.TabIndex = 9;
+            this.e_topHeight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.e_topHeight_KeyDown);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 283);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(61, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Top height:";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(538, 310);
+            this.ClientSize = new System.Drawing.Size(568, 354);
             this.Controls.Add(this.TestControl);
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
@@ -168,6 +189,8 @@
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button btEnterLeave;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox e_topHeight;
 
     }
 }

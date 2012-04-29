@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
+using AVLib.Utils;
 
 namespace AVLib.Controls
 {
@@ -62,6 +63,7 @@ namespace AVLib.Controls
             
         }
 
+        private int n = 0;
         protected override void OnPaint(PaintEventArgs pe)
         {
             this.m_mainRect.Paint(pe.Graphics);

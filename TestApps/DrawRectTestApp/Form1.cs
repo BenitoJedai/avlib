@@ -22,6 +22,7 @@ namespace DrawRectTestApp
         private DrawRect yellowRect;
         private DrawRect backRect;
         private ControlRect mouseRect;
+        private DrawRect topRect;
 
         public Form1()
         {
@@ -47,27 +48,29 @@ namespace DrawRectTestApp
             rect.Painters[0].FillRect(SystemColors.Control);
             rect.BorderSize = 5;
 
-            var r = rect.Add(RectAlignment.Top, 20);
-            r.Painters[0].FillRect(Color.Red);
+            topRect = rect.Add(RectAlignment.Top, 20);
+            topRect.AnimeAlign = true;
+            topRect.Painters[0].FillRect(Color.Red);
             {
-                var r2 = r.Add(RectAlignment.Right, 30);
+                var r2 = topRect.Add(RectAlignment.Right, 30);
                 r2.Painters[0].FillRect(Color.Indigo);
 
-                controlRect = r.Add(RectAlignment.Right, 60);
+                controlRect = topRect.Add(RectAlignment.Right, 60);
                 TextBox txt = new TextBox();
                 TestControl.Controls.Add(txt);
                 controlRect.Control = txt;
 
-                r2 = r.Add(RectAlignment.Left, 30);
+                r2 = topRect.Add(RectAlignment.Left, 30);
                 r2.Painters[0].FillRect(Color.Aqua);
-                r2 = r.Add(RectAlignment.Left, 30);
+                r2 = topRect.Add(RectAlignment.Left, 30);
                 r2.Painters[0].FillRect(Color.Green);
-                yellowRect = r.Add(RectAlignment.Left, 30);
+                yellowRect = topRect.Add(RectAlignment.Left, 30);
                 yellowRect.Painters[0].FillRect(Color.Yellow);
-                r2 = r.Add(RectAlignment.Left, 30);
+                r2 = topRect.Add(RectAlignment.Left, 30);
+                r2.AnimeAlign = true;
                 r2.Painters[0].FillRect(Color.LightSteelBlue);
             }
-            r = rect.Add(RectAlignment.Bottom, 20);
+            var r = rect.Add(RectAlignment.Bottom, 20);
             r.Painters[0].FillRectGradient(SimpleDirection.Vertical, Color.Green.BrightColor(40), Color.Green);
             {
                 var r2 = r.Add(RectAlignment.Left, 40);
@@ -114,7 +117,7 @@ namespace DrawRectTestApp
                                                };
             }
 
-            mouseRect = (ControlRect)rect.Add(new Point(80, 20), 60, 60);
+            mouseRect = (ControlRect)rect.Add(new Point(80, 10), 60, 60);
             mouseRect.Painters[0].FillRect(Color.Blue, "r1");
             mouseRect.BorderSize = 3;
             mouseRect.Painters[0].DrawRectangle(Color.Red.BrightColor(30), 3);
@@ -132,6 +135,11 @@ namespace DrawRectTestApp
                                                     ((ControlRect)s).Painters["r1"].Anime().ChangeInc("Color", Color.Blue, Speed.Medium);
                                                     s.Anime().ChangeDec("Size", new Size(60, 60), Speed.Medium);
                                                 };
+
+            var ctrlRect = rect.Add(new Point(100, 100), 100, 20);
+            var txt2 = new TextBox();
+            TestControl.Controls.Add(txt2);
+            ctrlRect.Control = txt2;
 
             transparentRect = (ControlRect)rect.Add(new Point(40, 40), 80, 80);
             transparentRect.Transparent = true;
@@ -183,6 +191,18 @@ namespace DrawRectTestApp
         private void button3_Click(object sender, EventArgs e)
         {
             TestControl.Invalidate();
+        }
+
+        private void e_topHeight_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                int n;
+                if (int.TryParse(e_topHeight.Text, out n))
+                {
+                    topRect.Height = n;
+                }
+            }
         }
     }
 }

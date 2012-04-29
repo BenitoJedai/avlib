@@ -48,6 +48,7 @@
     <Compile Include="Animation.Externals.cs" />
     <Compile Include="Animation.Internal.cs" />
     <Compile Include="ColorUtils.cs" />
+    <Compile Include="Draw.DrawRects.AnimeExternals.cs" />
     <Compile Include="Draw.DrawRects.ControlRect.cs" />
     <Compile Include="Draw.DrawRects.cs" />
     <Compile Include="Draw.DrawRects.Painters.cs" />

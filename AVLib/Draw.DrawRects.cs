@@ -59,6 +59,9 @@ namespace AVLib.Draw.DrawRects
         private bool m_Visible = true;
         private Control m_LockControl = null;
 
+        private bool m_AnimeAlign = false;
+        private bool m_AnimeChildAlign = false;
+
         #region Constructors
 
         public DrawRect(Control control, Point pos, int width, int height)
@@ -141,6 +144,18 @@ namespace AVLib.Draw.DrawRects
                     DoRectChanged(true);
                 }
             }
+        }
+
+        public int Height
+        {
+            get { return m_size.Height; }
+            set { Size = new Size(m_size.Width, value); }
+        }
+
+        public int Width
+        {
+            get { return m_size.Width; }
+            set { Size = new Size(value, m_size.Height); }
         }
 
         public Rectangle Rect
@@ -267,16 +282,16 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
-        public int Height
+        public bool AnimeAlign
         {
-            get { return m_size.Height; }
-            set { Size = new Size(m_size.Width, value); }
+            get { return m_AnimeAlign; }
+            set { m_AnimeAlign = value; }
         }
 
-        public int Width
+        public bool AnimeChildAlign
         {
-            get { return m_size.Width; }
-            set { Size = new Size(value, m_size.Height); }
+            get { return m_AnimeChildAlign; }
+            set { m_AnimeChildAlign = value; }
         }
 
         public DrawRect Parent
@@ -329,7 +344,7 @@ namespace AVLib.Draw.DrawRects
             rect.m_Parent = this;
             rect.m_ParentIndex = m_childs.Count;
             m_childs.Add(child);
-            DoAlign(child);
+            DoAlign(child, false);
         }
 
         public DrawRect Add(Point pos, int width, int height)
@@ -440,7 +455,10 @@ namespace AVLib.Draw.DrawRects
             if (paintReg.IsVisible(Rect))
             {
                 gr.Clip = paintReg;
-                m_painters.Paint(this, gr);
+                if (m_control == null)
+                    m_painters.Paint(this, gr);
+                else
+                    PaintControl(paintReg, gr);
             }
             if (Count > 0)
             {
@@ -451,6 +469,35 @@ namespace AVLib.Draw.DrawRects
                     info.child.Paint(gr);
                 }
             }
+        }
+
+        private Bitmap m_controlMap = null;
+        private void PrepareControlMap()
+        {
+            if (m_controlMap == null || m_controlMap.Width < m_control.Width || m_controlMap.Height < m_control.Height)
+            {
+                m_controlMap = new Bitmap(m_control.Width, m_control.Height);
+            }
+        }
+        private void PaintControl(Region paintReg, Graphics gr)
+        {
+            var redrowReg = new Region(m_rect);
+            RemoveOverlapsFromRegion(redrowReg, false);
+            var reg = new Region(m_rect);
+            RemoveOverlapsFromRegion(reg, true);
+            redrowReg.Exclude(reg);
+
+            if (redrowReg.IsVisible(m_rect))
+            {
+                PrepareControlMap();
+                m_control.DrawToBitmap(m_controlMap, new Rectangle(0, 0, m_control.Width, m_control.Height));
+                gr.Clip = redrowReg;
+                gr.DrawImage(m_controlMap, m_rect, new Rectangle(0, 0, m_control.Width, m_control.Height), GraphicsUnit.Pixel);
+            }
+
+            reg.Translate(-m_rect.X, -m_rect.Y);
+            if (m_control.Region == null || !reg.Equals(m_control.Region))
+                m_control.Region = reg;
         }
 
         private Region ClipReg
@@ -526,26 +573,50 @@ namespace AVLib.Draw.DrawRects
         public event OnValidateHandler OnInvalidate;
         public void Invalidate()
         {
-            InvalidateRegion.Union(Rect);
-            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+            Invalidate(Rect);
         }
         public void Invalidate(Rectangle invalidateRect)
         {
-            InvalidateRegion.Union(invalidateRect);
-            if (InvalidateDisabled <= 0) InvalidateIfNeeded();
+            var reg = new Region(invalidateRect);
+            Invalidate(reg);
         }
         public void Invalidate(Region invalidateRegion)
         {
+            RemoveOverlapsFromRegion(invalidateRegion, false);
             InvalidateRegion.Union(invalidateRegion);
             if (InvalidateDisabled <= 0) InvalidateIfNeeded();
         }
         public void PreInvalidate(Rectangle invalidateRect)
         {
-            InvalidateRegion.Union(invalidateRect);
+            var reg = new Region(invalidateRect);
+            PreInvalidate(reg);
         }
         public void PreInvalidate(Region invalidateRegion)
         {
+            RemoveOverlapsFromRegion(invalidateRegion, false);
             InvalidateRegion.Union(invalidateRegion);
+        }
+        private void RemoveOverlapsFromRegion(Region region, bool withTransparent)
+        {
+            if (m_Parent != null)
+            {
+                region.Intersect(m_Parent.RectWithoutBorder());
+                m_Parent.RemoveOverlapsFromRegion(region, m_ParentIndex, withTransparent);
+            }
+        }
+        private void RemoveOverlapsFromRegion(Region region, int childIndex, bool withTransparent)
+        {
+            if (Count > 0)
+            {
+                for (int i = childIndex + 1; i < m_childs.Count; i++)
+                {
+                    if (m_childs[i].Child.Transparent && !withTransparent)
+                        m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent);
+                    else
+                        region.Exclude(m_childs[i].Child.Rect);
+                }
+            }
+            RemoveOverlapsFromRegion(region, withTransparent);
         }
 
         //------------------------------------------
@@ -575,8 +646,7 @@ namespace AVLib.Draw.DrawRects
         public void EnableAlign()
         {
             AlignDisabled--;
-            if (m_Parent == null && AlignDisabled <= 0)
-                RealignChilds();
+            if (m_Parent == null) RealignChilds(false);
         }
 
         private void InvalidateChildRect(Rectangle oldRect, DrawRect rect)
@@ -612,69 +682,65 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
-        private bool DoAlign(DrawRectChild child)
+        private bool DoAlign(DrawRectChild child, bool force)
         {
+            if (!force && AlignDisabled > 0) return false;
+
             DisableInvalidate();
 
             child.RectForChild = m_freeRect;
+            var newRect = child.Child.m_rect;
             var oldRect = child.Child.Rect;
             if (child.Child.Visible)
             {
                 switch (child.Child.m_alignment)
                 {
                     case RectAlignment.Absolute:
-                        child.Child.m_rect = new Rectangle(m_rect.X + m_BorderSize + child.Child.m_pos.X,
+                        newRect = new Rectangle(m_rect.X + m_BorderSize + child.Child.m_pos.X,
                                                            m_rect.Y + m_BorderSize + child.Child.m_pos.Y, child.Child.Size.Width,
                                                            child.Child.Size.Height);
                         break;
                     case RectAlignment.Left:
-                        child.Child.m_rect = new Rectangle(m_freeRect.Location,
+                        newRect = new Rectangle(m_freeRect.Location,
                                                            new Size(child.Child.Width, m_freeRect.Height));
+                        m_freeRect = new Rectangle(m_freeRect.X + newRect.Width, m_freeRect.Y,
+                                                   m_freeRect.Width - newRect.Width, m_freeRect.Height);
                         break;
                     case RectAlignment.Right:
-                        child.Child.m_rect = new Rectangle(m_freeRect.Left + m_freeRect.Width - child.Child.Width,
+                        newRect = new Rectangle(m_freeRect.Left + m_freeRect.Width - child.Child.Width,
                                                            m_freeRect.Y, child.Child.Width, m_freeRect.Height);
+                        m_freeRect = new Rectangle(m_freeRect.Location,
+                                                   new Size(m_freeRect.Width - newRect.Width, m_freeRect.Height));
                         break;
                     case RectAlignment.Top:
-                        child.Child.m_rect = new Rectangle(m_freeRect.Location,
+                        newRect = new Rectangle(m_freeRect.Location,
                                                            new Size(m_freeRect.Width, child.Child.Height));
+                        m_freeRect = new Rectangle(m_freeRect.X, m_freeRect.Y + newRect.Height, m_freeRect.Width,
+                                                   m_freeRect.Height - newRect.Height);
                         break;
                     case RectAlignment.Bottom:
-                        child.Child.m_rect = new Rectangle(m_freeRect.X,
+                        newRect = new Rectangle(m_freeRect.X,
                                                            m_freeRect.Y + m_freeRect.Height - child.Child.Height,
                                                            m_freeRect.Width, child.Child.Height);
+                        m_freeRect = new Rectangle(m_freeRect.Location,
+                                                   new Size(m_freeRect.Width, m_freeRect.Height - newRect.Height));
                         break;
                     case RectAlignment.Fill:
-                        child.Child.m_rect = m_freeRect;
+                        newRect = m_freeRect;
                         break;
                 }
             }
 
-            if (child.Child.Visible)
+            if (!m_AnimeChildAlign && child.Child.AnimeAlign)
             {
-                switch (child.Child.m_alignment)
-                {
-                    case RectAlignment.Left:
-                        m_freeRect = new Rectangle(m_freeRect.X + child.Child.m_rect.Width, m_freeRect.Y,
-                                                   m_freeRect.Width - child.Child.Width, m_freeRect.Height);
-                        break;
-                    case RectAlignment.Right:
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width - child.Child.Width, m_freeRect.Height));
-                        break;
-                    case RectAlignment.Top:
-                        m_freeRect = new Rectangle(m_freeRect.X, m_freeRect.Y + child.Child.Height, m_freeRect.Width,
-                                                   m_freeRect.Height - child.Child.Height);
-                        break;
-                    case RectAlignment.Bottom:
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width, m_freeRect.Height - child.Child.Height));
-                        break;
-                }
+                child.Child.Anime(true).Rect(newRect, (d) => { child.Child.RealignChilds(force); });
             }
-
-            child.Child.RealignChilds();
-            InvalidateChildRect(oldRect, child.Child);
+            else
+            {
+                child.Child.m_rect = newRect;
+                child.Child.RealignChilds(force);
+                InvalidateChildRect(oldRect, child.Child);
+            }
 
             EnableInvalidate();
             return oldRect != child.Child.Rect;
@@ -686,9 +752,6 @@ namespace AVLib.Draw.DrawRects
             {
                 m_control.Location = m_rect.Location;
                 m_control.Size = m_rect.Size;
-                var contrlR = ClipReg.Clone();
-                contrlR.Translate(-m_rect.X, -m_rect.Y);
-                m_control.Region = contrlR;
             }
         }
 
@@ -719,14 +782,22 @@ namespace AVLib.Draw.DrawRects
             ClipChildControl(region, Count - 1);
         }
 
-        private void RealignChilds()
+        public void Align()
         {
-            AlignControl();
-            RealignChilds(0);
+            RealignChilds(true);
         }
 
-        private void RealignChilds(int fromIndex)
+        private void RealignChilds(bool force)
         {
+            if (!force && AlignDisabled > 0) return;
+            AlignControl();
+            RealignChilds(0, force);
+        }
+
+        private void RealignChilds(int fromIndex, bool force)
+        {
+            if (!force && AlignDisabled > 0) return;
+
             DisableInvalidate();
             if (fromIndex == 0)
                 m_freeRect = RectWithoutBorder();
@@ -736,7 +807,7 @@ namespace AVLib.Draw.DrawRects
             bool aligned = false;
             for (int i = fromIndex; i < Count; i++)
             {
-                aligned = DoAlign(m_childs[i]);
+                aligned = DoAlign(m_childs[i], force);
                 this.ClipChildControl(m_childs[i].Child.ClipReg, i - 1);
             }
             EnableInvalidate();
@@ -755,14 +826,16 @@ namespace AVLib.Draw.DrawRects
         private void DoRectChanged(bool isRect)
         {
             if (m_Parent != null)
-                m_Parent.RealignChilds(m_ParentIndex);
+                m_Parent.RealignChilds(m_ParentIndex, false);
             else
             {
                 var old = m_rect;
                 m_rect = new Rectangle(m_pos, m_size);
                 m_freeRect = RectWithoutBorder();
-                if (isRect) RealignChilds();
+                DisableInvalidate();
+                if (isRect) RealignChilds(false);
                 InvalidateChildRect(old, this);
+                EnableInvalidate();
             }
         }
 
