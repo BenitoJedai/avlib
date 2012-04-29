@@ -6,6 +6,13 @@ using System.Windows.Forms;
 
 namespace AVLib.Animations
 {
+    public interface IInvokeCompatible
+    {
+        bool InvokeRequired { get; }
+        object Invoke(Delegate method);
+        object Invoke(Delegate method, params Object[] args);
+    }
+
     public static class AnimationControler
     {
         #region Internal and Private
@@ -41,7 +48,7 @@ namespace AVLib.Animations
                 clon.PropertyName = PropertyName;
             }
         }
-        public class AnimatorState 
+        public class AnimatorState
         {
             internal BaseThreadParam Animator;
             public bool Canceled;
@@ -55,7 +62,7 @@ namespace AVLib.Animations
             private object control;
             private List<AnimatorState> Animators = new List<AnimatorState>();
             private bool isCancel = false;
-            
+
             public int AnimatorsCount
             {
                 get
@@ -111,11 +118,11 @@ namespace AVLib.Animations
                     animatorState.QueueMethodParam.controlState = this;
                     animatorState.QueueMethodParam.control = control;
 
-                    
+
                     animatorState.Animator = animatorState.QueueMethodParam;
                     animatorState.InQueue = false;
 
-                    ThreadPool.QueueUserWorkItem( animatorState.QueueMethod, animatorState.QueueMethodParam);
+                    ThreadPool.QueueUserWorkItem(animatorState.QueueMethod, animatorState.QueueMethodParam);
                 }
             }
             private void CheckForRun(object owner)
@@ -126,7 +133,7 @@ namespace AVLib.Animations
                 int minQueueLevel = int.MaxValue;
                 for (int i = 0; i < Animators.Count; i++)
                 {
-                    if (!Animators[i].InQueue) 
+                    if (!Animators[i].InQueue)
                         allInQueue = false;
                     else
                     {
@@ -176,7 +183,7 @@ namespace AVLib.Animations
                         Run(state);
                     }
                     //else
-                        //Trace.WriteLine("Execute: wait for cancel");
+                    //Trace.WriteLine("Execute: wait for cancel");
                     return state;
                 }
             }
@@ -185,7 +192,7 @@ namespace AVLib.Animations
                 lock (this)
                 {
                     bool inQueue = Animators.Count > 0;
-                    var state = new AnimatorState() { InQueue = true, QueueMethod = queueMethod, QueueMethodParam = queueMethodParam, QueueOwner = queueOwner};
+                    var state = new AnimatorState() { InQueue = true, QueueMethod = queueMethod, QueueMethodParam = queueMethodParam, QueueOwner = queueOwner };
                     Add(state);
                     if (!inQueue && !isCancel)
                     {
@@ -193,7 +200,7 @@ namespace AVLib.Animations
                         Run(state);
                     }
                     //else
-                        //Trace.WriteLine("Queue: wait");
+                    //Trace.WriteLine("Queue: wait");
                     return state;
                 }
             }
@@ -222,11 +229,14 @@ namespace AVLib.Animations
                         try
                         {
                             if (animator.QueueMethodParam.control is Control)
-                                ((Control)animator.QueueMethodParam.control).BeginInvoke(new FinalCallback(animator.QueueMethodParam.finalCallback), animator);
+                                ((Control)animator.QueueMethodParam.control).Invoke(new FinalCallback(animator.QueueMethodParam.finalCallback), animator);
+                            else if (animator.QueueMethodParam.control is IInvokeCompatible)
+                                ((IInvokeCompatible) animator.QueueMethodParam.control).Invoke(
+                                    new FinalCallback(animator.QueueMethodParam.finalCallback), animator);
                             else
                                 animator.QueueMethodParam.finalCallback(animator);
                         }
-                        catch(Exception){}
+                        catch (Exception) { }
                     }
                 }
             }

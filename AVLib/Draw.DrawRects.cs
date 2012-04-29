@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AVLib.Animations;
 
 namespace AVLib.Draw.DrawRects
 {
@@ -19,7 +20,7 @@ namespace AVLib.Draw.DrawRects
 
     public delegate void ChangedHandler();
 
-    public class DrawRect
+    public class DrawRect : IInvokeCompatible
     {
         private class DrawRectChild
         {
@@ -731,8 +732,9 @@ namespace AVLib.Draw.DrawRects
                 }
             }
 
-            if (!m_AnimeChildAlign && child.Child.AnimeAlign)
+            if (!m_AnimeChildAlign && child.Child.AnimeAlign && oldRect != newRect)
             {
+                child.Child.AnimeCancel();
                 child.Child.Anime(true).Rect(newRect, (d) => { child.Child.RealignChilds(force); });
             }
             else
@@ -743,7 +745,7 @@ namespace AVLib.Draw.DrawRects
             }
 
             EnableInvalidate();
-            return oldRect != child.Child.Rect;
+            return oldRect != newRect;
         }
 
         private void AlignControl()
@@ -753,33 +755,6 @@ namespace AVLib.Draw.DrawRects
                 m_control.Location = m_rect.Location;
                 m_control.Size = m_rect.Size;
             }
-        }
-
-        private void ClipChildControl(Region region, int upTo)
-        {
-            if (Count > 0)
-            {
-                for (int i = 0; i < Math.Min(upTo + 1, m_childs.Count); i++)
-                    m_childs[i].Child.ClipControl(region);
-            }
-        }
-
-        private void ClipControl(Region region)
-        {
-            if (m_control != null && region.IsVisible(m_rect))
-            {
-                var contrlR = m_control.Region == null ? null : m_control.Region.Clone();
-                if (contrlR == null)
-                    contrlR = ClipReg.Clone();
-                else
-                    contrlR.Translate(m_rect.X, m_rect.Y);
-
-                contrlR.Exclude(region);
-                contrlR.Translate(-m_rect.X, -m_rect.Y);
-                m_control.Region = contrlR;
-            }
-
-            ClipChildControl(region, Count - 1);
         }
 
         public void Align()
@@ -799,17 +774,15 @@ namespace AVLib.Draw.DrawRects
             if (!force && AlignDisabled > 0) return;
 
             DisableInvalidate();
+
             if (fromIndex == 0)
                 m_freeRect = RectWithoutBorder();
             else
                 m_freeRect = m_childs[fromIndex].RectForChild;
 
-            bool aligned = false;
             for (int i = fromIndex; i < Count; i++)
-            {
-                aligned = DoAlign(m_childs[i], force);
-                this.ClipChildControl(m_childs[i].Child.ClipReg, i - 1);
-            }
+                DoAlign(m_childs[i], force);
+
             EnableInvalidate();
         }
 
@@ -851,13 +824,13 @@ namespace AVLib.Draw.DrawRects
         event ChangedHandler Changed;
         void DoChange();
         void Paint(DrawRect rect, Graphics graf);
-        bool InvokeRequired();
+        bool InvokeRequired { get; }
         object Invoke(Delegate method, params Object[] args);
         object Invoke(Delegate method);
         bool Enabled { get; set; }
     }
 
-    public abstract class RectPainter : IRectPainter
+    public abstract class RectPainter : IRectPainter, IInvokeCompatible
     {
         private bool m_Enabled;
 
@@ -884,9 +857,9 @@ namespace AVLib.Draw.DrawRects
 
         public abstract void Paint(DrawRect rect, Graphics graf);
 
-        public bool InvokeRequired()
+        public bool InvokeRequired
         {
-            return (control != null && control.InvokeRequired);
+            get { return (control != null && control.InvokeRequired); }
         }
 
         public object Invoke(Delegate method, params Object[] args)
