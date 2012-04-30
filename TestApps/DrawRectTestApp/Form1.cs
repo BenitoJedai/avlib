@@ -31,14 +31,6 @@ namespace DrawRectTestApp
 
             button1_Click(null, null);
             button1.Visible = false;
-
-            btEnterLeave.AnimeEventQueue().Click().Wait(Speed.Slow, (d) =>
-                                                                   {
-                                                                       mouseRect.OnMouseEnter(new EventArgs());
-                                                                   }).Wait(Speed.Slow, (d) =>
-                                                                                           {
-                                                                                               mouseRect.OnMouseLeave(new EventArgs());
-                                                                                           });
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -151,19 +143,55 @@ namespace DrawRectTestApp
             transparentRect.MouseEnter += (s, args) =>
                                         {
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
-                                            s.AnimeCancel();
+                                            //s.AnimeCancel();
                                             ((ControlRect)s).Painters["transparent"].Anime().Change("Color", Color.Blue.Transparent(80), Speed.Medium);
-                                            s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 160, 160), Speed.Medium);
+                                            //s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 160, 160), Speed.Medium);
                                         };
             transparentRect.MouseLeave += (s, args) =>
                                         {
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
-                                            s.AnimeCancel();
+                                            //s.AnimeCancel();
                                             ((ControlRect)s).Painters["transparent"].Anime().Change("Color", Color.Green.Transparent(60), Speed.Medium);
-                                            s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 80, 80), Speed.Medium);
+                                            //s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 80, 80), Speed.Medium);
                                         };
+            transparentRect.AnimeEvent(Speed.Medium).MouseEnter().ChangeDec("ContainerRect", new Rectangle(40, 40, 160, 160));
+            transparentRect.AnimeEvent(Speed.Medium).MouseLeave().ChangeDec("ContainerRect", new Rectangle(40, 40, 80, 80));
 
             rect.Align();
+
+
+
+
+
+
+
+
+
+
+
+
+            //********** tabDrawControl *************************
+            tabDrawControl.TabStop = true;
+            rect = tabDrawControl.MainRect;
+            rect.Painters[0].FillRect(SystemColors.Control);
+
+            var cr = new ControlRect(new Point(40, 40), 100, 20);
+            rect.Add(cr);
+            cr.Painters[0].FillRect(Color.Red.BrightColor(40), "color");
+            cr.Painters[0].DrawRectangle(Color.Maroon, 2);
+            cr.TabIndex = 0;
+            cr.TabStop = true;
+            cr.Enter += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Red.BrightColor(80)); };
+            cr.Leave += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Red.BrightColor(40)); };
+
+            cr = new ControlRect(new Point(40, 80), 100, 20);
+            rect.Add(cr);
+            cr.Painters[0].FillRect(Color.Green.BrightColor(40), "color");
+            cr.Painters[0].DrawRectangle(Color.Green, 2);
+            cr.TabIndex = 1;
+            cr.TabStop = true;
+            cr.Enter += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Green.BrightColor(80)); };
+            cr.Leave += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Green.BrightColor(40)); };
         }
 
         private void button2_Click(object sender, EventArgs e)

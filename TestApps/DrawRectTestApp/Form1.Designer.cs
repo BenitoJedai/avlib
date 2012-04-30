@@ -29,17 +29,23 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.e_topHeight = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
-            this.btEnterLeave = new System.Windows.Forms.Button();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.TestControl = new AVLib.Controls.DrawControl();
-            this.e_topHeight = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabDrawControl = new AVLib.Controls.DrawControl();
             this.panel1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -47,7 +53,6 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.e_topHeight);
             this.panel1.Controls.Add(this.button3);
-            this.panel1.Controls.Add(this.btEnterLeave);
             this.panel1.Controls.Add(this.checkBox3);
             this.panel1.Controls.Add(this.checkBox2);
             this.panel1.Controls.Add(this.checkBox1);
@@ -59,6 +64,23 @@
             this.panel1.Size = new System.Drawing.Size(122, 354);
             this.panel1.TabIndex = 3;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 242);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(61, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Top height:";
+            // 
+            // e_topHeight
+            // 
+            this.e_topHeight.Location = new System.Drawing.Point(7, 259);
+            this.e_topHeight.Name = "e_topHeight";
+            this.e_topHeight.Size = new System.Drawing.Size(100, 20);
+            this.e_topHeight.TabIndex = 9;
+            this.e_topHeight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.e_topHeight_KeyDown);
+            // 
             // button3
             // 
             this.button3.Location = new System.Drawing.Point(20, 195);
@@ -68,15 +90,6 @@
             this.button3.Text = "Invalidate";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // btEnterLeave
-            // 
-            this.btEnterLeave.Location = new System.Drawing.Point(20, 235);
-            this.btEnterLeave.Name = "btEnterLeave";
-            this.btEnterLeave.Size = new System.Drawing.Size(90, 39);
-            this.btEnterLeave.TabIndex = 8;
-            this.btEnterLeave.Text = "mouse enter-leave";
-            this.btEnterLeave.UseVisualStyleBackColor = true;
             // 
             // checkBox3
             // 
@@ -137,43 +150,71 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(446, 354);
+            this.tabControl1.TabIndex = 5;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.TestControl);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(438, 328);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
             // TestControl
             // 
             this.TestControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.TestControl.Location = new System.Drawing.Point(0, 0);
+            this.TestControl.Location = new System.Drawing.Point(3, 3);
             this.TestControl.Name = "TestControl";
-            this.TestControl.Size = new System.Drawing.Size(446, 354);
-            this.TestControl.TabIndex = 4;
+            this.TestControl.Size = new System.Drawing.Size(432, 322);
+            this.TestControl.TabIndex = 5;
             this.TestControl.Text = "drawControl1";
             // 
-            // e_topHeight
+            // tabPage2
             // 
-            this.e_topHeight.Location = new System.Drawing.Point(10, 300);
-            this.e_topHeight.Name = "e_topHeight";
-            this.e_topHeight.Size = new System.Drawing.Size(100, 20);
-            this.e_topHeight.TabIndex = 9;
-            this.e_topHeight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.e_topHeight_KeyDown);
+            this.tabPage2.Controls.Add(this.tabDrawControl);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(438, 328);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // tabDrawControl
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 283);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(61, 13);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Top height:";
+            this.tabDrawControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabDrawControl.Location = new System.Drawing.Point(3, 3);
+            this.tabDrawControl.Name = "tabDrawControl";
+            this.tabDrawControl.Size = new System.Drawing.Size(432, 322);
+            this.tabDrawControl.TabIndex = 0;
+            this.tabDrawControl.Text = "drawControl1";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(568, 354);
-            this.Controls.Add(this.TestControl);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -182,15 +223,18 @@
 
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button1;
-        private AVLib.Controls.DrawControl TestControl;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button btEnterLeave;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox e_topHeight;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private AVLib.Controls.DrawControl TestControl;
+        private System.Windows.Forms.TabPage tabPage2;
+        private AVLib.Controls.DrawControl tabDrawControl;
 
     }
 }

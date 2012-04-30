@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 using AVLib.Animations;
+using AVLib.Draw.DrawRects;
 
 namespace AVLib.Animations
 {
@@ -63,7 +64,7 @@ namespace AVLib.Animations
             packetQueue.Add(packet);
         }
 
-        public void Execute(Control control)
+        public void Execute(object control)
         {
             object owner = null;
             for (int i = 0; i < packetQueue.Count; i++)
@@ -89,7 +90,7 @@ namespace AVLib.Animations
         private List<EventQueue> eventsQueue = new List<EventQueue>();
         internal List<EventQueue> EventsQueue { get { return eventsQueue; } }
 
-        public void Execute(Control control)
+        public void Execute(object control)
         {
             control.AnimeCancel();
             for (int i = 0; i < eventsQueue.Count; i++)
@@ -261,7 +262,7 @@ namespace AVLib.Animations
             }
         }
 
-        public static void Execute(Control control, AnimeEvent animeEvent)
+        public static void Execute(object control, AnimeEvent animeEvent)
         {
             lock (controlsData)
             {
@@ -274,7 +275,7 @@ namespace AVLib.Animations
             }
         }
 
-        internal static void ApplyToControl(Control control, AnimeCollector collector)
+        internal static void ApplyToControl(object control, AnimeCollector collector)
         {
             if (control == null || collector == null) return;
             ControllData dataClone = null;
@@ -304,7 +305,15 @@ namespace AVLib.Animations
         internal static void SetHandler(object control, AnimeEvent animeEvent)
         {
             if (control is Control)
-                SetHandler((Control)control, animeEvent);
+            {
+                SetHandler((Control) control, animeEvent);
+                return;
+            }
+            if (control is ControlRect)
+            {
+                SetHandler((ControlRect) control, animeEvent);
+                return;
+            }
         }
 
         internal static void SetHandler(Control control, AnimeEvent animeEvent)
@@ -372,103 +381,176 @@ namespace AVLib.Animations
             }
         }
 
+        internal static void SetHandler(ControlRect rect, AnimeEvent animeEvent)
+        {
+            switch (animeEvent)
+            {
+                case AnimeEvent.MouseEnter:
+                    rect.MouseEnter += ctrlMouseEnter;
+                    break;
+                case AnimeEvent.MouseLeave:
+                    rect.MouseLeave += ctrlMouseLeave;
+                    break;
+                case AnimeEvent.Click:
+                    rect.Click += ctrlClick;
+                    break;
+                case AnimeEvent.MouseDonw:
+                    rect.MouseDown += ctrlMouseDown;
+                    break;
+                case AnimeEvent.MouseUp:
+                    rect.MouseUp += ctrlMouseUp;
+                    break;
+                case AnimeEvent.DoubleClick:
+                    rect.DoubleClick += ctrlDoubleClick;
+                    break;
+                case AnimeEvent.DragEnter:
+                    rect.DragEnter += ctrlDragEnter;
+                    break;
+                case AnimeEvent.DragLeave:
+                    rect.DragLeave += ctrlDragLeave;
+                    break;
+                case AnimeEvent.DragDrop:
+                    rect.DragDrop += ctrlDragDrop;
+                    break;
+                case AnimeEvent.Enter:
+                case AnimeEvent.GotFocus:
+                    rect.Enter += ctrlEnter;
+                    break;
+                case AnimeEvent.Leave:
+                case AnimeEvent.LostFocus:
+                    rect.Leave += ctrlLeave;
+                    break;
+                case AnimeEvent.KeyDown:
+                    rect.KeyDown += ctrlKeyDown;
+                    break;
+                case AnimeEvent.KeyUp:
+                    rect.KeyUp += ctrlKeyUp;
+                    break;
+                case AnimeEvent.MouseWheel:
+                    rect.MouseWheel += ctrlMouseWheel;
+                    break;
+                case AnimeEvent.TextChanged:
+                    //rect.TextChanged += ctrlTextChanged;
+                    break;
+                case AnimeEvent.Visible:
+                    rect.VisibleChanged += ctrlVisibleChanged;
+                    break;
+                case AnimeEvent.Enabled:
+                case AnimeEvent.Disabled:
+                    rect.EnabledChanged += ctrlEnabledChanged;
+                    break;
+            }
+        }
+
         private static void ctrlEnabledChanged(object sender, EventArgs e)
         {
-            if (((Control) sender).Enabled)
-                Execute((Control) sender, AnimeEvent.Enabled);
-            else
-                Execute((Control) sender, AnimeEvent.Disabled);
+            if (sender is Control)
+            {
+                if (((Control) sender).Enabled)
+                    Execute((Control) sender, AnimeEvent.Enabled);
+                else
+                    Execute((Control) sender, AnimeEvent.Disabled);
+            }
         }
 
         private static void ctrlVisibleChanged(object sender, EventArgs e)
         {
-            if (((Control)sender).Visible)
-                Execute((Control)sender, AnimeEvent.Visible);
+            if (sender is Control)
+            {
+                if (((Control) sender).Visible)
+                    Execute(sender, AnimeEvent.Visible);
+                return;
+            }
+            if (sender is ControlRect)
+            {
+                if (((ControlRect) sender).Visible)
+                    Execute(sender, AnimeEvent.Visible);
+            }
         }
 
         private static void ctrlTextChanged(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.TextChanged);
+            Execute(sender, AnimeEvent.TextChanged);
         }
 
         private static void ctrlMouseWheel(object sender, MouseEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.MouseWheel);
+            Execute(sender, AnimeEvent.MouseWheel);
         }
 
         private static void ctrlLostFocus(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.LostFocus);
+            Execute(sender, AnimeEvent.LostFocus);
         }
 
         private static void ctrlKeyUp(object sender, KeyEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.KeyUp);
+            Execute(sender, AnimeEvent.KeyUp);
         }
 
         private static void ctrlKeyDown(object sender, KeyEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.KeyDown);
+            Execute(sender, AnimeEvent.KeyDown);
         }
 
         private static void ctrlGotFocus(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.GotFocus);
+            Execute(sender, AnimeEvent.GotFocus);
         }
 
         private static void ctrlLeave(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.Leave);
+            Execute(sender, AnimeEvent.Leave);
         }
 
         private static void ctrlEnter(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.Enter);
+            Execute(sender, AnimeEvent.Enter);
         }
 
         private static void ctrlDragDrop(object sender, DragEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.DragDrop);
+            Execute(sender, AnimeEvent.DragDrop);
         }
 
         private static void ctrlDragLeave(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.DragLeave);
+            Execute(sender, AnimeEvent.DragLeave);
         }
 
         private static void ctrlDragEnter(object sender, DragEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.DragEnter);
+            Execute(sender, AnimeEvent.DragEnter);
         }
 
         private static void ctrlDoubleClick(object sender, EventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.DoubleClick);
+            Execute(sender, AnimeEvent.DoubleClick);
         }
 
         private static void ctrlMouseUp(object sender, MouseEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.MouseUp);
+            Execute(sender, AnimeEvent.MouseUp);
         }
 
         private static void ctrlMouseDown(object sender, MouseEventArgs e)
         {
-            Execute((Control)sender, AnimeEvent.MouseDonw);
+            Execute(sender, AnimeEvent.MouseDonw);
         }
 
         private static void ctrlMouseEnter(object sender, EventArgs args)
         {
-            Execute((Control)sender, AnimeEvent.MouseEnter);
+            Execute(sender, AnimeEvent.MouseEnter);
         }
 
         private static void ctrlMouseLeave(object sender, EventArgs args)
         {
-            Execute((Control)sender, AnimeEvent.MouseLeave);
+            Execute(sender, AnimeEvent.MouseLeave);
         }
 
         private static void ctrlClick(object sender, EventArgs args)
         {
-            Execute((Control)sender, AnimeEvent.Click);
+            Execute(sender, AnimeEvent.Click);
         }
 
         #endregion

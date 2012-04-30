@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AVLib.Draw.DrawRects;
 
 namespace AVLib.Animations
 {
@@ -10,6 +11,30 @@ namespace AVLib.Animations
     {
         private AnimeEvent animeEvent;
         public ControlEventQueue(Control ctrl, AnimeEvent animeEvent, int queueLevel, object queueOwner, bool isQueue)
+            : base(ctrl, queueLevel, queueOwner, isQueue)
+        {
+            this.animeEvent = animeEvent;
+        }
+
+        private EventQueue eventQueue = null;
+        private void InitQueue()
+        {
+            if (eventQueue != null) return;
+            eventQueue = ControlController.GetEventThreads(ctrl, animeEvent).NewQueue();
+            if (eventQueue.IsNew) ControlController.SetHandler(ctrl, animeEvent);
+        }
+        internal override void ProcessPacket(AnimationControler.AnimePacket packet)
+        {
+            InitQueue();
+            eventQueue.Add(packet);
+            if (isQueue) queueLevel++;
+        }
+    }
+
+    public class ControlRectEventQueue : DrawRectsAnimeExternals.DrawRectQueue
+    {
+        private AnimeEvent animeEvent;
+        public ControlRectEventQueue(DrawRect ctrl, AnimeEvent animeEvent, int queueLevel, object queueOwner, bool isQueue)
             : base(ctrl, queueLevel, queueOwner, isQueue)
         {
             this.animeEvent = animeEvent;
@@ -61,11 +86,27 @@ namespace AVLib.Animations
         internal Control ctrl;
         internal bool isQueue;
         internal int time = AnimationControler.GetSpeedTime(Speed.Fast);
-        internal Speed Speed { set { time = AnimationControler.GetSpeedTime(Speed.Fast); } }
+        internal Speed Speed { set { time = AnimationControler.GetSpeedTime(value); } }
         internal SpeedMode SpeedMode = SpeedMode.Normal;
         internal bool CompleteIfCancel = false;
         internal string QueueName = "";
         public AnimeEventSelector(Control ctrl, bool isQueue)
+        {
+            this.ctrl = ctrl;
+            this.isQueue = isQueue;
+        }
+    }
+
+    public class AnimeCtrlRectEventSelector
+    {
+        internal ControlRect ctrl;
+        internal bool isQueue;
+        internal int time = AnimationControler.GetSpeedTime(Speed.Fast);
+        internal Speed Speed { set { time = AnimationControler.GetSpeedTime(value); } }
+        internal SpeedMode SpeedMode = SpeedMode.Normal;
+        internal bool CompleteIfCancel = false;
+        internal string QueueName = "";
+        public AnimeCtrlRectEventSelector(ControlRect ctrl, bool isQueue)
         {
             this.ctrl = ctrl;
             this.isQueue = isQueue;
@@ -77,7 +118,7 @@ namespace AVLib.Animations
         internal AnimeCollector collector;
         internal bool isQueue;
         internal int time = AnimationControler.GetSpeedTime(Speed.Fast);
-        internal Speed Speed { set { time = AnimationControler.GetSpeedTime(Speed.Fast); } }
+        internal Speed Speed { set { time = AnimationControler.GetSpeedTime(value); } }
         internal SpeedMode SpeedMode = SpeedMode.Normal;
         internal bool CompleteIfCancel = false;
         internal string QueueName = "";
@@ -396,6 +437,327 @@ namespace AVLib.Animations
         }
 
         #endregion
+
+
+
+
+        
+
+
+
+        #region ControlRect
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control)
+        {
+            return new AnimeCtrlRectEventSelector(control, false);
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, int time)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, int time)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, int time, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, int time, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, int time, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, SpeedMode = speedMode };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, int time, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, SpeedMode = speedMode, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, Speed speed)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, Speed speed)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, Speed speed, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, Speed speed, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, Speed speed, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, SpeedMode = speedMode };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, Speed speed, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, SpeedMode = speedMode, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEvent(this ControlRect control, string queueName, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, false) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control)
+        {
+            return new AnimeCtrlRectEventSelector(control, true);
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, int time)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, int time)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, int time, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, int time, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, int time, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, SpeedMode = speedMode };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, int time, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, SpeedMode = speedMode, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, int time, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { time = time, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, Speed speed)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, Speed speed)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, Speed speed, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, Speed speed, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, Speed speed, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, SpeedMode = speedMode };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, Speed speed, SpeedMode speedMode)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, SpeedMode = speedMode, QueueName = queueName };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel };
+        }
+
+        public static AnimeCtrlRectEventSelector AnimeEventQueue(this ControlRect control, string queueName, Speed speed, SpeedMode speedMode, bool CompleteIfCancel)
+        {
+            return new AnimeCtrlRectEventSelector(control, true) { Speed = speed, SpeedMode = speedMode, CompleteIfCancel = CompleteIfCancel, QueueName = queueName };
+        }
+
+
+
+
+        public static ControlRectEventQueue MouseEnter(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.MouseEnter, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue MouseLeave(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.MouseLeave, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Click(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Click, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue MouseDown(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.MouseDonw, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue MouseUp(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.MouseUp, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue DoubleClick(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.DoubleClick, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue DragEnter(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.DragEnter, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue DragLeave(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.DragLeave, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue DragDrop(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.DragDrop, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Enter(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Enter, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Leave(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Leave, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue GotFocus(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.GotFocus, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue KeyDown(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.KeyDown, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue KeyUp(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.KeyUp, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue LostFocus(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.LostFocus, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue MouseWheel(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.MouseWheel, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue TextChanged(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.TextChanged, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Visible(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Visible, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Enabled(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Enabled, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        public static ControlRectEventQueue Disabled(this AnimeCtrlRectEventSelector selector)
+        {
+            return new ControlRectEventQueue(selector.ctrl, Animations.AnimeEvent.Disabled, -1, null, selector.isQueue) { time = selector.time, SpeedMode = selector.SpeedMode, CompleteIfCancel = selector.CompleteIfCancel, QueueName = selector.QueueName };
+        }
+
+        #endregion
+
+
+        
+
+
+
+
 
         #region Collector
 

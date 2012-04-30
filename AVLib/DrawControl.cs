@@ -93,6 +93,7 @@ namespace AVLib.Controls
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            if (TabStop && !Focused) Select();
             base.OnMouseDown(e);
             m_mainRect.OnMouseDown(e);
         }
@@ -125,6 +126,60 @@ namespace AVLib.Controls
         {
             base.OnMouseWheel(e);
             m_mainRect.OnMouseWheel(e);
+        }
+
+        protected override void OnDragEnter(DragEventArgs drgevent)
+        {
+            base.OnDragEnter(drgevent);
+            m_mainRect.OnDragEnter(drgevent);
+        }
+
+        protected override void OnDragLeave(EventArgs e)
+        {
+            base.OnDragLeave(e);
+            m_mainRect.OnDragLeave(e);
+        }
+
+        protected override void OnDragDrop(DragEventArgs drgevent)
+        {
+            base.OnDragDrop(drgevent);
+            m_mainRect.OnDragDrop(drgevent);
+        }
+
+        protected override void OnDragOver(DragEventArgs drgevent)
+        {
+            base.OnDragOver(drgevent);
+            m_mainRect.OnDragOver(drgevent);
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            m_mainRect.OnGotFocus(e);
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            m_mainRect.OnLostFocus(e);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            m_mainRect.OnKeyDown(e);
+            if (!e.Handled) base.OnKeyDown(e);
+        }
+
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+        {
+            base.OnPreviewKeyDown(e);
+            m_mainRect.OnPreviewKeyDown(e);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            m_mainRect.OnKeyUp(e);
         }
     }
 }

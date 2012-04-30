@@ -28,6 +28,8 @@ namespace AVLib.Draw.DrawRects
 
     public class DrawRect : IInvokeCompatible
     {
+        public event EventHandler VisibleChanged;
+
         private class DrawRectChild
         {
             public Rectangle RectForChild;
@@ -82,6 +84,15 @@ namespace AVLib.Draw.DrawRects
             m_rect = new Rectangle(pos.X, pos.Y, width, height);
             m_freeRect = m_rect;
             m_invalidateRegion = new Region();
+        }
+
+        public DrawRect(Point pos, int width, int height)
+            : this()
+        {
+            m_alignment = RectAlignment.Absolute;
+            m_pos = pos;
+            m_size = new Size(width, height);
+            m_rect = new Rectangle(pos.X, pos.Y, width, height);
         }
 
         public DrawRect()
@@ -269,6 +280,8 @@ namespace AVLib.Draw.DrawRects
                     if (m_control != null) m_control.Visible = m_Visible;
                     if (m_Visible || m_alignment != RectAlignment.Absolute) DoRectChanged(true);
                     Invalidate(m_rect);
+
+                    if (VisibleChanged != null) VisibleChanged(this, new EventArgs());
                 }
             }
         }
@@ -863,6 +876,56 @@ namespace AVLib.Draw.DrawRects
         {
             return new DrawRect();
         }
+
+
+
+        #region Enumerate child
+
+
+        public class EnumerateChildStatus
+        {
+            public bool skipChild;
+            public bool skipAll;
+        }
+
+        public delegate void OnEnumerateRectHandler(DrawRect item, EnumerateChildStatus status);
+
+        public void EnumerateChilds(OnEnumerateRectHandler method)
+        {
+            EnumerateChilds(method, true);
+        }
+
+        public void EnumerateChilds(OnEnumerateRectHandler method, bool forward)
+        {
+            var status = new EnumerateChildStatus() {skipChild = false, skipAll = false};
+            EnumerateChilds(method, forward, status);
+        }
+
+        public void EnumerateChilds(OnEnumerateRectHandler method, bool forward, EnumerateChildStatus status)
+        {
+            if (forward)
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    method(m_childs[i].Child, status);
+                    if (status.skipAll) return;
+                    if (!status.skipChild) m_childs[i].Child.EnumerateChilds(method, forward, status);
+                    if (status.skipAll) return;
+                }
+            }
+            else
+            {
+                for (int i = Count - 1; i >= 0; i--)
+                {
+                    method(m_childs[i].Child, status);
+                    if (status.skipAll) return;
+                    if (!status.skipChild) m_childs[i].Child.EnumerateChilds(method, forward, status);
+                    if (status.skipAll) return;
+                }
+            }
+        }
+
+        #endregion
     }
 
     public interface IRectPainter
