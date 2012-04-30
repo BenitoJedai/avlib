@@ -26,6 +26,7 @@ namespace AVLib.Animations
             public string PropertyName;
             public int QueueLevel = 0;
             public bool CompleteIfCancel;
+            public string queueName = "";
             internal FinalCallback finalCallback;
 
             public object Clone()
@@ -48,6 +49,7 @@ namespace AVLib.Animations
                 clon.PropertyName = PropertyName;
             }
         }
+
         public class AnimatorState
         {
             internal BaseThreadParam Animator;
@@ -57,11 +59,13 @@ namespace AVLib.Animations
             public BaseThreadParam QueueMethodParam;
             internal object QueueOwner;
         }
+
         internal class ControlState
         {
             private object control;
             private List<AnimatorState> Animators = new List<AnimatorState>();
             private bool isCancel = false;
+            private bool isForce = false;
 
             public int AnimatorsCount
             {
@@ -88,6 +92,7 @@ namespace AVLib.Animations
                 lock (this)
                 {
                     isCancel = Animators.Count > 0;
+                    isForce = isCancel && forceComplete;
                     //Trace.Write("Cancel: " + isCancel);
                     int removed = 0;
                     int canceled = 0;
@@ -95,8 +100,16 @@ namespace AVLib.Animations
                     {
                         if (Animators[i].Animator == null)
                         {
-                            Animators.RemoveAt(i);
-                            removed++;
+                            if (isForce)
+                            {
+                                Animators[i].QueueMethodParam.CompleteIfCancel = true;
+                                Animators[i].Canceled = true;
+                            }
+                            else
+                            {
+                                Animators.RemoveAt(i);
+                                removed++;
+                            }
                         }
                         else
                         {
@@ -142,7 +155,7 @@ namespace AVLib.Animations
                             minQueueLevel = Animators[i].QueueMethodParam.QueueLevel;
                     }
                     if (Animators[i].Animator != null) allStoped = false;
-                    if (Animators[i].Animator == null && !isCancel)
+                    if (Animators[i].Animator == null && (!isCancel || isForce))
                     {
                         if (!Animators[i].InQueue || (owner != null && Animators[i].QueueOwner == owner))
                         {
@@ -152,7 +165,7 @@ namespace AVLib.Animations
                         }
                     }
                 }
-                if (allInQueue && !isCancel && Animators.Count > 0)
+                if (allInQueue && (!isCancel || isForce) && Animators.Count > 0)
                 {
                     for (int i = 0; i < Animators.Count; i++)
                     {
@@ -165,7 +178,7 @@ namespace AVLib.Animations
                 }
                 if (allStoped && isCancel)
                 {
-                    isCancel = false;
+                    isCancel = isForce = false;
                     //Trace.Write(" isCancel=false");
                     if (Animators.Count > 0) CheckForRun(null);
                 }
@@ -243,7 +256,53 @@ namespace AVLib.Animations
             }
         }
 
-        private static Dictionary<object, ControlState> animeControls = new Dictionary<object, ControlState>();
+        private class NamedControlState
+        {
+            public string name;
+            public ControlState controlState;
+        }
+
+        private class NamedControlStateList
+        {
+            public Dictionary<string, ControlState> list = new Dictionary<string, ControlState>();
+
+            public bool RemoveEmpty()
+            {
+                List<string> listForRemove = new List<string>();
+                foreach (var item in list)
+                {
+                    if (item.Value.AnimatorsCount == 0)
+                        listForRemove.Add(item.Key);
+                }
+                foreach (var name in listForRemove)
+                {
+                    list.Remove(name);
+                    //Trace.WriteLine("Empty control removed");
+                }
+                return list.Count == 0;
+            }
+
+            public ControlState this[object control, string name]
+            {
+                get
+                {
+                    if (list.ContainsKey(name))
+                        return list[name];
+                    var state = new ControlState(control);
+                    list.Add(name, state);
+                    return state;
+                }
+            }
+
+            public ControlState FindControlState(string name)
+            {
+                if (list.ContainsKey(name))
+                    return list[name];
+                return null;
+            }
+        }
+
+        private static Dictionary<object, NamedControlStateList> animeControls = new Dictionary<object, NamedControlStateList>();
 
         private static void RemoveEmpty()
         {
@@ -252,7 +311,7 @@ namespace AVLib.Animations
                 List<object> listForRemove = new List<object>();
                 foreach (var item in animeControls)
                 {
-                    if (item.Value.AnimatorsCount == 0)
+                    if (item.Value.RemoveEmpty())
                         listForRemove.Add(item.Key);
                 }
                 foreach (var control in listForRemove)
@@ -300,15 +359,22 @@ namespace AVLib.Animations
             }
         }
 
-        private static ControlState GetControlState(object control)
+        private static ControlState GetControlState(object control, string name)
         {
             CheckActive();
             if (animeControls.ContainsKey(control))
-                return animeControls[control];
+                return animeControls[control][control, name];
 
-            var controlState = new ControlState(control);
+            var controlState = new NamedControlStateList();
             animeControls.Add(control, controlState);
-            return controlState;
+            return controlState[control, name];
+        }
+
+        private static ControlState FindControlState(object control, string name)
+        {
+            if (animeControls.ContainsKey(control))
+                return animeControls[control].FindControlState(name);
+            return null;
         }
 
         internal class AnimePacket : ICloneable
@@ -335,20 +401,34 @@ namespace AVLib.Animations
         {
             if (packet.cancel)
             {
-                Cancel(control, false);
+                Cancel(control, packet.threadParam.queueName, false);
                 return null;
             }
             if (packet.isQueue) return Queue(control, packet.method, packet.threadParam, packet.queueOwner);
             return Execute(control, packet.method, packet.threadParam);
         }
 
-        internal static void Cancel(object control, bool forceComplete)
+        internal static void Cancel(object control, string name, bool forceComplete)
         {
             if (control == null) return;
             lock (animeControls)
             {
-                ControlState controlState = GetControlState(control);
-                controlState.Cancel(forceComplete);
+                if (name == "all")
+                {
+                    if (animeControls.ContainsKey(control))
+                    {
+                        var list = animeControls[control].list;
+                        foreach (var controlState in list)
+                        {
+                            controlState.Value.Cancel(forceComplete);
+                        }
+                    }
+                }
+                else
+                {
+                    ControlState controlState = FindControlState(control, name);
+                    if (controlState != null) controlState.Cancel(forceComplete);
+                }
             }
         }
 
@@ -357,7 +437,7 @@ namespace AVLib.Animations
             if (control == null) return null;
             lock (animeControls)
             {
-                ControlState controlState = GetControlState(control);
+                ControlState controlState = GetControlState(control, queueMethodParam.queueName);
                 return controlState.Execute(queueMethod, queueMethodParam);
             }
         }
@@ -367,7 +447,7 @@ namespace AVLib.Animations
             if (control == null) return null;
             lock (animeControls)
             {
-                ControlState controlState = GetControlState(control);
+                ControlState controlState = GetControlState(control, queueMethodParam.queueName);
                 return controlState.Queue(queueMethod, queueMethodParam, queueOwner);
             }
         }

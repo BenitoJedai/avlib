@@ -47,6 +47,7 @@ namespace DrawRectTestApp
             rect.Painters.Clear();
             rect.Painters[0].FillRect(SystemColors.Control);
             rect.BorderSize = 5;
+            rect.AnimeChildAlign = true;
 
             topRect = rect.Add(RectAlignment.Top, 20);
             topRect.AnimeAlign = true;
@@ -105,7 +106,7 @@ namespace DrawRectTestApp
                 locationRect.Transparent = true;
                 locationRect.BorderSize = 2;
                 locationRect.Painters[0].FillRect(Color.Red.BrightColor(40).Transparent(40));
-                locationRect.Painters[0].DrawRectangle(Color.Navy, 2);
+                locationRect.Painters[0].DrawRectangle(Color.Brown.DarkColor(20), 2);
                 locationRect.MouseEnter += (s, args) =>
                                                {
                                                    s.AnimeCancel();
@@ -118,22 +119,23 @@ namespace DrawRectTestApp
             }
 
             mouseRect = (ControlRect)rect.Add(new Point(80, 10), 60, 60);
-            mouseRect.Painters[0].FillRect(Color.Blue, "r1");
+            mouseRect.Transparent = true;
+            mouseRect.Painters[0].FillRect(Color.Blue.Transparent(50), "r1");
             mouseRect.BorderSize = 3;
-            mouseRect.Painters[0].DrawRectangle(Color.Red.BrightColor(30), 3);
+            mouseRect.Painters[0].DrawRectangle(Color.Navy, 3);
             mouseRect.MouseEnter += (s, args) =>
                                                 {
                                                     ((ControlRect)s).Painters["r1"].AnimeCancel();
                                                     s.AnimeCancel();
-                                                    ((ControlRect)s).Painters["r1"].Anime().ChangeDec("Color", Color.Aqua, Speed.Medium);
-                                                    s.Anime().ChangeDec("Size", new Size(180, 180), Speed.Medium);
+                                                    ((ControlRect)s).Painters["r1"].Anime().ChangeDec("Color", Color.Aqua.Transparent(20), Speed.Medium);
+                                                    s.Anime().ChangeDec("ContainerRect", new Rectangle(80, 10, 180, 180), Speed.Medium);
                                                 };
             mouseRect.MouseLeave += (s, args) =>
                                                 {
                                                     ((ControlRect)s).Painters["r1"].AnimeCancel();
                                                     s.AnimeCancel();
-                                                    ((ControlRect)s).Painters["r1"].Anime().ChangeInc("Color", Color.Blue, Speed.Medium);
-                                                    s.Anime().ChangeDec("Size", new Size(60, 60), Speed.Medium);
+                                                    ((ControlRect)s).Painters["r1"].Anime().ChangeInc("Color", Color.Blue.Transparent(50), Speed.Medium);
+                                                    s.Anime().ChangeDec("ContainerRect", new Rectangle(80, 10, 60, 60), Speed.Medium);
                                                 };
 
             var ctrlRect = rect.Add(new Point(100, 100), 100, 20);
@@ -144,24 +146,24 @@ namespace DrawRectTestApp
             transparentRect = (ControlRect)rect.Add(new Point(40, 40), 80, 80);
             transparentRect.Transparent = true;
             transparentRect.BorderSize = 2;
-            transparentRect.Painters[0].FillRect(Color.Green.Transparent(40), "transparent");
-            transparentRect.Painters[0].DrawRectangle(Color.Yellow, 2);
+            transparentRect.Painters[0].FillRect(Color.Green.Transparent(60), "transparent");
+            transparentRect.Painters[0].DrawRectangle(Color.Green, 2);
             transparentRect.MouseEnter += (s, args) =>
                                         {
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
                                             s.AnimeCancel();
-                                            ((ControlRect)s).Painters["transparent"].Anime().ChangeDec("Color", Color.Yellow.Transparent(40), Speed.Medium);
-                                            s.Anime().ChangeDec("Size", new Size(160, 160), Speed.Medium);
+                                            ((ControlRect)s).Painters["transparent"].Anime().Change("Color", Color.Blue.Transparent(80), Speed.Medium);
+                                            s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 160, 160), Speed.Medium);
                                         };
             transparentRect.MouseLeave += (s, args) =>
                                         {
                                             ((ControlRect)s).Painters["transparent"].AnimeCancel();
                                             s.AnimeCancel();
-                                            ((ControlRect)s).Painters["transparent"].Anime().ChangeInc("Color", Color.Green.Transparent(40), Speed.Medium);
-                                            s.Anime().ChangeDec("Size", new Size(80, 80), Speed.Medium);
+                                            ((ControlRect)s).Painters["transparent"].Anime().Change("Color", Color.Green.Transparent(60), Speed.Medium);
+                                            s.Anime().ChangeDec("ContainerRect", new Rectangle(40, 40, 80, 80), Speed.Medium);
                                         };
 
-            rect.Invalidate();
+            rect.Align();
         }
 
         private void button2_Click(object sender, EventArgs e)

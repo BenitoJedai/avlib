@@ -85,15 +85,15 @@ namespace WinFormAnimation
 
         private void button3_Click(object sender, EventArgs e)
         {
-            panel.AnimeCancel();
-            panel.AnimeQueue().ColorDec(Color.Lime, 2000).ColorInc(panelColor, 2000);
-            panel.AnimeQueue().HeightDec(100, 2000).HeightInc(50, 2000);
+            panel.AnimeCancel("down-up");
+            panel.AnimeQueue("color").ColorDec(Color.Lime, 2000).ColorInc(panelColor, 2000);
+            panel.AnimeQueue("down-up").HeightDec(100, 2000).HeightInc(50, 2000);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            panel.AnimeCancel();
-            panel.AnimeQueue().Color(Color.Yellow, Speed.Slow).Color(Color.Red, Speed.Slow).Color(Color.Lime, Speed.Slow).
+            panel.AnimeForceAll();
+            panel.AnimeQueue("color").Color(Color.Yellow, Speed.Slow).Color(Color.Red, Speed.Slow).Color(Color.Lime, Speed.Slow).
                 Color(Color.Blue, Speed.Slow).Color(Color.Maroon, Speed.Slow).Color(Color.Aqua, Speed.Slow).
                 Color(panelColor, Speed.Slow);
         }
@@ -187,6 +187,11 @@ namespace WinFormAnimation
         private void label1_MouseLeave(object sender, EventArgs e)
         {
             
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            panel.AnimeForceAll();
         }
     }
 }

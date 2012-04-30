@@ -38,9 +38,9 @@ namespace AVLib.Utils
             return (tmp > byte.MaxValue) ? byte.MaxValue : (byte)tmp;
         }
 
-        private static byte UnionAlfa(byte alfa1, byte alfa2)
+        private static byte OverlapChanel(byte chanel, byte overlapChanel)
         {
-            return (byte)Math.Min(byte.MaxValue, alfa1 + Math.Max(0, (float) (byte.MaxValue - alfa1)*(alfa2/byte.MaxValue)));
+            return (byte)Math.Min(byte.MaxValue, chanel + Math.Max(0, (float)(byte.MaxValue - chanel) * (overlapChanel / byte.MaxValue)));
         }
 
         #endregion
@@ -61,9 +61,18 @@ namespace AVLib.Utils
                                   DarkColorChannel(color.B, pct));
         }
 
+
+        public static Color OverlapColor(this Color color, Color overlapColor)
+        {
+            return Color.FromArgb(OverlapChanel(color.A, overlapColor.A),
+                                  OverlapChanel(color.R, overlapColor.R),
+                                  OverlapChanel(color.G, overlapColor.G),
+                                  OverlapChanel(color.B, overlapColor.B));
+        }
+
         public static Color MergeColor(this Color color, Color mergeColor, Single mergeColorPct)
         {
-            return Color.FromArgb(UnionAlfa(color.A, mergeColor.A),
+            return Color.FromArgb(MergeColorChanel(color.A, mergeColor.A, mergeColorPct),
                                   MergeColorChanel(color.R, mergeColor.R, mergeColorPct),
                                   MergeColorChanel(color.G, mergeColor.G, mergeColorPct),
                                   MergeColorChanel(color.B, mergeColor.B, mergeColorPct));
@@ -72,7 +81,7 @@ namespace AVLib.Utils
         public static Color Transparent(this Color color, Single pct)
         {
             if (pct > 0)
-                return Color.FromArgb((byte)Math.Min(byte.MaxValue, pct/100*byte.MaxValue),
+                return Color.FromArgb((byte)Math.Min(byte.MaxValue, 1 - pct/100*byte.MaxValue),
                                       color.R,
                                       color.G,
                                       color.B);

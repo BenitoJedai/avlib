@@ -122,10 +122,35 @@ namespace AVLib.Animations
             }
         }
 
+        private class RectArrayThreadParam : AnimationControler.BaseThreadParam
+        {
+            public Rectangle[] rects;
+            public object[] objects;
+            public SpeedMode speedMode;
+            protected override AnimationControler.BaseThreadParam CreateClon()
+            {
+                return new RectArrayThreadParam();
+            }
+            protected override void CloneTo(AnimationControler.BaseThreadParam clon)
+            {
+                base.CloneTo(clon);
+                ((RectArrayThreadParam)clon).rects = (Rectangle[])rects.Clone();
+                ((RectArrayThreadParam)clon).objects = (object[])objects.Clone();
+                ((RectArrayThreadParam)clon).speedMode = speedMode;
+            }
+        }
+
         private delegate void SetObjectPropertyDelegate(object ctrl, string path, object value);
         private static void SetPropertyForObject(object ctrl, string path, object value)
         {
             ctrl.SetProperty(path, value);
+        }
+
+        private delegate void SetObjectPropertyArrayDelegate(object[] objects, string path, object[] values);
+        private static void SetPropertiesFroObjects(object[] objects, string path, object[] values)
+        {
+            for (int i = 0; i < objects.Length; i++)
+                objects[i].SetProperty(path, values[i]);
         }
 
         private static void SetObjectProperty(object ctrl, string path, object value)
@@ -146,6 +171,26 @@ namespace AVLib.Animations
                 return;
             }
             ctrl.SetProperty(path, value);
+        }
+
+        private static void SetObjectsProperties(object ctrl, object[] objects, string path, object[] values)
+        {
+            if (ctrl is Control)
+            {
+                ((Control)ctrl).Invoke(new SetObjectPropertyArrayDelegate(SetPropertiesFroObjects), objects, path, values);
+                return;
+            }
+            if (ctrl is DrawRect)
+            {
+                ((DrawRect)ctrl).Invoke(new SetObjectPropertyArrayDelegate(SetPropertiesFroObjects), objects, path, values);
+                return;
+            }
+            if (ctrl is IRectPainter)
+            {
+                ((IRectPainter)ctrl).Invoke(new SetObjectPropertyArrayDelegate(SetPropertiesFroObjects), objects, path, values);
+                return;
+            }
+            SetPropertiesFroObjects(objects, path, values);
         }
 
         private static void SetIntProperty(object intThreadParam)
@@ -336,6 +381,104 @@ namespace AVLib.Animations
             }
         }
 
+        private class MultiRectCalcData
+        {
+            public Rectangle currRect;
+            public Rectangle finalRect;
+            public int changeX;
+            public int changeY;
+            public int changeW;
+            public int changeH;
+            public SizeCalculator calcX;
+            public SizeCalculator calcY;
+            public SizeCalculator calcW;
+            public SizeCalculator calcH;
+            public Rectangle newRect;
+            public Rectangle prevRect;
+            public object obj;
+        }
+
+        private static void SetMultiRectProperty(object rectArrayThreadParam)
+        {
+            RectArrayThreadParam td = (RectArrayThreadParam)rectArrayThreadParam;
+            try
+            {
+                int iterations = AnimationControler.GetIterations(td.time);
+                var calcList = new List<MultiRectCalcData>();
+                for (int i = 0; i < td.objects.Length; i++)
+                {
+                    var calc = new MultiRectCalcData();
+                    calcList.Add(calc);
+
+                    calc.obj = td.objects[i];
+                    calc.currRect = (Rectangle)td.objects[i].GetProperty(td.PropertyName);
+                    calc.finalRect = td.rects[i];
+                    calc.changeX = calc.finalRect.X - calc.currRect.X;
+                    calc.changeY = calc.finalRect.Y - calc.currRect.Y;
+                    calc.changeW = calc.finalRect.Width - calc.currRect.Width;
+                    calc.changeH = calc.finalRect.Height - calc.currRect.Height;
+                    calc.calcX = new SizeCalculator(calc.changeX, td.speedMode, iterations);
+                    calc.calcY = new SizeCalculator(calc.changeY, td.speedMode, iterations);
+                    calc.calcW = new SizeCalculator(calc.changeW, td.speedMode, iterations);
+                    calc.calcH = new SizeCalculator(calc.changeH, td.speedMode, iterations);
+                    calc.newRect = calc.currRect;
+                    calc.prevRect = calc.currRect;
+                }
+
+                StepProcesor procesor = new StepProcesor(iterations, td.time);
+
+                procesor.Start((d) =>
+                {
+                    List<object> objects = new List<object>();
+                    List<object> newRects = new List<object>();
+                    for (int i = 0; i < calcList.Count; i++)
+                    {
+                        var calc = calcList[i];
+                        calc.newRect = new Rectangle(calc.currRect.X + calc.calcX.NextSize, calc.currRect.Y + calc.calcY.NextSize, calc.currRect.Width + calc.calcW.NextSize, calc.currRect.Height + calc.calcH.NextSize);
+                        if (td.animatorState.Canceled)
+                        {
+                            d.Cancel = true;
+                            return;
+                        }
+                        if (calc.newRect != calc.prevRect)
+                        {
+                            objects.Add(calc.obj);
+                            newRects.Add(calc.newRect);
+                        }
+                        //SetObjectProperty(td.control, td.PropertyName, newRect);
+                        calc.prevRect = calc.newRect;
+                    }
+                    if (objects.Count > 0) SetObjectsProperties(td.control, objects.ToArray(), td.PropertyName, newRects.ToArray());
+                });
+
+                if (td.animatorState.Canceled && !td.CompleteIfCancel) return;
+
+                foreach (var calc in calcList)
+                {
+                    List<object> objects = new List<object>();
+                    List<object> newRects = new List<object>();
+                    if (calc.newRect != calc.finalRect)
+                    {
+                        objects.Add(calc.obj);
+                        newRects.Add(calc.finalRect);
+                    }
+
+                    if (objects.Count > 0)
+                        try
+                        {
+                            SetObjectsProperties(td.control, objects.ToArray(), td.PropertyName, newRects.ToArray());
+                        }
+                        catch (Exception e)
+                        {
+                        }
+                }
+            }
+            finally
+            {
+                td.controlState.AnimatorEnd(td.animatorState);
+            }
+        }
+
         private static void SetColorProperty(object colorThreadParam)
         {
             ColorThreadParam td = (ColorThreadParam)colorThreadParam;
@@ -451,21 +594,22 @@ namespace AVLib.Animations
             td.controlState.AnimatorEnd(td.animatorState);
         }
 
-        internal static AnimationControler.AnimePacket AnimeWaitPacket(int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        internal static AnimationControler.AnimePacket AnimeWaitPacket(string queueName, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
         {
             AnimationControler.BaseThreadParam baseThreadParam = new AnimationControler.BaseThreadParam();
             baseThreadParam.time = time;
             baseThreadParam.QueueLevel = queueLevel;
             baseThreadParam.finalCallback = finalCallback;
+            baseThreadParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = Wait, threadParam = baseThreadParam };
         }
 
-        public static object AnimeWait(Control ctrl, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        public static object AnimeWait(Control ctrl, string queueName, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeWaitPacket(time, queue, queueLevel, queueOwner, finalCallback));
+            return AnimationControler.ProcessPacket(ctrl, AnimeWaitPacket(queueName, time, queue, queueLevel, queueOwner, finalCallback));
         }
 
-        internal static AnimationControler.AnimePacket AnimeIntPropPacket(string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        internal static AnimationControler.AnimePacket AnimeIntPropPacket(string queueName, string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
             IntValueThreadParam sizeParam = new IntValueThreadParam() { CompleteIfCancel = CompleteIfCancel };
             sizeParam.value = height;
@@ -474,15 +618,16 @@ namespace AVLib.Animations
             sizeParam.speedMode = speedMode;
             sizeParam.QueueLevel = queueLevel;
             sizeParam.finalCallback = finalCallback;
+            sizeParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetIntProperty, threadParam = sizeParam };
         }
 
-        public static object AnimeIntProp(object ctrl, string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        public static object AnimeIntProp(string queueName, object ctrl, string propName, int height, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeIntPropPacket(propName, height, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+            return AnimationControler.ProcessPacket(ctrl, AnimeIntPropPacket(queueName, propName, height, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimePointPropPacket(string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        internal static AnimationControler.AnimePacket AnimePointPropPacket(string queueName, string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
             LocationThreadParam sizeParam = new LocationThreadParam() { CompleteIfCancel = CompleteIfCancel };
             sizeParam.location = point;
@@ -491,15 +636,16 @@ namespace AVLib.Animations
             sizeParam.speedMode = speedMode;
             sizeParam.QueueLevel = queueLevel;
             sizeParam.finalCallback = finalCallback;
+            sizeParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetPointProperty, threadParam = sizeParam };
         }
 
-        public static object AnimePointProp(object ctrl, string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        public static object AnimePointProp(object ctrl, string queueName, string propName, Point point, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimePointPropPacket(propName, point, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+            return AnimationControler.ProcessPacket(ctrl, AnimePointPropPacket(queueName, propName, point, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimeSizePropPacket(string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        internal static AnimationControler.AnimePacket AnimeSizePropPacket(string queueName, string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
             SizeThreadParam sizeParam = new SizeThreadParam() { CompleteIfCancel = CompleteIfCancel };
             sizeParam.size = size;
@@ -508,15 +654,16 @@ namespace AVLib.Animations
             sizeParam.speedMode = speedMode;
             sizeParam.QueueLevel = queueLevel;
             sizeParam.finalCallback = finalCallback;
+            sizeParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetSizeProperty, threadParam = sizeParam };
         }
 
-        public static object AnimeSizeProp(object ctrl, string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        public static object AnimeSizeProp(object ctrl, string queueName, string propName, Size size, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeSizePropPacket(propName, size, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+            return AnimationControler.ProcessPacket(ctrl, AnimeSizePropPacket(queueName, propName, size, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimeRectPropPacket(string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        internal static AnimationControler.AnimePacket AnimeRectPropPacket(string queueName, string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
             RectThreadParam sizeParam = new RectThreadParam() { CompleteIfCancel = CompleteIfCancel };
             sizeParam.rect = rect;
@@ -525,69 +672,92 @@ namespace AVLib.Animations
             sizeParam.speedMode = speedMode;
             sizeParam.QueueLevel = queueLevel;
             sizeParam.finalCallback = finalCallback;
+            sizeParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetRectProperty, threadParam = sizeParam };
         }
 
-        public static object AnimeRectProp(object ctrl, string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        public static object AnimeRectProp(object ctrl, string queueName, string propName, Rectangle rect, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeRectPropPacket(propName, rect, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+            return AnimationControler.ProcessPacket(ctrl, AnimeRectPropPacket(queueName, propName, rect, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimeColorPropPacket(string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        internal static AnimationControler.AnimePacket AnimeMultiRectPropPacket(string queueName, string propName, object[] objects, Rectangle[] rects, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            ColorThreadParam colorParam = new ColorThreadParam(){CompleteIfCancel = CompleteIfCancel};
+            RectArrayThreadParam multiRectParam = new RectArrayThreadParam() { CompleteIfCancel = CompleteIfCancel };
+            multiRectParam.rects = rects;
+            multiRectParam.objects = objects;
+            multiRectParam.time = time;
+            multiRectParam.PropertyName = propName;
+            multiRectParam.speedMode = speedMode;
+            multiRectParam.QueueLevel = queueLevel;
+            multiRectParam.finalCallback = finalCallback;
+            multiRectParam.queueName = queueName;
+            return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetMultiRectProperty, threadParam = multiRectParam };
+        }
+
+        public static object AnimeMultiRectProp(object ctrl, string queueName, string propName, object[] objects, Rectangle[] rects, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            return AnimationControler.ProcessPacket(ctrl, AnimeMultiRectPropPacket(queueName, propName, objects, rects, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+        }
+
+        internal static AnimationControler.AnimePacket AnimeColorPropPacket(string queueName, string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        {
+            ColorThreadParam colorParam = new ColorThreadParam() { CompleteIfCancel = CompleteIfCancel };
             colorParam.color = color;
             colorParam.time = time;
             colorParam.PropertyName = propName;
             colorParam.speedMode = speedMode;
             colorParam.QueueLevel = queueLevel;
             colorParam.finalCallback = finalCallback;
+            colorParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = SetColorProperty, threadParam = colorParam };
         }
 
-        public static object AnimeColorProp(object ctrl, string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
+        public static object AnimeColorProp(object ctrl, string queueName, string propName, Color color, int time, SpeedMode speedMode, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback, bool CompleteIfCancel)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeColorPropPacket(propName, color, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
+            return AnimationControler.ProcessPacket(ctrl, AnimeColorPropPacket(queueName, propName, color, time, speedMode, queue, queueLevel, queueOwner, finalCallback, CompleteIfCancel));
         }
 
-        internal static AnimationControler.AnimePacket AnimeHighlightPacket(int highlightPercent, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        internal static AnimationControler.AnimePacket AnimeHighlightPacket(string queueName, int highlightPercent, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
         {
             HiglightThreadParam highlightParam = new HiglightThreadParam();
             highlightParam.HiglightPercent = highlightPercent;
             highlightParam.time = time;
             highlightParam.QueueLevel = queueLevel;
             highlightParam.finalCallback = finalCallback;
+            highlightParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = DoHighlight, threadParam = highlightParam };
         }
 
-        public static object AnimeHighlight(Control ctrl, int highlightPercent, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        public static object AnimeHighlight(Control ctrl, string queueName, int highlightPercent, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeHighlightPacket(highlightPercent, time, queue, queueLevel, queueOwner, finalCallback));
+            return AnimationControler.ProcessPacket(ctrl, AnimeHighlightPacket(queueName, highlightPercent, time, queue, queueLevel, queueOwner, finalCallback));
         }
 
-        internal static AnimationControler.AnimePacket AnimeHighlightForecolorPacket(int highlightPercent, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        internal static AnimationControler.AnimePacket AnimeHighlightForecolorPacket(string queueName, int highlightPercent, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
         {
             HiglightThreadParam highlightParam = new HiglightThreadParam();
             highlightParam.HiglightPercent = highlightPercent;
             highlightParam.time = time;
             highlightParam.QueueLevel = queueLevel;
             highlightParam.finalCallback = finalCallback;
+            highlightParam.queueName = queueName;
             return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = DoHighlightForecolor, threadParam = highlightParam };
         }
 
-        public static object AnimeHighlightForecolor(Control ctrl, int highlightPercent, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        public static object AnimeHighlightForecolor(Control ctrl, string queueName, int highlightPercent, int time, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
         {
-            return AnimationControler.ProcessPacket(ctrl, AnimeHighlightForecolorPacket(highlightPercent, time, queue, queueLevel, queueOwner, finalCallback));
+            return AnimationControler.ProcessPacket(ctrl, AnimeHighlightForecolorPacket(queueName, highlightPercent, time, queue, queueLevel, queueOwner, finalCallback));
         }
 
-        public static void AnimeCancel(object ctrl)
+        public static void AnimeCancel(object ctrl, string name)
         {
-            AnimationControler.Cancel(ctrl, false);
+            AnimationControler.Cancel(ctrl, name, false);
         }
 
-        public static void AnimeForce(object ctrl)
+        public static void AnimeForce(object ctrl, string name)
         {
-            AnimationControler.Cancel(ctrl, true);
+            AnimationControler.Cancel(ctrl, name, true);
         }
 
     }

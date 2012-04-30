@@ -59,6 +59,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.txtEnterLeave = new System.Windows.Forms.TextBox();
             this.autoPanel = new System.Windows.Forms.Panel();
+            this.button6 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -82,6 +83,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage1.Controls.Add(this.button6);
             this.tabPage1.Controls.Add(this.button5);
             this.tabPage1.Controls.Add(this.btnNewForm);
             this.tabPage1.Controls.Add(this.button4);
@@ -131,7 +133,7 @@
             // 
             this.button3.Location = new System.Drawing.Point(296, 35);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(111, 23);
+            this.button3.Size = new System.Drawing.Size(84, 23);
             this.button3.TabIndex = 7;
             this.button3.Text = "down-up Color";
             this.button3.UseVisualStyleBackColor = true;
@@ -417,6 +419,16 @@
             this.autoPanel.Size = new System.Drawing.Size(100, 50);
             this.autoPanel.TabIndex = 0;
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(386, 35);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(52, 23);
+            this.button6.TabIndex = 11;
+            this.button6.Text = "Force";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -470,6 +482,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button6;
 
 
     }

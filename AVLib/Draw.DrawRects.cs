@@ -8,6 +8,12 @@ using AVLib.Animations;
 
 namespace AVLib.Draw.DrawRects
 {
+    public static class AnimeNames
+    {
+        public static string Align = "c:align";
+        public static string ChildAlign = "c:childalign";
+    }
+
     public enum RectAlignment
     {
         Absolute,
@@ -168,7 +174,10 @@ namespace AVLib.Draw.DrawRects
                 {
                     var old = m_rect;
                     m_rect = value;
+                    DisableInvalidate();
+                    RealignChilds(false);
                     this.InvalidateChildRect(old, this);
+                    EnableInvalidate();
                 }
             }
         }
@@ -237,9 +246,16 @@ namespace AVLib.Draw.DrawRects
             get { return m_control; }
             set
             {
+                if (m_control != null) m_control.Validated -= m_control_TextChanged;
                 m_control = value;
+                m_control.TextChanged += m_control_TextChanged;
                 AlignControl();
             }
+        }
+
+        private void m_control_TextChanged(object sender, EventArgs e)
+        {
+            Invalidate(m_rect);
         }
 
         public bool Visible
@@ -336,7 +352,11 @@ namespace AVLib.Draw.DrawRects
 
         public void Add(DrawRect rect)
         {
-            if (m_childs == null) m_childs = new List<DrawRectChild>();
+            if (m_childs == null)
+            {
+                m_childs = new List<DrawRectChild>();
+                m_freeRect = RectWithoutBorder();
+            }
 
             DrawRectChild child = new DrawRectChild();
             child.Child = rect;
@@ -345,7 +365,7 @@ namespace AVLib.Draw.DrawRects
             rect.m_Parent = this;
             rect.m_ParentIndex = m_childs.Count;
             m_childs.Add(child);
-            DoAlign(child, false);
+            DoAlign(child.Child, CalcAlign(child, ref m_freeRect), false);
         }
 
         public DrawRect Add(Point pos, int width, int height)
@@ -683,15 +703,10 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
-        private bool DoAlign(DrawRectChild child, bool force)
+        private Rectangle CalcAlign(DrawRectChild child, ref Rectangle freeRect)
         {
-            if (!force && AlignDisabled > 0) return false;
-
-            DisableInvalidate();
-
-            child.RectForChild = m_freeRect;
-            var newRect = child.Child.m_rect;
-            var oldRect = child.Child.Rect;
+            child.RectForChild = freeRect;
+            var newRect = child.Child.Rect;
             if (child.Child.Visible)
             {
                 switch (child.Child.m_alignment)
@@ -702,46 +717,55 @@ namespace AVLib.Draw.DrawRects
                                                            child.Child.Size.Height);
                         break;
                     case RectAlignment.Left:
-                        newRect = new Rectangle(m_freeRect.Location,
-                                                           new Size(child.Child.Width, m_freeRect.Height));
-                        m_freeRect = new Rectangle(m_freeRect.X + newRect.Width, m_freeRect.Y,
-                                                   m_freeRect.Width - newRect.Width, m_freeRect.Height);
+                        newRect = new Rectangle(freeRect.Location,
+                                                           new Size(child.Child.Width, freeRect.Height));
+                        freeRect = new Rectangle(freeRect.X + newRect.Width, freeRect.Y,
+                                                   freeRect.Width - newRect.Width, freeRect.Height);
                         break;
                     case RectAlignment.Right:
-                        newRect = new Rectangle(m_freeRect.Left + m_freeRect.Width - child.Child.Width,
-                                                           m_freeRect.Y, child.Child.Width, m_freeRect.Height);
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width - newRect.Width, m_freeRect.Height));
+                        newRect = new Rectangle(freeRect.Left + freeRect.Width - child.Child.Width,
+                                                           freeRect.Y, child.Child.Width, freeRect.Height);
+                        freeRect = new Rectangle(freeRect.Location,
+                                                   new Size(freeRect.Width - newRect.Width, freeRect.Height));
                         break;
                     case RectAlignment.Top:
-                        newRect = new Rectangle(m_freeRect.Location,
-                                                           new Size(m_freeRect.Width, child.Child.Height));
-                        m_freeRect = new Rectangle(m_freeRect.X, m_freeRect.Y + newRect.Height, m_freeRect.Width,
-                                                   m_freeRect.Height - newRect.Height);
+                        newRect = new Rectangle(freeRect.Location,
+                                                           new Size(freeRect.Width, child.Child.Height));
+                        freeRect = new Rectangle(freeRect.X, freeRect.Y + newRect.Height, freeRect.Width,
+                                                   freeRect.Height - newRect.Height);
                         break;
                     case RectAlignment.Bottom:
-                        newRect = new Rectangle(m_freeRect.X,
-                                                           m_freeRect.Y + m_freeRect.Height - child.Child.Height,
-                                                           m_freeRect.Width, child.Child.Height);
-                        m_freeRect = new Rectangle(m_freeRect.Location,
-                                                   new Size(m_freeRect.Width, m_freeRect.Height - newRect.Height));
+                        newRect = new Rectangle(freeRect.X,
+                                                           freeRect.Y + freeRect.Height - child.Child.Height,
+                                                           freeRect.Width, child.Child.Height);
+                        freeRect = new Rectangle(freeRect.Location,
+                                                   new Size(freeRect.Width, freeRect.Height - newRect.Height));
                         break;
                     case RectAlignment.Fill:
-                        newRect = m_freeRect;
+                        newRect = freeRect;
                         break;
                 }
             }
+            return newRect;
+        }
 
-            if (!m_AnimeChildAlign && child.Child.AnimeAlign && oldRect != newRect)
+        private bool DoAlign(DrawRect child, Rectangle newRect, bool force)
+        {
+            if (!force && AlignDisabled > 0) return false;
+
+            DisableInvalidate();
+
+            var oldRect = child.Rect;
+            if (!m_AnimeChildAlign && child.AnimeAlign && oldRect != newRect)
             {
-                child.Child.AnimeCancel();
-                child.Child.Anime().RectDec(newRect, (d) => { child.Child.RealignChilds(force); });
+                child.AnimeCancel(AnimeNames.Align);
+                child.Anime(AnimeNames.Align).RectInc(newRect);
             }
             else
             {
-                child.Child.m_rect = newRect;
-                child.Child.RealignChilds(force);
-                InvalidateChildRect(oldRect, child.Child);
+                child.m_rect = newRect;
+                child.RealignChilds(force);
+                InvalidateChildRect(oldRect, child);
             }
 
             EnableInvalidate();
@@ -780,8 +804,31 @@ namespace AVLib.Draw.DrawRects
             else
                 m_freeRect = m_childs[fromIndex].RectForChild;
 
+            var childs = new List<DrawRect>();
+            var newRects = new List<Rectangle>();
+
             for (int i = fromIndex; i < Count; i++)
-                DoAlign(m_childs[i], force);
+            {
+                var newRect = CalcAlign(m_childs[i], ref m_freeRect);
+                if (newRect != m_childs[i].Child.m_rect)
+                {
+                    newRects.Add(newRect);
+                    childs.Add(m_childs[i].Child);
+                }
+            }
+
+            if (m_AnimeChildAlign)
+            {
+                foreach (var child in childs)
+                    child.AnimeCancel(AnimeNames.Align);
+                this.AnimeCancel(AnimeNames.ChildAlign);
+                this.Anime(AnimeNames.ChildAlign).MultiRectDec(childs.ToArray(), newRects.ToArray());
+            }
+            else
+            {
+                for (int i = 0; i < childs.Count; i++)
+                    DoAlign(childs[i], newRects[i], force);
+            }
 
             EnableInvalidate();
         }
