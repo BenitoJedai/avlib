@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -91,6 +92,41 @@ namespace AVLib.Utils
             }
 
             return (pInfo != null) || (fieldInfo != null) || (methodInfo != null);
+        }
+    }
+
+    public static class ObjectConvertUtils
+    {
+        public static string AsString(this object obj)
+        {
+            if (obj == null) return string.Empty;
+            return obj.ToString();
+        }
+
+        public static int AsInteger(this object obj)
+        {
+            if (obj == null) return 0;
+            if (obj is int) return (int) obj;
+            if (obj is byte) return (byte) obj;
+            int n;
+            if (obj is string && int.TryParse((string)obj, out n)) return n;
+            if (obj is double) return (int) (double) obj;
+            if (obj is float) return (int) (float) obj;
+            return 0;
+        }
+
+        public static Color AsColor(this object obj)
+        {
+            if (obj == null) return Color.Black;
+            if (obj is Color) return (Color) obj;
+            return Color.FromArgb(obj.AsInteger());
+        }
+
+        public static bool AsBoolean(this object obj)
+        {
+            if (obj == null) return false;
+            if (obj is bool) return (bool) obj;
+            return false;
         }
     }
 }

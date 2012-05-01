@@ -353,21 +353,6 @@ namespace AVLib.Draw.DrawRects.Painters
         }
     }
 
-    public delegate void PainterPaintHandler(DrawRect rect, Graphics graf);
-    public class CustomPainter : RectPainter
-    {
-        private PainterPaintHandler paintHandler;
-        public CustomPainter(PainterPaintHandler paintHandler, string name)
-        {
-            this.paintHandler = paintHandler;
-            this.Name = name;
-        }
-        public override void Paint(DrawRect rect, Graphics graf)
-        {
-            if (paintHandler != null) paintHandler(rect, graf);
-        }
-    }
-
     public static class Painters
     {
         public static void FillRect(this RectPainters.PaintLevel paintLevel, Color color, int cornerRadius, string name)

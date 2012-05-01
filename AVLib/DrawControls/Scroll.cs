@@ -86,7 +86,7 @@ namespace VALib.Draw.Controls
         {
             button1 = new DrawButton();
             button1.Size = Size;
-            //button1.CornerRadius = 2;
+            button1.CornerRadius = 1;
             button1.BorderSize = 1;
             button1.Alignment = RectAlignment.Top;
             button1.Transparent = true;
@@ -96,7 +96,7 @@ namespace VALib.Draw.Controls
             scrollButton = new DrawButton();
             scrollButton.Pos = new Point(0, button1.Height);
             scrollButton.Size = Size;
-            scrollButton.CornerRadius = 2;
+            scrollButton.CornerRadius = 1;
             scrollButton.BorderSize = 1;
             scrollButton.Alignment = RectAlignment.Absolute;
             scrollButton.Transparent = true;
@@ -107,7 +107,7 @@ namespace VALib.Draw.Controls
 
             button2 = new DrawButton();
             button2.Size = Size;
-            //button2.CornerRadius = 2;
+            button2.CornerRadius = 1;
             button2.BorderSize = 1;
             button2.Alignment = RectAlignment.Bottom;
             button2.Transparent = true;

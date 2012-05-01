@@ -77,6 +77,52 @@ namespace AVLib.Draw.DrawRects
         private bool m_AnimeAlign = false;
         private bool m_AnimeChildAlign = false;
 
+        private Dictionary<string, object> m_properties;
+        public bool SetProperty(string property, object value)
+        {
+            if (m_properties == null)
+                m_properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            if (m_properties.ContainsKey(property))
+            {
+                var res = m_properties[property] != value;
+                m_properties[property] = value;
+                return res;
+            }
+            m_properties.Add(property, value);
+            return true;
+        }
+        public object this[string property]
+        {
+            get
+            {
+                if (m_properties == null) return null;
+                object res;
+                if (m_properties.TryGetValue(property, out res)) return res;
+                return null;
+            }
+            set
+            {
+                SetProperty(property, value);
+            }
+        }
+        public object this[string property, object defValue]
+        {
+            get
+            {
+                if (m_properties == null) return defValue;
+                object res;
+                if (m_properties.TryGetValue(property, out res)) return res;
+                return defValue;
+            }
+        }
+        public T Property<T>(string property, object defValue)
+        {
+            object obj = this[property, defValue];
+            if (obj == null) return (T) defValue;
+            if (typeof(T) == obj.GetType()) return (T) obj;
+            return (T)defValue;
+        }
+
         #region Constructors
 
         public DrawRect(Control control, Point pos, int width, int height)
@@ -1039,6 +1085,21 @@ namespace AVLib.Draw.DrawRects
         }
     }
 
+    public delegate void PainterPaintHandler(DrawRect rect, Graphics graf);
+    public class CustomPainter : RectPainter
+    {
+        private PainterPaintHandler paintHandler;
+        public CustomPainter(PainterPaintHandler paintHandler, string name)
+        {
+            this.paintHandler = paintHandler;
+            this.Name = name;
+        }
+        public override void Paint(DrawRect rect, Graphics graf)
+        {
+            if (paintHandler != null) paintHandler(rect, graf);
+        }
+    }
+
     public class RectPainters
     {
         internal Control control;
@@ -1092,6 +1153,15 @@ namespace AVLib.Draw.DrawRects
                 m_handlers.Add(painter);
                 painter.Changed += painter_Changed;
                 m_owner.DoChanged();
+            }
+            public void Add(PainterPaintHandler method, string name)
+            {
+                var painter = new CustomPainter(method, name);
+                Add(painter);
+            }
+            public void Add(PainterPaintHandler method)
+            {
+                Add(method, "");
             }
 
             private void painter_Changed()

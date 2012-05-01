@@ -217,11 +217,11 @@ namespace DrawRectTestApp
             bt.MouseOverColor = Color.Blue.BrightColor(70);
             bt.BorderSize = 2;
             bt.CornerRadius = 2;
-            bt.Gradient = true;
+            bt.Gradient = false;
             bt.Transparent = true;
             bt.DrawFocus = true;
             bt.Switch = false;
-            bt.Flat = false;
+            bt.Flat = true;
             bt.Text = "Test";
             bt.TextColor = Color.Navy;
             bt.CaptuReDown = true;
@@ -232,7 +232,7 @@ namespace DrawRectTestApp
             scroll.Size = new Size(16, 16);
             scroll.Alignment = RectAlignment.Right;
             scroll.Align = DrawScrollAlign.Vertical;
-            scroll.BorderSize = 1;
+            //scroll.BorderSize = 1;
             rect.Add(scroll);
         }
 
