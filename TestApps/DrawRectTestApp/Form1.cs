@@ -12,6 +12,7 @@ using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
 using AVLib.Utils;
 using AVLib.Animations;
+using VALib.Draw.Controls;
 
 namespace DrawRectTestApp
 {
@@ -23,6 +24,7 @@ namespace DrawRectTestApp
         private DrawRect backRect;
         private ControlRect mouseRect;
         private DrawRect topRect;
+        private DrawButton drowBt;
 
         public Form1()
         {
@@ -173,7 +175,6 @@ namespace DrawRectTestApp
             //********** tabDrawControl *************************
             tabDrawControl.TabStop = true;
             rect = tabDrawControl.MainRect;
-            rect.Painters[0].FillRect(SystemColors.Control);
 
             var cr = new ControlRect(new Point(40, 40), 100, 20);
             rect.Add(cr);
@@ -181,10 +182,14 @@ namespace DrawRectTestApp
             cr.Painters[0].DrawRectangle(Color.Maroon, 2);
             cr.TabIndex = 0;
             cr.TabStop = true;
-            cr.Enter += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Red.BrightColor(80)); };
+            cr.Enter += (s, arg) =>
+                            {
+                                ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Red.BrightColor(80));
+                            };
             cr.Leave += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Red.BrightColor(40)); };
 
             cr = new ControlRect(new Point(40, 80), 100, 20);
+            cr.Alignment = RectAlignment.Center;
             rect.Add(cr);
             cr.Painters[0].FillRect(Color.Green.BrightColor(40), "color");
             cr.Painters[0].DrawRectangle(Color.Green, 2);
@@ -192,6 +197,43 @@ namespace DrawRectTestApp
             cr.TabStop = true;
             cr.Enter += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Green.BrightColor(80)); };
             cr.Leave += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Green.BrightColor(40)); };
+
+            cr = new ControlRect(new Point(40, 120), 100, 20);
+            rect.Add(cr);
+            cr.Painters[0].FillRect(Color.Blue.BrightColor(40), "color");
+            cr.Painters[0].DrawRectangle(Color.Navy, 2);
+            cr.TabIndex = 2;
+            cr.TabStop = true;
+            cr.Enter += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Blue.BrightColor(80)); };
+            cr.Leave += (s, arg) => { ((ControlRect)s).Painters["color"].SetProperty("Color", Color.Blue.BrightColor(40)); };
+
+
+            var bt = new DrawButton();
+            drowBt = bt;
+            bt.Pos = new Point(40, 160);
+            bt.Size = new Size(100, 23);
+            bt.TabIndex = 3;
+            //bt.Color = Color.Aqua;
+            bt.MouseOverColor = Color.Blue.BrightColor(70);
+            bt.BorderSize = 2;
+            bt.CornerRadius = 2;
+            bt.Gradient = true;
+            bt.Transparent = true;
+            bt.DrawFocus = true;
+            bt.Switch = false;
+            bt.Flat = false;
+            bt.Text = "Test";
+            bt.TextColor = Color.Navy;
+            bt.CaptuReDown = true;
+            rect.Add(bt);
+
+
+            var scroll = new DrawScroll();
+            scroll.Size = new Size(16, 16);
+            scroll.Alignment = RectAlignment.Right;
+            scroll.Align = DrawScrollAlign.Vertical;
+            scroll.BorderSize = 1;
+            rect.Add(scroll);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -233,6 +275,19 @@ namespace DrawRectTestApp
                     topRect.Height = n;
                 }
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            using (Form1 newForm = new Form1())
+            {
+                newForm.ShowDialog();
+            }
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            this.drowBt.Enabled = checkBox4.Checked;
         }
     }
 }

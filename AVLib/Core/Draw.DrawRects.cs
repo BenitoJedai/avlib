@@ -21,14 +21,19 @@ namespace AVLib.Draw.DrawRects
         Right,
         Top,
         Bottom,
-        Fill
+        Fill,
+        Center
     }
 
     public delegate void ChangedHandler();
+    public delegate void ItemChangeHandler(DrawRect rect);
 
     public class DrawRect : IInvokeCompatible
     {
         public event EventHandler VisibleChanged;
+        public event ItemChangeHandler AlignmentChanged;
+        public event ItemChangeHandler ItemAdded;
+        public event ItemChangeHandler Resize;
 
         private class DrawRectChild
         {
@@ -50,6 +55,7 @@ namespace AVLib.Draw.DrawRects
                 if (m_rect_internal != value)
                 {
                     m_rect_internal = value;
+                    if (Resize != null) Resize(this);
                     ChildMoved(this);
                 }
             }
@@ -95,9 +101,30 @@ namespace AVLib.Draw.DrawRects
             m_rect = new Rectangle(pos.X, pos.Y, width, height);
         }
 
+        public DrawRect(RectAlignment alignment, int size)
+        {
+            m_alignment = alignment;
+            m_size = new Size(size, size);
+        }
+
         public DrawRect()
         {
             m_painters.Changed += new ChangedHandler(m_painters_Changed);
+        }
+
+        protected Control LockControl
+        {
+            get { return m_LockControl; }
+            private set
+            {
+                m_LockControl = value;
+                m_painters.control = value;
+                if (Count > 0)
+                {
+                    foreach (var child in m_childs)
+                        child.Child.LockControl = value;
+                }
+            }
         }
 
         public delegate void NotifyHandler(object sender);
@@ -123,16 +150,21 @@ namespace AVLib.Draw.DrawRects
 
         public bool InvokeRequired
         {
-            get { return m_LockControl.InvokeRequired; }
+            get
+            {
+                return (m_LockControl == null) ? true : m_LockControl.InvokeRequired;
+            }
         }
 
         public object Invoke(Delegate method)
         {
+            if (m_LockControl == null) return null;
             return m_LockControl.Invoke(method);
         }
 
         public object Invoke(Delegate method, params Object[] args)
         {
+            if (m_LockControl == null) return null;
             return m_LockControl.Invoke(method, args);
         }
 
@@ -247,6 +279,7 @@ namespace AVLib.Draw.DrawRects
                 if (m_alignment != value)
                 {
                     m_alignment = value;
+                    if (AlignmentChanged != null) AlignmentChanged(this);
                     DoRectChanged(true);
                 }
             }
@@ -278,7 +311,8 @@ namespace AVLib.Draw.DrawRects
                 {
                     m_Visible = value;
                     if (m_control != null) m_control.Visible = m_Visible;
-                    if (m_Visible || m_alignment != RectAlignment.Absolute) DoRectChanged(true);
+                    if (m_Visible || (m_alignment != RectAlignment.Absolute && m_alignment != RectAlignment.Center)) 
+                        DoRectChanged(true);
                     Invalidate(m_rect);
 
                     if (VisibleChanged != null) VisibleChanged(this, new EventArgs());
@@ -373,12 +407,18 @@ namespace AVLib.Draw.DrawRects
 
             DrawRectChild child = new DrawRectChild();
             child.Child = rect;
-            rect.m_LockControl = m_LockControl;
-            rect.Painters.control = m_LockControl;
+            rect.LockControl = m_LockControl;
             rect.m_Parent = this;
             rect.m_ParentIndex = m_childs.Count;
             m_childs.Add(child);
             DoAlign(child.Child, CalcAlign(child, ref m_freeRect), false);
+
+            DoItemAdded(rect);
+        }
+
+        protected virtual void DoItemAdded(DrawRect item)
+        {
+            if (ItemAdded != null) ItemAdded(item);
         }
 
         public DrawRect Add(Point pos, int width, int height)
@@ -593,6 +633,7 @@ namespace AVLib.Draw.DrawRects
                 return;
             }
 
+            if (InvalidateRegion == null) return; //not assigned to Parent
             if (OnInvalidate != null)
             {
                 if (InvalidateRegion.IsVisible(Rect))
@@ -616,6 +657,8 @@ namespace AVLib.Draw.DrawRects
         }
         public void Invalidate(Region invalidateRegion)
         {
+            if (InvalidateRegion == null) return;
+
             RemoveOverlapsFromRegion(invalidateRegion, false);
             InvalidateRegion.Union(invalidateRegion);
             if (InvalidateDisabled <= 0) InvalidateIfNeeded();
@@ -627,6 +670,8 @@ namespace AVLib.Draw.DrawRects
         }
         public void PreInvalidate(Region invalidateRegion)
         {
+            if (InvalidateRegion == null) return;
+
             RemoveOverlapsFromRegion(invalidateRegion, false);
             InvalidateRegion.Union(invalidateRegion);
         }
@@ -635,22 +680,22 @@ namespace AVLib.Draw.DrawRects
             if (m_Parent != null)
             {
                 region.Intersect(m_Parent.RectWithoutBorder());
-                m_Parent.RemoveOverlapsFromRegion(region, m_ParentIndex, withTransparent);
+                m_Parent.RemoveOverlapsFromRegion(region, m_ParentIndex, withTransparent, false);
             }
         }
-        private void RemoveOverlapsFromRegion(Region region, int childIndex, bool withTransparent)
+        private void RemoveOverlapsFromRegion(Region region, int childIndex, bool withTransparent, bool skipParent)
         {
             if (Count > 0)
             {
                 for (int i = childIndex + 1; i < m_childs.Count; i++)
                 {
                     if (m_childs[i].Child.Transparent && !withTransparent)
-                        m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent);
+                        m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent, true);
                     else
                         region.Exclude(m_childs[i].Child.Rect);
                 }
             }
-            RemoveOverlapsFromRegion(region, withTransparent);
+            if (!skipParent) RemoveOverlapsFromRegion(region, withTransparent);
         }
 
         //------------------------------------------
@@ -728,6 +773,11 @@ namespace AVLib.Draw.DrawRects
                         newRect = new Rectangle(m_rect.X + m_BorderSize + child.Child.m_pos.X,
                                                            m_rect.Y + m_BorderSize + child.Child.m_pos.Y, child.Child.Size.Width,
                                                            child.Child.Size.Height);
+                        break;
+                    case RectAlignment.Center:
+                        newRect = new Rectangle(m_rect.X + (m_rect.Width - child.Child.Width)/2,
+                                                m_rect.Y + (m_rect.Height - child.Child.Height)/2, child.Child.Width,
+                                                child.Child.Height);
                         break;
                     case RectAlignment.Left:
                         newRect = new Rectangle(freeRect.Location,

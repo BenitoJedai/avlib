@@ -30,11 +30,17 @@ namespace AVLib.Controls
             m_mainRect = new ControlRect(this, new Point(0, 0), Width, Height);
             m_mainRect.Painters[0].FillRect(SystemColors.Control);
             this.Resize += new EventHandler(DrawControl_Resize);
+            this.Disposed += new EventHandler(DrawControl_Disposed);
 
             m_mainRect.OnInvalidate += new DrawRect.OnValidateHandler(m_mainRect_OnInvalidate);
             m_mainRect.OnChildMoved += new DrawRect.NotifyHandler(m_mainRect_OnChildMoved);
 
             InitializeRects();
+        }
+
+        void DrawControl_Disposed(object sender, EventArgs e)
+        {
+            m_mainRect.Dispose();
         }
 
         private void m_mainRect_OnChildMoved(object sender)

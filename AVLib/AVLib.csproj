@@ -41,24 +41,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation.Controller.cs" />
-    <Compile Include="Animation.cs" />
-    <Compile Include="Animation.Controller.ControlController.cs" />
-    <Compile Include="Animation.Externals.Controls.cs" />
-    <Compile Include="Animation.Externals.cs" />
-    <Compile Include="Animation.Internal.cs" />
-    <Compile Include="ColorUtils.cs" />
-    <Compile Include="Draw.DrawRects.AnimeExternals.cs" />
-    <Compile Include="Draw.DrawRects.ControlRect.cs" />
-    <Compile Include="Draw.DrawRects.cs" />
-    <Compile Include="Draw.DrawRects.Painters.cs" />
-    <Compile Include="DrawControl.cs">
+    <Compile Include="Core\Animation.Controller.cs" />
+    <Compile Include="Core\Animation.cs" />
+    <Compile Include="Core\Animation.Controller.ControlController.cs" />
+    <Compile Include="Core\Animation.Externals.Controls.cs" />
+    <Compile Include="Core\Animation.Externals.cs" />
+    <Compile Include="Core\Animation.Internal.cs" />
+    <Compile Include="Core\ColorUtils.cs" />
+    <Compile Include="Core\Draw.DrawRects.AnimeExternals.cs" />
+    <Compile Include="Core\Draw.DrawRects.ControlRect.cs" />
+    <Compile Include="Core\Draw.DrawRects.cs" />
+    <Compile Include="Core\Draw.DrawRects.Painters.cs" />
+    <Compile Include="Core\DrawControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DrawControl.Designer.cs">
+    <Compile Include="Core\DrawControl.Designer.cs">
       <DependentUpon>DrawControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObjectUtils.cs" />
+    <Compile Include="Core\ObjectUtils.cs" />
+    <Compile Include="DrawControls\Button.cs" />
+    <Compile Include="DrawControls\Scroll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
