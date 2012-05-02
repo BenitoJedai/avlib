@@ -7,6 +7,22 @@ using System.Text;
 
 namespace AVLib.Utils
 {
+    public class PropertyRef
+    {
+        public object obj;
+        public string propertyPath;
+        public object Value
+        {
+            get { return obj.GetProperty(propertyPath); }
+            set { obj.SetProperty(propertyPath, value); }
+        }
+        public object this[object obj]
+        {
+            get { return obj.GetProperty(propertyPath); }
+            set { obj.SetProperty(propertyPath, value); }
+        }
+    }
+
     public static class ObjectUtils
     {
         public static object GetProperty(this object target, string Path)
@@ -92,6 +108,11 @@ namespace AVLib.Utils
             }
 
             return (pInfo != null) || (fieldInfo != null) || (methodInfo != null);
+        }
+
+        public static PropertyRef PropertyRef(this object obj, string propertyPath)
+        {
+            return new PropertyRef(){obj = obj, propertyPath = propertyPath};
         }
     }
 

@@ -17,31 +17,20 @@ namespace VALib.Draw.Controls
 
     public class DrawScroll : ControlRect
     {
-        private DrawScrollAlign m_align = DrawScrollAlign.Vertical;
         public DrawScrollAlign Align
         {
-            get { return m_align; }
-            set
-            {
-                if (m_align != value)
-                {
-                    m_align = value;
-                }
-            }
+            get { return Property.GetAs<DrawScrollAlign>("Align", DrawScrollAlign.Vertical); }
+            set { Property.SetProperty("Align", value); }
         }
 
-        private Color m_color = SystemColors.Control;
         public Color Color
         {
-            get { return m_color; }
+            get { return Property["Color", SystemColors.Control].AsColor(); }
             set
             {
-                if (m_color != value)
+                if (Property.SetProperty("Color", value))
                 {
-                    m_color = value;
-                    button1.Color = value;
-                    button2.Color = value;
-                    scrollButton.Color = value;
+                    Invalidate();
                 }
             }
         }
@@ -50,7 +39,7 @@ namespace VALib.Draw.Controls
         private int m_scrollWidth = 10;
         private int ScrollMaxWay()
         {
-            var sz = m_align == DrawScrollAlign.Vertical
+            var sz = Align == DrawScrollAlign.Vertical
                          ? Rect.Height - button1.Rect.Height - button2.Rect.Height
                          : Rect.Width - button1.Rect.Width - button2.Rect.Width;
             sz -= m_scrollWidth;
@@ -65,12 +54,12 @@ namespace VALib.Draw.Controls
             if (newValue != m_scrollPos)
             {
                 m_scrollPos = newValue;
-                scrollButton.Pos = m_align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
+                scrollButton.Pos = Align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
             }
         }
         private int ScrollPos()
         {
-            return m_align == DrawScrollAlign.Vertical
+            return Align == DrawScrollAlign.Vertical
                        ? button1.Rect.Height + m_scrollPos
                        : button1.Rect.Width + m_scrollPos;
         }
@@ -91,6 +80,7 @@ namespace VALib.Draw.Controls
             button1.Alignment = RectAlignment.Top;
             button1.Transparent = true;
             button1.Flat = true;
+            button1.Property["Color"] = Property.Get("Color");
             this.Add(button1);
 
             scrollButton = new DrawButton();
@@ -100,6 +90,7 @@ namespace VALib.Draw.Controls
             scrollButton.BorderSize = 1;
             scrollButton.Alignment = RectAlignment.Absolute;
             scrollButton.Transparent = true;
+            scrollButton.Property["Color"] = Property.Get("Color");
             scrollButton.MouseDown += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseDown);
             scrollButton.MouseUp += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseUp);
             scrollButton.MouseMove += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseMove);
@@ -112,6 +103,7 @@ namespace VALib.Draw.Controls
             button2.Alignment = RectAlignment.Bottom;
             button2.Transparent = true;
             button2.Flat = true;
+            button2.Property["Color"] = Property.Get("Color");
             this.Add(button2);
 
             this.Painters[0].Add(new CustomPainter(new PainterPaintHandler(PaintBar), "bar"));
@@ -145,7 +137,7 @@ namespace VALib.Draw.Controls
             {
                 int dx = e.Location.X - downMousePoint.X;
                 int dy = e.Location.Y - downMousePoint.Y;
-                if (m_align == DrawScrollAlign.Vertical)
+                if (Align == DrawScrollAlign.Vertical)
                     SetScrollPos(downScrollPos + dy);
                 else
                     SetScrollPos(downScrollPos + dx);
@@ -154,15 +146,15 @@ namespace VALib.Draw.Controls
 
         private void DrawScroll_Resize(DrawRect rect)
         {
-            int size = (m_align == DrawScrollAlign.Vertical ? Rect.Width : Rect.Height) - BorderSize*2;
+            int size = (Align == DrawScrollAlign.Vertical ? Rect.Width : Rect.Height) - BorderSize * 2;
 
             DisableInvalidate();
             try
             {
                 button1.Size = new Size(size, size);
                 button2.Size = new Size(size, size);
-                scrollButton.Size = m_align == DrawScrollAlign.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
-                scrollButton.Pos = m_align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
+                scrollButton.Size = Align == DrawScrollAlign.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
+                scrollButton.Pos = Align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
             }
             finally
             {
@@ -175,25 +167,10 @@ namespace VALib.Draw.Controls
             var drawRect = rect.Rect;
             if (BorderSize > 0)
             {
-                DrawRectMethods.DrawRectangle(rect.Rect, graf, m_color.DarkColor(30), BorderSize);
+                DrawRectMethods.DrawRectangle(rect.Rect, graf, Color.DarkColor(30), BorderSize);
                 drawRect.Inflate(-BorderSize, -BorderSize);
             }
-            //DrawRectMethods.FillRect(drawRect, graf, m_color.BrightColor(20));
-            DrawRectMethods.FillRectGradient(drawRect, graf, m_color.BrightColor(20), m_color.DarkColor(5), SimpleDirection.Horisontal);
-
-//            var pen = new Pen(m_color.DarkColor(10), 4);
-//            switch (m_align)
-//            {
-//                case DrawScrollAlign.Vertical:
-//                    graf.DrawLine(pen, drawRect.X + 1, drawRect.Y, drawRect.X + 1, drawRect.Bottom);
-//                    graf.DrawLine(pen, drawRect.Right - 1, drawRect.Y, drawRect.Right - 1, drawRect.Bottom);
-//                    break;
-//                case DrawScrollAlign.Horizontal:
-//                    graf.DrawLine(pen, drawRect.X , drawRect.Y + 1, drawRect.Right, drawRect.Y + 1);
-//                    graf.DrawLine(pen, drawRect.X, drawRect.Bottom - 1, drawRect.Right, drawRect.Bottom - 1);
-//                    break;
-//            }
-            
+            DrawRectMethods.FillRectGradient(drawRect, graf, Color.BrightColor(20), Color.DarkColor(5), SimpleDirection.Horisontal);
         }
     }
 }

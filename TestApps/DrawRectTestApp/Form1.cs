@@ -215,6 +215,7 @@ namespace DrawRectTestApp
             bt.TabIndex = 3;
             //bt.Color = Color.Aqua;
             bt.MouseOverColor = Color.Blue.BrightColor(70);
+            bt.UseMouseOverColor = true;
             bt.BorderSize = 2;
             bt.CornerRadius = 2;
             bt.Gradient = false;
@@ -224,7 +225,7 @@ namespace DrawRectTestApp
             bt.Flat = true;
             bt.Text = "Test";
             bt.TextColor = Color.Navy;
-            bt.CaptuReDown = true;
+            bt.HoldDownIfMouseLeave = true;
             rect.Add(bt);
 
 
@@ -232,6 +233,7 @@ namespace DrawRectTestApp
             scroll.Size = new Size(16, 16);
             scroll.Alignment = RectAlignment.Right;
             scroll.Align = DrawScrollAlign.Vertical;
+            scroll.Color = Color.LightSalmon;
             //scroll.BorderSize = 1;
             rect.Add(scroll);
         }

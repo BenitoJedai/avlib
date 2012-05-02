@@ -8,112 +8,58 @@ using AVLib.Animations;
 using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
 using AVLib.Utils;
+using VALib.Draw.Controls.Core;
 
 namespace VALib.Draw.Controls
 {
-    public class DrawButton : ControlRect
+    public class DrawButton : BaseEventReaction
     {
-        public Color Color
-        {
-            get { return this["color", SystemColors.Control].AsColor(); }
-            set
-            {
-                bool setMouseOver = Color == MouseOverColor;
-                if (SetProperty("color", value))
-                {
-                    if (setMouseOver) MouseOverColor = value;
-                    if (!m_mouse_over) CurrentColor = value;
-                }
-            }
-        }
-
-        public Color MouseOverColor
-        {
-            get { return this["MouseOverColor", SystemColors.Control].AsColor(); }
-            set
-            {
-                if (SetProperty("MouseOverColor", value))
-                    if (m_mouse_over) CurrentColor = value;
-            }
-        }
-
-        public Color CurrentColor
-        {
-            get { return this["CurrentColor", Color].AsColor(); }
-            set
-            {
-                if (SetProperty("CurrentColor", value))
-                    Invalidate();
-            }
-        }
-
-
-        public Color FocusColor
-        {
-            get { return this["FocusColor", Color.Blue].AsColor(); }
-            set
-            {
-                if (SetProperty("FocusColor", value))
-                    if (Focused) Invalidate();
-            }
-        }
-
-        public bool DrawFocus
-        {
-            get { return this["DrawFocus"].AsBoolean(); }
-            set
-            {
-                if (SetProperty("DrawFocus", value))
-                    if (Focused) Invalidate();
-            }
-        }
-
         public bool Gradient
         {
-            get { return this["Gradient"].AsBoolean(); }
+            get { return Property["Gradient"].AsBoolean(); }
             set
             {
-                if (SetProperty("Gradient", value))
+                if (Property.SetProperty("Gradient", value))
                     Invalidate();
             }
         }
 
         public bool Flat
         {
-            get { return this["Flat"].AsBoolean(); }
+            get { return Property["Flat"].AsBoolean(); }
             set
             {
-                if (SetProperty("Flat", value))
+                if (Property.SetProperty("Flat", value))
                     Invalidate();
             }
         }
 
         public int CornerRadius
         {
-            get { return this["CornerRadius"].AsInteger(); }
+            get { return Property["CornerRadius"].AsInteger(); }
             set
             {
-                if (SetProperty("CornerRadius", value))
+                if (Property.SetProperty("CornerRadius", value))
                     Invalidate();
             }
         }
 
         public string Text
         {
-            get { return this["Text"].AsString(); }
+            get { return Property["Text"].AsString(); }
             set
             {
-                if (SetProperty("Text", value == null ? "" : value))
+                if (Property.SetProperty("Text", value == null ? "" : value))
                     Invalidate();
             }
         }
 
         public Color TextColor
         {
-            get { return this["TextColor", Color.Navy].AsColor(); }
+            get { return Property["TextColor", Color.Navy].AsColor(); }
             set
             {
-                if (SetProperty("TextColor", value))
+                if (Property.SetProperty("TextColor", value))
                     Invalidate();
             }
         }
@@ -125,10 +71,10 @@ namespace VALib.Draw.Controls
 
         public bool Switch
         {
-            get { return this["Switch"].AsBoolean(); }
+            get { return Property["Switch"].AsBoolean(); }
             set
             {
-                if (SetProperty("Switch", value))
+                if (Property.SetProperty("Switch", value))
                 {
                     if (!value) Down = false;
                     Invalidate();
@@ -138,10 +84,10 @@ namespace VALib.Draw.Controls
 
         public bool Down
         {
-            get { return this["Down"].AsBoolean(); }
+            get { return Property["Down"].AsBoolean(); }
             set
             {
-                if (SetProperty("Down", value))
+                if (Property.SetProperty("Down", value))
                 {
                     Invalidate();
                     if (OnOff != null) OnOff(this, new EventArgs());
@@ -149,35 +95,41 @@ namespace VALib.Draw.Controls
             }
         }
 
-        public bool CaptuReDown
-        {
-            get { return this["CaptuReDown"].AsBoolean(); }
-            set { SetProperty("CaptuReDown", value); }
-        }
-
         public DrawRect MarkRect
         {
-            get { return Property<DrawRect>("MarkRect", null); }
-            set { SetProperty("MarkRect", value); }
+            get { return Property.GetAs<DrawRect>("MarkRect", null); }
+            set { Property.SetProperty("MarkRect", value); }
         }
 
         public DrawRect ContentRect
         {
-            get { return Property<DrawRect>("ContentRect", null); }
-            set { SetProperty("ContentRect", value); }
+            get { return Property.GetAs<DrawRect>("ContentRect", null); }
+            set { Property.SetProperty("ContentRect", value); }
+        }
+
+        public bool HoldDownIfMouseLeave
+        {
+            get { return Property["HoldDownIfMouseLeave", false].AsBoolean(); }
+            set
+            {
+                if (Property.SetProperty("HoldDownIfMouseLeave", value))
+                {
+                    if (Down && !MouseIsOver) Down = false;
+                }
+            }
         }
 
         public Font Font
         {
             get
             {
-                var res = Property<Font>("Font", null);
-                if (res == null) SetProperty("Font", new Font("Arial", 8));
-                return Property<Font>("Font", null);
+                var res = Property.GetAs<Font>("Font", null);
+                if (res == null) Property.SetProperty("Font", new Font("Arial", 8));
+                return Property.GetAs<Font>("Font", null);
             }
             set
             {
-                if (SetProperty("Font", value))
+                if (Property.SetProperty("Font", value))
                     Invalidate();
             }
         }
@@ -186,7 +138,10 @@ namespace VALib.Draw.Controls
 
         protected override void InitializeControl()
         {
+            base.InitializeControl();
+
             TabStop = true;
+            this.CaptureMouseClick = true;
 
             this.Painters[0].Add(PaintBody, "body");
             this.Painters[0].Add(PaintBorder, "border");
@@ -211,61 +166,37 @@ namespace VALib.Draw.Controls
         {
             if (e.Button == MouseButtons.Left)
             {
-                m_inMouseDown = false;
                 if (!Switch || !m_goDown) Down = false;
-                Capture(this, false);
-                if (!Switch && m_mouse_over && Click != null) Click(this, new EventArgs());
+                if (!Switch && MouseIsOver && Click != null) Click(this, new EventArgs());
             }
         }
 
         private bool m_goDown = false;
-        private bool m_inMouseDown = false;
         private void DrawButton_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 m_goDown = !Down;
-                m_inMouseDown = true;
                 if (!Down) Down = true;
-                Capture(this, true);
             }
         }
 
         private void DrawButton_MouseLeave(object sender, EventArgs e)
         {
-            m_mouse_over = false;
-            if (m_inMouseDown && m_goDown && !CaptuReDown) Down = false;
-
-            if (MouseOverColor != Color)
-            {
-                this.AnimeCancel("color");
-                this.Anime("color", 500).Change("CurrentColor", Color);
-            }
-            else
-                Invalidate();
+            if (MouseIsDown && m_goDown && !HoldDownIfMouseLeave) Down = false;
         }
 
         private void DrawButton_MouseEnter(object sender, EventArgs e)
         {
-            m_mouse_over = true;
-            if (m_inMouseDown && m_goDown && !CaptuReDown) Down = true;
-
-            if (MouseOverColor != Color)
-            {
-                this.AnimeCancel("color");
-                this.Anime("color", 200).ChangeDec("CurrentColor", MouseOverColor);
-            }
-            else
-                Invalidate();
+            if (MouseIsDown && m_goDown && !HoldDownIfMouseLeave) Down = true;
         }
 
         #region Painters
 
-        private bool m_mouse_over = false;
 
         private void PaintBorder(DrawRect rect, Graphics graf)
         {
-            if (Flat && !m_mouse_over) return;
+            if (Flat && !MouseIsOver && !Down) return;
 
             var drawRect = rect.Rect;
 

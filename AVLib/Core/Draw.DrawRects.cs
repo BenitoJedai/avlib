@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using AVLib.Animations;
+using AVLib.Utils;
+using VALib.Draw.Controls;
 
 namespace AVLib.Draw.DrawRects
 {
@@ -77,50 +79,10 @@ namespace AVLib.Draw.DrawRects
         private bool m_AnimeAlign = false;
         private bool m_AnimeChildAlign = false;
 
-        private Dictionary<string, object> m_properties;
-        public bool SetProperty(string property, object value)
+        private ControlProperties m_properties = new ControlProperties();
+        public ControlProperties Property
         {
-            if (m_properties == null)
-                m_properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            if (m_properties.ContainsKey(property))
-            {
-                var res = m_properties[property] != value;
-                m_properties[property] = value;
-                return res;
-            }
-            m_properties.Add(property, value);
-            return true;
-        }
-        public object this[string property]
-        {
-            get
-            {
-                if (m_properties == null) return null;
-                object res;
-                if (m_properties.TryGetValue(property, out res)) return res;
-                return null;
-            }
-            set
-            {
-                SetProperty(property, value);
-            }
-        }
-        public object this[string property, object defValue]
-        {
-            get
-            {
-                if (m_properties == null) return defValue;
-                object res;
-                if (m_properties.TryGetValue(property, out res)) return res;
-                return defValue;
-            }
-        }
-        public T Property<T>(string property, object defValue)
-        {
-            object obj = this[property, defValue];
-            if (obj == null) return (T) defValue;
-            if (typeof(T) == obj.GetType()) return (T) obj;
-            return (T)defValue;
+            get { return m_properties; }
         }
 
         #region Constructors
