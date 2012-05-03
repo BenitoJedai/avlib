@@ -44,6 +44,12 @@ namespace AVLib.Draw.DrawRects
             set { Value["Enabled"] = value; }
         }
 
+        public bool UseRectProperties
+        {
+            get { return Value["UseRectProperties"].AsBoolean(); }
+            set { Value["UseRectProperties"] = value; }
+        }
+
         public RectPainter()
         {
             Property["Enabled", true].Changed += () => { DoChange(); };
@@ -63,7 +69,7 @@ namespace AVLib.Draw.DrawRects
 
         public virtual void Paint(DrawRect rect, Graphics graf)
         {
-            if (m_paintMethod != null) m_paintMethod(this.Value, rect, graf);
+            if (m_paintMethod != null) m_paintMethod(UseRectProperties ? rect.Value : this.Value, rect, graf);
         }
     }
 
