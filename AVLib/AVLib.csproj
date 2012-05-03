@@ -41,8 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreDrawControls\BaseEventReaction.cs" />
-    <Compile Include="CoreDrawControls\BaseProperties.cs" />
+    <Compile Include="DrawControlsCore\BaseEventReaction.cs" />
+    <Compile Include="DrawControlsCore\BaseProperties.cs" />
     <Compile Include="Core\Animation.Controller.cs" />
     <Compile Include="Core\Animation.cs" />
     <Compile Include="Core\Animation.Controller.ControlController.cs" />
@@ -62,6 +62,7 @@
     </Compile>
     <Compile Include="Core\ObjectUtils.cs" />
     <Compile Include="Core\ControlProperties.cs" />
+    <Compile Include="DrawControlsCore\BaseTypes.cs" />
     <Compile Include="DrawControls\Button.cs" />
     <Compile Include="DrawControls\Scroll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

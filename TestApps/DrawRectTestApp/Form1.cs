@@ -232,10 +232,11 @@ namespace DrawRectTestApp
             var scroll = new DrawScroll();
             scroll.Size = new Size(16, 16);
             scroll.Alignment = RectAlignment.Right;
-            scroll.Align = DrawScrollAlign.Vertical;
+            scroll.Align = Orientation.Vertical;
             scroll.Color = Color.LightSalmon;
             //scroll.BorderSize = 1;
             rect.Add(scroll);
+
         }
 
         private void button2_Click(object sender, EventArgs e)

@@ -1,78 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
 using AVLib.Utils;
+using VALib.Draw.Controls.Core;
 
 namespace VALib.Draw.Controls
 {
-    public enum DrawScrollAlign
+    public class DrawScroll : BaseEventReaction
     {
-        Horizontal,
-        Vertical
-    }
 
-    public class DrawScroll : ControlRect
-    {
-        public DrawScrollAlign Align
+        #region Properties
+
+        public Orientation Align
         {
-            get { return Property.GetAs<DrawScrollAlign>("Align", DrawScrollAlign.Vertical); }
+            get { return Property.GetAs<Orientation>("Align"); }
             set { Property.SetProperty("Align", value); }
         }
 
-        public Color Color
-        {
-            get { return Property["Color", SystemColors.Control].AsColor(); }
-            set
-            {
-                if (Property.SetProperty("Color", value))
-                {
-                    Invalidate();
-                }
-            }
-        }
-
-        private int m_scrollPos = 0;
-        private int m_scrollWidth = 10;
-        private int ScrollMaxWay()
-        {
-            var sz = Align == DrawScrollAlign.Vertical
-                         ? Rect.Height - button1.Rect.Height - button2.Rect.Height
-                         : Rect.Width - button1.Rect.Width - button2.Rect.Width;
-            sz -= m_scrollWidth;
-            sz -= BorderSize*2;
-            return sz;
-        }
-        private void SetScrollPos(int newValue)
-        {
-            var max = ScrollMaxWay();
-            if (newValue < 0) newValue = 0;
-            if (newValue > max) newValue = max;
-            if (newValue != m_scrollPos)
-            {
-                m_scrollPos = newValue;
-                scrollButton.Pos = Align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
-            }
-        }
-        private int ScrollPos()
-        {
-            return Align == DrawScrollAlign.Vertical
-                       ? button1.Rect.Height + m_scrollPos
-                       : button1.Rect.Width + m_scrollPos;
-        }
-
-        private DrawButton button1;
         public DrawButton Button1 { get { return button1; } }
-        private DrawButton button2;
         public DrawRect Button2 { get { return button2; } }
-        private DrawButton scrollButton;
         public DrawButton ScrollButton { get { return scrollButton; } }
+
+        #endregion
 
         protected override void InitializeControl()
         {
+            base.InitializeControl();
+            InitProperties();
+
             button1 = new DrawButton();
             button1.Size = Size;
             button1.CornerRadius = 1;
@@ -90,10 +51,10 @@ namespace VALib.Draw.Controls
             scrollButton.BorderSize = 1;
             scrollButton.Alignment = RectAlignment.Absolute;
             scrollButton.Transparent = true;
+            scrollButton.CaptureMouseClick = true;
             scrollButton.Property["Color"] = Property.Get("Color");
-            scrollButton.MouseDown += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseDown);
-            scrollButton.MouseUp += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseUp);
-            scrollButton.MouseMove += new System.Windows.Forms.MouseEventHandler(scrollButton_MouseMove);
+            scrollButton.MouseDown += scrollButton_MouseDown;
+            scrollButton.MouseMove += scrollButton_MouseMove;
             this.Add(scrollButton);
 
             button2 = new DrawButton();
@@ -106,9 +67,49 @@ namespace VALib.Draw.Controls
             button2.Property["Color"] = Property.Get("Color");
             this.Add(button2);
 
-            this.Painters[0].Add(new CustomPainter(new PainterPaintHandler(PaintBar), "bar"));
-            this.Resize += new ItemChangeHandler(DrawScroll_Resize);
-            this.MouseWheel += new System.Windows.Forms.MouseEventHandler(DrawScroll_MouseWheel);
+            this.Painters[0].Add(PaintBody, "body");
+            this.Painters[0].Add(PaintBorder, "border");
+            this.Resize += DrawScroll_Resize;
+            this.MouseWheel += DrawScroll_MouseWheel;
+        }
+
+        public void InitProperties()
+        {
+            Property.Get("Align", Orientation.Vertical);
+        }
+
+        private DrawButton button1;
+        private DrawButton button2;
+        private DrawButton scrollButton;
+        
+
+        private int m_scrollPos = 0;
+        private int m_scrollWidth = 10;
+        private int ScrollMaxWay()
+        {
+            var sz = Align == Orientation.Vertical
+                         ? Rect.Height - button1.Rect.Height - button2.Rect.Height
+                         : Rect.Width - button1.Rect.Width - button2.Rect.Width;
+            sz -= m_scrollWidth;
+            sz -= BorderSize*2;
+            return sz;
+        }
+        private void SetScrollPos(int newValue)
+        {
+            var max = ScrollMaxWay();
+            if (newValue < 0) newValue = 0;
+            if (newValue > max) newValue = max;
+            if (newValue != m_scrollPos)
+            {
+                m_scrollPos = newValue;
+                scrollButton.Pos = Align == Orientation.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
+            }
+        }
+        private int ScrollPos()
+        {
+            return Align == Orientation.Vertical
+                       ? button1.Rect.Height + m_scrollPos
+                       : button1.Rect.Width + m_scrollPos;
         }
 
         private void DrawScroll_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -118,26 +119,20 @@ namespace VALib.Draw.Controls
 
         private Point downMousePoint;
         private int downScrollPos;
-        private bool inMouseDown;
         private void scrollButton_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             downMousePoint = e.Location;
             downScrollPos = m_scrollPos;
-            inMouseDown = true;
         }
 
-        private void scrollButton_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            inMouseDown = false;
-        }
-
+        private int i = 0;
         void scrollButton_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (inMouseDown)
+            if (scrollButton.MouseIsDown)
             {
                 int dx = e.Location.X - downMousePoint.X;
                 int dy = e.Location.Y - downMousePoint.Y;
-                if (Align == DrawScrollAlign.Vertical)
+                if (Align == Orientation.Vertical)
                     SetScrollPos(downScrollPos + dy);
                 else
                     SetScrollPos(downScrollPos + dx);
@@ -146,15 +141,15 @@ namespace VALib.Draw.Controls
 
         private void DrawScroll_Resize(DrawRect rect)
         {
-            int size = (Align == DrawScrollAlign.Vertical ? Rect.Width : Rect.Height) - BorderSize * 2;
+            int size = (Align == Orientation.Vertical ? Rect.Width : Rect.Height) - BorderSize * 2;
 
             DisableInvalidate();
             try
             {
                 button1.Size = new Size(size, size);
                 button2.Size = new Size(size, size);
-                scrollButton.Size = Align == DrawScrollAlign.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
-                scrollButton.Pos = Align == DrawScrollAlign.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
+                scrollButton.Size = Align == Orientation.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
+                scrollButton.Pos = Align == Orientation.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
             }
             finally
             {
@@ -162,7 +157,7 @@ namespace VALib.Draw.Controls
             }
         }
 
-        private void PaintBar(DrawRect rect, Graphics graf)
+        private void PaintBorder(DrawRect rect, Graphics graf)
         {
             var drawRect = rect.Rect;
             if (BorderSize > 0)
@@ -170,7 +165,11 @@ namespace VALib.Draw.Controls
                 DrawRectMethods.DrawRectangle(rect.Rect, graf, Color.DarkColor(30), BorderSize);
                 drawRect.Inflate(-BorderSize, -BorderSize);
             }
-            DrawRectMethods.FillRectGradient(drawRect, graf, Color.BrightColor(20), Color.DarkColor(5), SimpleDirection.Horisontal);
+        }
+
+        private void PaintBody(DrawRect rect, Graphics graf)
+        {
+            DrawRectMethods.FillRectGradient(rect.Rect, graf, Color.BrightColor(20), Color.DarkColor(5), SimpleDirection.Horisontal);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -134,7 +135,7 @@ namespace AVLib.Draw.DrawRects
             if (MouseMove != null) MouseMove(this, e);
 
             if (m_captureControl != null) m_captureControl.OnMouseMove(e);
-            if (ch != null) ch.OnMouseMove(e);
+            if (ch != null && ch != m_captureControl) ch.OnMouseMove(e);
         }
 
         internal void OnMouseEnter(EventArgs e)

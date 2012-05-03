@@ -76,6 +76,15 @@ namespace VALib.Draw.Controls.Core
 
         #region Handle mouse events
 
+        private void DrawMouseReaction_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                MouseIsDown = true;
+                if (CaptureMouseClick) Capture(this, true);
+            }
+        }
+
         private void DrawMouseReaction_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -86,15 +95,6 @@ namespace VALib.Draw.Controls.Core
                     if (CaptureMouseClick) Capture(this, false);
                     if (UseMouseOverColor && !MouseIsOver) ChangeCurrentColor(Color, MouseOverColorAnimeLeaveTime);
                 }
-            }
-        }
-
-        private void DrawMouseReaction_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                MouseIsDown = true;
-                if (CaptureMouseClick) Capture(this, true);
             }
         }
 

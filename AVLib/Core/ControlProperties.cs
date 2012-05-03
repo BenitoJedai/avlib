@@ -130,6 +130,11 @@ namespace VALib.Draw.Controls
             }
         }
 
+        public T GetAs<T>(string property)
+        {
+            return GetAs<T>(property, null);
+        }
+
         public T GetAs<T>(string property, object defValue)
         {
             var obj = this[property, defValue];

@@ -14,131 +14,83 @@ namespace VALib.Draw.Controls
 {
     public class DrawButton : BaseEventReaction
     {
+        #region Properties
+
         public bool Gradient
         {
             get { return Property["Gradient"].AsBoolean(); }
-            set
-            {
-                if (Property.SetProperty("Gradient", value))
-                    Invalidate();
-            }
+            set { Property.SetProperty("Gradient", value); }
         }
 
         public bool Flat
         {
             get { return Property["Flat"].AsBoolean(); }
-            set
-            {
-                if (Property.SetProperty("Flat", value))
-                    Invalidate();
-            }
+            set { Property.SetProperty("Flat", value); }
         }
 
         public int CornerRadius
         {
             get { return Property["CornerRadius"].AsInteger(); }
-            set
-            {
-                if (Property.SetProperty("CornerRadius", value))
-                    Invalidate();
-            }
+            set { Property.SetProperty("CornerRadius", value); }
         }
 
         public string Text
         {
             get { return Property["Text"].AsString(); }
-            set
-            {
-                if (Property.SetProperty("Text", value == null ? "" : value))
-                    Invalidate();
-            }
+            set { Property.SetProperty("Text", value); }
         }
 
         public Color TextColor
         {
-            get { return Property["TextColor", Color.Navy].AsColor(); }
-            set
-            {
-                if (Property.SetProperty("TextColor", value))
-                    Invalidate();
-            }
+            get { return Property["TextColor"].AsColor(); }
+            set { Property.SetProperty("TextColor", value); }
         }
-
-        #region Button Property
-
-        public event EventHandler Click;
-        public event EventHandler OnOff;
 
         public bool Switch
         {
             get { return Property["Switch"].AsBoolean(); }
-            set
-            {
-                if (Property.SetProperty("Switch", value))
-                {
-                    if (!value) Down = false;
-                    Invalidate();
-                }
-            }
+            set { Property.SetProperty("Switch", value); }
         }
 
         public bool Down
         {
             get { return Property["Down"].AsBoolean(); }
-            set
-            {
-                if (Property.SetProperty("Down", value))
-                {
-                    Invalidate();
-                    if (OnOff != null) OnOff(this, new EventArgs());
-                }
-            }
+            set { Property.SetProperty("Down", value); }
         }
 
         public DrawRect MarkRect
         {
-            get { return Property.GetAs<DrawRect>("MarkRect", null); }
+            get { return Property.GetAs<DrawRect>("MarkRect"); }
             set { Property.SetProperty("MarkRect", value); }
         }
 
         public DrawRect ContentRect
         {
-            get { return Property.GetAs<DrawRect>("ContentRect", null); }
+            get { return Property.GetAs<DrawRect>("ContentRect"); }
             set { Property.SetProperty("ContentRect", value); }
         }
 
         public bool HoldDownIfMouseLeave
         {
-            get { return Property["HoldDownIfMouseLeave", false].AsBoolean(); }
-            set
-            {
-                if (Property.SetProperty("HoldDownIfMouseLeave", value))
-                {
-                    if (Down && !MouseIsOver) Down = false;
-                }
-            }
+            get { return Property["HoldDownIfMouseLeave"].AsBoolean(); }
+            set { Property.SetProperty("HoldDownIfMouseLeave", value); }
         }
 
         public Font Font
         {
-            get
-            {
-                var res = Property.GetAs<Font>("Font", null);
-                if (res == null) Property.SetProperty("Font", new Font("Arial", 8));
-                return Property.GetAs<Font>("Font", null);
-            }
-            set
-            {
-                if (Property.SetProperty("Font", value))
-                    Invalidate();
-            }
+            get { return Property.GetAs<Font>("Font"); }
+            set { Property.SetProperty("Font", value); }
         }
 
         #endregion
 
+        public event EventHandler Click;
+        public event EventHandler OnOff;
+
         protected override void InitializeControl()
         {
             base.InitializeControl();
+            InitProperties();
 
             TabStop = true;
             this.CaptureMouseClick = true;
@@ -161,6 +113,41 @@ namespace VALib.Draw.Controls
             MarkRect.Painters[0].Add(PaintMarkRect, "mark");
             this.Add(MarkRect);
         }
+
+        public void InitProperties()
+        {
+            Property.Get("Gradient", false)
+                .Changed += () => { Invalidate(); };
+            Property.Get("Flat", false)
+                .Changed += () => { Invalidate(); };
+            Property.Get("CornerRadius", 0)
+                .Changed += () => { Invalidate(); };
+            Property.Get("Text", "")
+                .Changed += () => { Invalidate(); };
+            Property.Get("TextColor", Color.Navy)
+                .Changed += () => { Invalidate(); };
+            Property.Get("Switch", false)
+                .Changed += () =>
+                                {
+                                    if (!Switch) Down = false;
+                                    Invalidate();
+                                };
+            Property.Get("Down", false)
+                .Changed += () =>
+                                {
+                                    Invalidate();
+                                    if (OnOff != null) OnOff(this, new EventArgs());
+                                };
+            Property.Get("HoldDownIfMouseLeave", false)
+                .Changed += () =>
+                                {
+                                    if (Down && !MouseIsOver) Down = false;
+                                };
+            Property.Get("Font", new Font("Arial", 8))
+                .Changed += () => { Invalidate(); };
+        }
+        
+
 
         private void DrawButton_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
@@ -192,8 +179,7 @@ namespace VALib.Draw.Controls
         }
 
         #region Painters
-
-
+        
         private void PaintBorder(DrawRect rect, Graphics graf)
         {
             if (Flat && !MouseIsOver && !Down) return;
