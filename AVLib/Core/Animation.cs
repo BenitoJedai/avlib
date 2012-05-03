@@ -165,11 +165,6 @@ namespace AVLib.Animations
                 ((DrawRect)ctrl).Invoke(new SetObjectPropertyDelegate(SetPropertyForObject), ctrl, path, value);
                 return;
             }
-            if (ctrl is IRectPainter)
-            {
-                ((IRectPainter)ctrl).Invoke(new SetObjectPropertyDelegate(SetPropertyForObject), ctrl, path, value);
-                return;
-            }
             ctrl.SetProperty(path, value);
         }
 
@@ -183,11 +178,6 @@ namespace AVLib.Animations
             if (ctrl is DrawRect)
             {
                 ((DrawRect)ctrl).Invoke(new SetObjectPropertyArrayDelegate(SetPropertiesFroObjects), objects, path, values);
-                return;
-            }
-            if (ctrl is IRectPainter)
-            {
-                ((IRectPainter)ctrl).Invoke(new SetObjectPropertyArrayDelegate(SetPropertiesFroObjects), objects, path, values);
                 return;
             }
             SetPropertiesFroObjects(objects, path, values);

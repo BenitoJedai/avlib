@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Drawing.Drawing2D;
+using AVLib.Utils;
+using VALib.Draw.Controls;
 
 namespace AVLib.Draw.DrawRects.Painters
 {
@@ -200,230 +202,69 @@ namespace AVLib.Draw.DrawRects.Painters
         }
     }
 
-    public class PainterFillRectGradient : RectPainter
-    {
-        private SimpleDirection direction;
-        private Color color1;
-        private Color color2;
-        private int cornerRadius;
-        public PainterFillRectGradient(SimpleDirection direction, Color color1, Color color2, int cornerRadius, string name)
-        {
-            this.direction = direction;
-            this.color1 = color1;
-            this.color2 = color2;
-            this.cornerRadius = cornerRadius;
-            Name = name;
-        }
-        public SimpleDirection Direction
-        {
-            get { return direction; }
-            set
-            {
-                direction = value;
-                DoChange();
-            }
-        }
-        public Color Color1
-        {
-            get { return color1; }
-            set
-            {
-                color1 = value;
-                DoChange();
-            }
-        }
-        public Color Color2
-        {
-            get { return color2; }
-            set
-            {
-                color2 = value;
-                DoChange();
-            }
-        }
-        public int CornerRadius
-        {
-            get { return cornerRadius; }
-            set
-            {
-                if (cornerRadius != value)
-                {
-                    cornerRadius = value;
-                    DoChange();
-                }
-            }
-        }
-
-        public override void Paint(DrawRect rect, Graphics graf)
-        {
-            DrawRectMethods.FillRectGradient(rect.Rect, graf, color1, color2, direction, cornerRadius);
-        }
-    }
-
-    public class PainterFillRect : RectPainter
-    {
-        private Color color;
-        private int cornerRadius;
-        public PainterFillRect(Color color, int cornerRadius, string name)
-        {
-            this.color = color;
-            this.cornerRadius = cornerRadius;
-            Name = name;
-        }
-        public Color Color
-        {
-            get { return color; }
-            set
-            {
-                color = value;
-                DoChange();
-            }
-        }
-        public int CornerRadius
-        {
-            get { return cornerRadius; }
-            set
-            {
-                if (cornerRadius != value)
-                {
-                    cornerRadius = value;
-                    DoChange();
-                }
-            }
-        }
-
-        public override void Paint(DrawRect rect, Graphics graf)
-        {
-            DrawRectMethods.FillRect(rect.Rect, graf, color, cornerRadius);
-        }
-    }
-
-    public class PainterDrawRectangle : RectPainter
-    {
-        private Color color;
-        private int width;
-        private int cornerRadius;
-        private RectSides sides;
-        public PainterDrawRectangle(Color color, int width, RectSides sides, int cornerRadius, string name)
-        {
-            this.color = color;
-            this.width = width;
-            this.cornerRadius = cornerRadius;
-            this.sides = sides;
-            Name = name;
-        }
-        public Color Color
-        {
-            get { return color; }
-            set
-            {
-                color = value;
-                DoChange();
-            }
-        }
-        public int Width
-        {
-            get { return width; }
-            set
-            {
-                width = value;
-                DoChange();
-            }
-        }
-        public int CornerRadius
-        {
-            get { return cornerRadius; }
-            set
-            {
-                if(cornerRadius != value)
-                {
-                    cornerRadius = value;
-                    DoChange();
-                }
-            }
-        }
-
-        public override void Paint(DrawRect rect, Graphics graf)
-        {
-            DrawRectMethods.DrawRectangle(rect.Rect, graf, color, width, cornerRadius, sides);
-        }
-    }
-
     public static class Painters
     {
-        public static void FillRect(this RectPainters.PaintLevel paintLevel, Color color, int cornerRadius, string name)
+        public static void Rect(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
-            if (paintLevel != null)
-                paintLevel.Add(new PainterFillRect(color, cornerRadius, name));
+            DrawRectMethods.DrawRectangle(Params["Rect", rect.Rect].As<Rectangle>(), graf, Params["Color"].AsColor(),
+                                          Params["Width", rect.BorderSize].AsInteger(),
+                                          Params["CornerRadius"].AsInteger(), Params["Sides", () => { return new RectSides() { Full = true }; }].As<RectSides>());
         }
 
-        public static void FillRect(this RectPainters.PaintLevel paintLevel, Color color, string name)
+        public static void FillRect(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
-            FillRect(paintLevel, color, 0, name);
+            DrawRectMethods.FillRect(Params["Rect", rect.Rect].As<Rectangle>(), graf, Params["Color"].AsColor(), Params["CornerRadius"].AsInteger());
         }
 
-        public static void FillRect(this RectPainters.PaintLevel paintLevel, Color color)
+        public static void FillGradient(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
-            paintLevel.FillRect(color, "");
+            DrawRectMethods.FillRectGradient(Params["Rect", rect.Rect].As<Rectangle>(), graf, Params["Color"].AsColor(), Params["Color2"].AsColor(),
+                                                 Params["Direction", SimpleDirection.Vertical].As<SimpleDirection>(),
+                                                 Params["CornerRadius"].AsInteger());
         }
 
-        public static void FillRectGradient(this RectPainters.PaintLevel paintLevel, SimpleDirection direction, Color color1, Color color2, int cornerRadius, string name)
+        public static void Text(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
-            if (paintLevel != null)
-                paintLevel.Add(new PainterFillRectGradient(direction, color1, color2, cornerRadius, name));
-        }
+            var text = Params["Text"].AsString();
+            if (text == "") return;
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            var font = Params["Font", () => { return new Font("Arial", 8); }].As<Font>();
+            var alignment = Params["Alignment", StringAlignment.Near].As<StringAlignment>();
+            var vertAlignment = Params["VertAlignment", StringAlignment.Center].As<StringAlignment>();
 
-        public static void FillRectGradient(this RectPainters.PaintLevel paintLevel, SimpleDirection direction, Color color1, Color color2, string name)
-        {
-            FillRectGradient(paintLevel, direction, color1, color2, 0, name);
-        }
+            var sz = graf.MeasureString(text, font);
+            var dx = (int)(drawRect.Width - sz.Width);
+            var dy = (int)(drawRect.Height - sz.Height);
 
-        public static void FillRectGradient(this RectPainters.PaintLevel paintLevel, SimpleDirection direction, Color color1, Color color2)
-        {
-            paintLevel.FillRectGradient(direction, color1, color2, "");
-        }
+            var offset = Params["Offset", () => { return new Point(0, 0); }].As<Point>();
+            var pt = new Point(0, 0);
+            switch (alignment)
+            {
+                case StringAlignment.Near:
+                    pt.X = 0;
+                    break;
+                case StringAlignment.Far:
+                    pt.X = dx;
+                    break;
+                case StringAlignment.Center:
+                    pt.X = dx / 2;
+                    break;
+            }
+            switch (vertAlignment)
+            {
+                case StringAlignment.Near:
+                    pt.Y = 0;
+                    break;
+                case StringAlignment.Far:
+                    pt.Y = dy;
+                    break;
+                case StringAlignment.Center:
+                    pt.Y = dy / 2;
+                    break;
+            }
+            pt.Offset(offset);
 
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color, int width, RectSides sides, int cornerRadius, string name)
-        {
-            if (paintLevel != null)
-                paintLevel.Add(new PainterDrawRectangle(color, width, sides, cornerRadius, name));
-        }
-
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color, int width, RectSides sides, string name)
-        {
-            DrawRectangle(paintLevel, color, width, sides, 0, name);
-        }
-
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color, int width, int cornerRadius, string name)
-        {
-            DrawRectangle(paintLevel, color, width, new RectSides() {Full = true}, cornerRadius, name);
-        }
-
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color, int width, string name)
-        {
-            DrawRectangle(paintLevel, color, width, 0, name);
-        }
-
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color, int width)
-        {
-            paintLevel.DrawRectangle(color, width, "");
-        }
-
-        public static void DrawRectangle(this RectPainters.PaintLevel paintLevel, Color color)
-        {
-            paintLevel.DrawRectangle(color, 1);
-        }
-
-        public static void DrawCustom(this RectPainters.PaintLevel paintLevel, PainterPaintHandler paintHandler, string name)
-        {
-            if (paintLevel != null)
-                paintLevel.Add(new CustomPainter(paintHandler, name));
-        }
-
-        public static void DrawCustom(this RectPainters.PaintLevel paintLevel, PainterPaintHandler paintHandler)
-        {
-            if (paintLevel != null)
-                paintLevel.Add(new CustomPainter(paintHandler, ""));
+            graf.DrawString(text, font, new SolidBrush(Params["Color"].AsColor()), drawRect.X + pt.X, rect.Rect.Y + pt.Y);
         }
     }
 }

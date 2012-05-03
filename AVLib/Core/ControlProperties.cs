@@ -6,80 +6,6 @@ using AVLib.Utils;
 
 namespace VALib.Draw.Controls
 {
-    public class ControlPropertyValue
-    {
-        public Func<bool> Condition;
-        public Func<object, object> Modifier; 
-        private object m_value;
-
-        private object Modify(object obj)
-        {
-            return (Modifier == null || obj == null) ? obj : Modifier(obj);
-        }
-
-        public object Value
-        {
-            get
-            {
-                if (m_value != null)
-                {
-                    if (m_value is ControlProperty)
-                        return Modify(((ControlProperty)m_value).Value);
-                    if (m_value is Func<object>)
-                        return Modify(((Func<object>)m_value)());
-                    if (m_value is PropertyRef)
-                        return Modify(((PropertyRef)m_value).Value);
-                    if (m_value is ControlPropertyValues)
-                        return Modify(((ControlPropertyValues)m_value).Value);
-                }
-                return Modify(m_value);
-            }
-            set { m_value = value; }
-        }
-    }
-
-    internal class ControlPropertyValues
-    {
-        List<ControlPropertyValue> m_values = new List<ControlPropertyValue>(); 
-
-        public void Clear()
-        {
-            m_values.Clear();
-        }
-
-        public ControlPropertyValue Add(Func<bool> condition, object value, Func<object, object> modifier)
-        {
-            var res = new ControlPropertyValue() {Condition = condition, Value = value};
-            m_values.Add(res);
-            return res;
-        }
-
-        private ControlPropertyValue NullCondition
-        {
-            get
-            {
-                foreach (var val in m_values)
-                {
-                    if (val.Condition == null) return val;
-                }
-                return Add(null, null, null);
-            }
-        }
-
-        public object Value
-        {
-            get
-            {
-                foreach (var val in m_values)
-                {
-                    if (val.Condition == null || val.Condition()) return val.Value;
-                }
-                return null;
-            }
-            set { NullCondition.Value = value; }
-        }
-    }
-
     public class ControlProperty
     {
         private object m_value;
@@ -95,23 +21,23 @@ namespace VALib.Draw.Controls
 
         public ControlProperty(object value) { m_value = value; }
 
+        public static object GetValue(object obj)
+        {
+            if (obj != null)
+            {
+                if (obj is ControlProperty)
+                    return ((ControlProperty)obj).Value;
+                if (obj is Func<object>)
+                    return ((Func<object>)obj)();
+                if (obj is PropertyRef)
+                    return ((PropertyRef)obj).Value;
+            }
+            return obj;
+        }
+
         public object Value
         {
-            get
-            {
-                if (m_value != null)
-                {
-                    if (m_value is ControlProperty)
-                        return Modify(((ControlProperty)m_value).Value);
-                    if (m_value is Func<object>)
-                        return Modify(((Func<object>)m_value)());
-                    if (m_value is PropertyRef)
-                        return Modify(((PropertyRef)m_value).Value);
-                    if (m_value is ControlPropertyValues)
-                        return Modify(((ControlPropertyValues)m_value).Value);
-                }
-                return Modify(m_value);
-            }
+            get { return Modify(GetValue(m_value)); }
             set { SetValue(value); }
         }
 
@@ -133,31 +59,6 @@ namespace VALib.Draw.Controls
             SetValue(null);
         }
 
-        private ControlPropertyValues AsControlPropertyValues
-        {
-            get
-            {
-                if (m_value == null || !(m_value is ControlPropertyValues))
-                    Value = new ControlPropertyValues();
-                return (ControlPropertyValues)m_value;
-            }
-        }
-
-        public ControlPropertyValue this[object value]
-        {
-            get { return AsControlPropertyValues.Add(null, value, null); }
-        }
-
-        public ControlPropertyValue this[object value, Func<object, object> modifier]
-        {
-            get { return AsControlPropertyValues.Add(null, value, modifier); }
-        }
-
-        public ControlPropertyValue this[Func<bool> condition]
-        {
-            get { return AsControlPropertyValues.Add(condition, null, null); }
-        }
-
         private void DoChanged()
         {
             if (Changed != null) Changed();
@@ -175,13 +76,16 @@ namespace VALib.Draw.Controls
         ControlProperty this[string property, object initValue] { get; }
         ControlProperty this[string property] { get; }
         void Remove(string property);
+        bool ContainsProperty(string property);
     }
 
     public interface IControlPropertiesValue
     {
         object this[string property] { get; set; }
         object this[string property, object defValue] { get; }
+        object this[string property, Func<object> defValue] { get; }
         object this[string property, Func<object, object> modifier] { set; }
+        bool ContainsProperty(string property);
     }
 
     public class ControlProperties : IControlPropertiesValue, IControlProperties
@@ -229,6 +133,11 @@ namespace VALib.Draw.Controls
             }
         }
 
+        public bool ContainsProperty(string property)
+        {
+            return m_properties.ContainsKey(property);
+        }
+
         public object this[string property]
         {
             get
@@ -248,7 +157,12 @@ namespace VALib.Draw.Controls
 
         public object this[string property, object defValue]
         {
-            get { return this[property] ?? defValue; }
+            get { return this[property] ?? ControlProperty.GetValue(defValue); }
+        }
+
+        public object this[string property, Func<object> defValue]
+        {
+            get { return this[property] ?? ControlProperty.GetValue(defValue()); }
         }
 
         public void Remove(string property)

@@ -10,45 +10,9 @@ using VALib.Draw.Controls;
 
 namespace AVLib.Draw.DrawRects
 {
-    public interface IRectPainter
-    {
-        string Name { get; set; }
-        event ChangedHandler Changed;
-        void DoChange();
-        void Paint(DrawRect rect, Graphics graf);
-        bool InvokeRequired { get; }
-        object Invoke(Delegate method, params Object[] args);
-        object Invoke(Delegate method);
-        bool Enabled { get; set; }
-    }
-
     public delegate void RectPaintHandler(IControlPropertiesValue Params, DrawRect rect, Graphics graf);
-    public abstract class RectPainter : IRectPainter, IInvokeCompatible
-    {
+    public class RectPainter    {
         #region Internal
-
-        internal Control control;
-
-        public bool InvokeRequired
-        {
-            get { return (control != null && control.InvokeRequired); }
-        }
-
-        public object Invoke(Delegate method, params Object[] args)
-        {
-            if (control != null)
-                return control.Invoke(method, args);
-
-            return method.DynamicInvoke(method, args);
-        }
-
-        public object Invoke(Delegate method)
-        {
-            if (control != null)
-                return control.Invoke(method);
-
-            return method.DynamicInvoke(method);
-        }
 
         private ControlProperties m_properties = new ControlProperties();
         public IControlProperties Property
@@ -85,7 +49,22 @@ namespace AVLib.Draw.DrawRects
             Property["Enabled", true].Changed += () => { DoChange(); };
         }
 
-        public abstract void Paint(DrawRect rect, Graphics graf);
+
+        private RectPaintHandler m_paintMethod = null;
+        public RectPaintHandler PaintMethod
+        {
+            get { return m_paintMethod; }
+            set
+            {
+                m_paintMethod = value;
+                DoChange();
+            }
+        }
+
+        public virtual void Paint(DrawRect rect, Graphics graf)
+        {
+            if (m_paintMethod != null) m_paintMethod(this.Value, rect, graf);
+        }
     }
 
     public delegate void PainterPaintHandler(DrawRect rect, Graphics graf);
@@ -105,57 +84,28 @@ namespace AVLib.Draw.DrawRects
 
     public class RectPainters
     {
-        internal Control control;
-
-        public event ChangedHandler Changed;
-
-        private int m_disable_change = 0;
-        private bool m_need_change = false;
-
-        private void DisableChange()
-        {
-            m_disable_change++;
-        }
-        private void EnableChange()
-        {
-            m_disable_change--;
-            if (m_disable_change == 0 && m_need_change)
-            {
-                m_need_change = false;
-                DoChanged();
-            }
-        }
-
-        private void DoChanged()
-        {
-            if (Changed != null)
-            {
-                if (m_disable_change == 0)
-                    Changed();
-                else
-                    m_need_change = true;
-            }
-        }
-
         public class PaintLevel
         {
-            private RectPainters m_owner;
-            private List<IRectPainter> m_handlers = new List<IRectPainter>();
-            public PaintLevel(RectPainters owner)
-            {
-                m_owner = owner;
-            }
+            private List<RectPainter> m_handlers = new List<RectPainter>();
+            
             public void Paint(DrawRect rect, Graphics graf)
             {
                 foreach (var h in m_handlers)
-                    h.Paint(rect, graf);
+                    if (h.Enabled) h.Paint(rect, graf);
             }
             public void Add(RectPainter painter)
             {
-                painter.control = m_owner.control;
                 m_handlers.Add(painter);
-                painter.Changed += painter_Changed;
-                m_owner.DoChanged();
+            }
+            public RectPainter Add(RectPaintHandler method, string name)
+            {
+                var painter = new RectPainter() { PaintMethod = method, Name = name };
+                Add(painter);
+                return painter;
+            }
+            public RectPainter Add(RectPaintHandler method)
+            {
+                return Add(method, "");
             }
             public void Add(PainterPaintHandler method, string name)
             {
@@ -167,21 +117,15 @@ namespace AVLib.Draw.DrawRects
                 Add(method, "");
             }
 
-            private void painter_Changed()
-            {
-                m_owner.DoChanged();
-            }
             public void Clear()
             {
-                foreach (var painter in m_handlers)
-                    painter.Changed -= painter_Changed;
                 m_handlers.Clear();
             }
             public int Count
             {
                 get { return m_handlers.Count; }
             }
-            public IRectPainter this[string name]
+            public RectPainter this[string name]
             {
                 get
                 {
@@ -212,19 +156,17 @@ namespace AVLib.Draw.DrawRects
 
         private void ClearFromLevel(int level)
         {
-            DisableChange();
             for (int i = m_PaintLevels.Count - 1; i >= level; i--)
             {
                 m_PaintLevels[i].Clear();
                 m_PaintLevels.RemoveAt(i);
             }
-            EnableChange();
         }
 
         private void EnsureLevel(int level)
         {
             while (m_PaintLevels.Count < level + 1)
-                m_PaintLevels.Add(new PaintLevel(this));
+                m_PaintLevels.Add(new PaintLevel());
         }
 
         public void Paint(DrawRect rect, Graphics graf)
@@ -242,11 +184,11 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
-        public IRectPainter this[string name]
+        public RectPainter this[string name]
         {
             get
             {
-                IRectPainter res = null;
+                RectPainter res = null;
                 foreach (var l in m_PaintLevels)
                 {
                     res = l[name];

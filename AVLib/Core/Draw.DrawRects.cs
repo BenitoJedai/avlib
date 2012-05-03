@@ -24,7 +24,8 @@ namespace AVLib.Draw.DrawRects
         Top,
         Bottom,
         Fill,
-        Center
+        Center,
+        Custom
     }
 
     public delegate void ChangedHandler();
@@ -88,6 +89,14 @@ namespace AVLib.Draw.DrawRects
         {
             get { return m_properties; }
         }
+        public void AddValidatedProperty(string property, object initValue)
+        {
+            Property[property, initValue].Changed += () => { Invalidate(); };
+        }
+        public void AddValidatedProperty(string property, Func<object> initValue)
+        {
+            Property[property, initValue].Changed += () => { Invalidate(); };
+        }
 
         #region Constructors
 
@@ -95,7 +104,6 @@ namespace AVLib.Draw.DrawRects
             : this()
         {
             m_LockControl = control;
-            m_painters.control = control;
             m_alignment = RectAlignment.Absolute;
             m_pos = pos;
             m_size = new Size(width, height);
@@ -121,7 +129,6 @@ namespace AVLib.Draw.DrawRects
 
         public DrawRect()
         {
-            m_painters.Changed += new ChangedHandler(m_painters_Changed);
         }
 
         protected Control LockControl
@@ -130,7 +137,6 @@ namespace AVLib.Draw.DrawRects
             private set
             {
                 m_LockControl = value;
-                m_painters.control = value;
                 if (Count > 0)
                 {
                     foreach (var child in m_childs)
@@ -920,7 +926,7 @@ namespace AVLib.Draw.DrawRects
 
         private void DoRectChanged(bool isRect)
         {
-            if (m_Parent != null)
+            if (m_Parent != null && !(Alignment == RectAlignment.Custom))
                 m_Parent.RealignChilds(m_ParentIndex, false);
             else
             {

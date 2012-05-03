@@ -116,16 +116,11 @@ namespace VALib.Draw.Controls
 
         public void InitProperties()
         {
-            Property["Gradient", false]
-                .Changed += () => { Invalidate(); };
-            Property["Flat", false]
-                .Changed += () => { Invalidate(); };
-            Property["CornerRadius", 0]
-                .Changed += () => { Invalidate(); };
-            Property["Text", ""]
-                .Changed += () => { Invalidate(); };
-            Property["TextColor", Color.Navy]
-                .Changed += () => { Invalidate(); };
+            AddValidatedProperty("Gradient", false);
+            AddValidatedProperty("Flat", false);
+            AddValidatedProperty("CornerRadius", 0);
+            AddValidatedProperty("Text", "");
+            AddValidatedProperty("TextColor", Color.Navy);
             Property["Switch", false]
                 .Changed += () =>
                                 {
@@ -143,8 +138,7 @@ namespace VALib.Draw.Controls
                                 {
                                     if (Down && !MouseIsOver) Down = false;
                                 };
-            Property["Font", new Font("Arial", 8)]
-                .Changed += () => { Invalidate(); };
+            AddValidatedProperty("Font", () => { return new Font("Arial", 8); });
         }
         
 

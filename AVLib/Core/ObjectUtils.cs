@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using AVLib.Draw.DrawRects;
 
 namespace AVLib.Utils
 {
@@ -27,6 +28,9 @@ namespace AVLib.Utils
     {
         public static object GetProperty(this object target, string Path)
         {
+            if (target is DrawRect && ((DrawRect)target).Value.ContainsProperty(Path))
+                return ((DrawRect) target).Value[Path];
+
             PropertyInfo pInfo;
             FieldInfo fieldInfo;
             MethodInfo methodInfo;
@@ -46,6 +50,12 @@ namespace AVLib.Utils
 
         public static void SetProperty(this object target, string Path, object value)
         {
+            if (target is DrawRect && ((DrawRect)target).Value.ContainsProperty(Path))
+            {
+                ((DrawRect) target).Value[Path] = value;
+                return;
+            }
+
             PropertyInfo pInfo;
             FieldInfo fieldInfo;
             MethodInfo methodInfo;

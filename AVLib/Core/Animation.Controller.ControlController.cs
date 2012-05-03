@@ -71,6 +71,7 @@ namespace AVLib.Animations
             {
                 var p = packetQueue[i];
                 p.queueOwner = owner;
+                control.AnimeCancel(p.threadParam.queueName);
                 owner = AnimationControler.ProcessPacket(control, p);
                 p.queueOwner = null;
             }
@@ -92,7 +93,6 @@ namespace AVLib.Animations
 
         public void Execute(object control)
         {
-            control.AnimeCancel();
             for (int i = 0; i < eventsQueue.Count; i++)
                 eventsQueue[i].Execute(control);
         }
