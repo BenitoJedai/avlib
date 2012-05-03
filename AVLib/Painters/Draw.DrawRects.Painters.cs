@@ -43,25 +43,21 @@ namespace AVLib.Draw.DrawRects.Painters
             if (sides.left)
             {
                 gfxPath.AddLine(rect.X, rect.Bottom - radius, rect.X, rect.Y + radius);
-                //gfxPath.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
                 gfxPath.AddLine(rect.X, rect.Y + radius, rect.X + radius, rect.Y);
             }
             if (sides.top)
             {
                 gfxPath.AddLine(rect.X + radius, rect.Y, rect.Right - radius, rect.Y);
-                //gfxPath.AddArc(rect.X + rect.Width - radius, rect.Y, radius, radius, 270, 90);
                 gfxPath.AddLine(rect.Right - radius, rect.Y, rect.Right, rect.Y + radius);
             }
             if (sides.right)
             {
                 gfxPath.AddLine(rect.Right, rect.Y + radius, rect.Right, rect.Bottom - radius);
-                //gfxPath.AddArc(rect.Right - radius, rect.Bottom - radius, radius, radius, 0, 90);
                 gfxPath.AddLine(rect.Right, rect.Bottom - radius, rect.Right - radius, rect.Bottom);
             }
             if (sides.bottom)
             {
                 gfxPath.AddLine(rect.Right - radius, rect.Bottom, rect.X + radius, rect.Bottom);
-                //gfxPath.AddArc(rect.X, rect.Bottom - radius, radius, radius, 90, 90);
                 gfxPath.AddLine(rect.X + radius, rect.Bottom, rect.X, rect.Bottom - radius);
             }
             return gfxPath;

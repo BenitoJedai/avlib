@@ -149,5 +149,10 @@ namespace AVLib.Utils
             if (obj is bool) return (bool) obj;
             return false;
         }
+
+        public static T As<T>(this object obj)
+        {
+            return (T) obj;
+        }
     }
 }

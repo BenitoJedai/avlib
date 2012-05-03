@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Draw.DrawRects.Painter.cs" />
     <Compile Include="DrawControlsCore\BaseEventReaction.cs" />
     <Compile Include="DrawControlsCore\BaseProperties.cs" />
     <Compile Include="Core\Animation.Controller.cs" />
@@ -53,7 +54,8 @@
     <Compile Include="Core\Draw.DrawRects.AnimeExternals.cs" />
     <Compile Include="Core\Draw.DrawRects.ControlRect.cs" />
     <Compile Include="Core\Draw.DrawRects.cs" />
-    <Compile Include="Core\Draw.DrawRects.Painters.cs" />
+    <Compile Include="Painters\Draw.DrawRects.Painters.ControlSimple.cs" />
+    <Compile Include="Painters\Draw.DrawRects.Painters.cs" />
     <Compile Include="Core\DrawControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -67,6 +69,7 @@
     <Compile Include="DrawControls\Scroll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

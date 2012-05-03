@@ -18,68 +18,68 @@ namespace VALib.Draw.Controls
 
         public bool Gradient
         {
-            get { return Property["Gradient"].AsBoolean(); }
-            set { Property.SetProperty("Gradient", value); }
+            get { return Value["Gradient"].AsBoolean(); }
+            set { Value["Gradient"] = value; }
         }
 
         public bool Flat
         {
-            get { return Property["Flat"].AsBoolean(); }
-            set { Property.SetProperty("Flat", value); }
+            get { return Value["Flat"].AsBoolean(); }
+            set { Value["Flat"] = value; }
         }
 
         public int CornerRadius
         {
-            get { return Property["CornerRadius"].AsInteger(); }
-            set { Property.SetProperty("CornerRadius", value); }
+            get { return Value["CornerRadius"].AsInteger(); }
+            set { Value["CornerRadius"] = value; }
         }
 
         public string Text
         {
-            get { return Property["Text"].AsString(); }
-            set { Property.SetProperty("Text", value); }
+            get { return Value["Text"].AsString(); }
+            set { Value["Text"] = value; }
         }
 
         public Color TextColor
         {
-            get { return Property["TextColor"].AsColor(); }
-            set { Property.SetProperty("TextColor", value); }
+            get { return Value["TextColor"].AsColor(); }
+            set { Value["TextColor"] = value; }
         }
 
         public bool Switch
         {
-            get { return Property["Switch"].AsBoolean(); }
-            set { Property.SetProperty("Switch", value); }
+            get { return Value["Switch"].AsBoolean(); }
+            set { Value["Switch"] = value; }
         }
 
         public bool Down
         {
-            get { return Property["Down"].AsBoolean(); }
-            set { Property.SetProperty("Down", value); }
+            get { return Value["Down"].AsBoolean(); }
+            set { Value["Down"] = value; }
         }
 
         public DrawRect MarkRect
         {
-            get { return Property.GetAs<DrawRect>("MarkRect"); }
-            set { Property.SetProperty("MarkRect", value); }
+            get { return Value["MarkRect"].As<DrawRect>(); }
+            set { Value["MarkRect"] =  value; }
         }
 
         public DrawRect ContentRect
         {
-            get { return Property.GetAs<DrawRect>("ContentRect"); }
-            set { Property.SetProperty("ContentRect", value); }
+            get { return Value["ContentRect"].As<DrawRect>(); }
+            set { Value["ContentRect"] = value; }
         }
 
         public bool HoldDownIfMouseLeave
         {
-            get { return Property["HoldDownIfMouseLeave"].AsBoolean(); }
-            set { Property.SetProperty("HoldDownIfMouseLeave", value); }
+            get { return Value["HoldDownIfMouseLeave"].AsBoolean(); }
+            set { Value["HoldDownIfMouseLeave"] = value; }
         }
 
         public Font Font
         {
-            get { return Property.GetAs<Font>("Font"); }
-            set { Property.SetProperty("Font", value); }
+            get { return Value["Font"].As<Font>(); }
+            set { Value["Font"] = value; }
         }
 
         #endregion
@@ -116,34 +116,34 @@ namespace VALib.Draw.Controls
 
         public void InitProperties()
         {
-            Property.Get("Gradient", false)
+            Property["Gradient", false]
                 .Changed += () => { Invalidate(); };
-            Property.Get("Flat", false)
+            Property["Flat", false]
                 .Changed += () => { Invalidate(); };
-            Property.Get("CornerRadius", 0)
+            Property["CornerRadius", 0]
                 .Changed += () => { Invalidate(); };
-            Property.Get("Text", "")
+            Property["Text", ""]
                 .Changed += () => { Invalidate(); };
-            Property.Get("TextColor", Color.Navy)
+            Property["TextColor", Color.Navy]
                 .Changed += () => { Invalidate(); };
-            Property.Get("Switch", false)
+            Property["Switch", false]
                 .Changed += () =>
                                 {
                                     if (!Switch) Down = false;
                                     Invalidate();
                                 };
-            Property.Get("Down", false)
+            Property["Down", false]
                 .Changed += () =>
                                 {
                                     Invalidate();
                                     if (OnOff != null) OnOff(this, new EventArgs());
                                 };
-            Property.Get("HoldDownIfMouseLeave", false)
+            Property["HoldDownIfMouseLeave", false]
                 .Changed += () =>
                                 {
                                     if (Down && !MouseIsOver) Down = false;
                                 };
-            Property.Get("Font", new Font("Arial", 8))
+            Property["Font", new Font("Arial", 8)]
                 .Changed += () => { Invalidate(); };
         }
         

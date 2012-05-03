@@ -25,31 +25,31 @@ namespace VALib.Draw.Controls.Core
 
         public void InitProperties()
         {
-            Property.Get("Color", SystemColors.Control)
+            Property["Color", SystemColors.Control]
                 .Changed += () => { if (!UseMouseOverColor || !MouseIsOver) CurrentColor = Color; };
 
-            Property.Get("MouseOverColor", SystemColors.Control.BrightColor(30))
+            Property["MouseOverColor", SystemColors.Control.BrightColor(30)]
                 .Changed += () => { if (UseMouseOverColor && MouseIsOver) CurrentColor = MouseOverColor; };
 
-            Property.Get("CurrentColor", SystemColors.Control)
+            Property["CurrentColor", SystemColors.Control]
                 .Changed += () => { Invalidate(); };
 
-            Property.Get("FocusColor", Color.Blue)
+            Property["FocusColor", Color.Blue]
                 .Changed += () => { if (Focused) Invalidate(); };
 
-            Property.Get("DrawFocus", false)
+            Property["DrawFocus", false]
                 .Changed += () => { if (Focused) Invalidate(); };
 
-            Property.Get("MouseIsOver", false)
+            Property["MouseIsOver", false]
                 .Changed += () => { Invalidate(); };
 
-            Property.Get("UseMouseOverColor", false)
+            Property["UseMouseOverColor", false]
                 .Changed += () => { if (MouseIsOver) Invalidate(); };
 
-            Property.SetProperty("MouseOverColorAnimeLeaveTime", 500);
-            Property.SetProperty("MouseOverColorAnimeEnterTime", 200);
+            MouseOverColorAnimeLeaveTime = 500;
+            MouseOverColorAnimeEnterTime = 200;
 
-            Property.Get("CaptureMouseClick", false)
+            Property["CaptureMouseClick", false]
                 .Changed += () =>
                                 {
                                     if (!CaptureMouseClick && MouseIsDown)

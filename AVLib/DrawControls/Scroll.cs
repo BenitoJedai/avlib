@@ -19,8 +19,8 @@ namespace VALib.Draw.Controls
 
         public Orientation Align
         {
-            get { return Property.GetAs<Orientation>("Align"); }
-            set { Property.SetProperty("Align", value); }
+            get { return Value["Align"].As<Orientation>(); }
+            set { Value["Align"] = value; }
         }
 
         public DrawButton Button1 { get { return button1; } }
@@ -41,7 +41,7 @@ namespace VALib.Draw.Controls
             button1.Alignment = RectAlignment.Top;
             button1.Transparent = true;
             button1.Flat = true;
-            button1.Property["Color"] = Property.Get("Color");
+            button1.Value["Color"] = Property["Color"];
             this.Add(button1);
 
             scrollButton = new DrawButton();
@@ -52,7 +52,7 @@ namespace VALib.Draw.Controls
             scrollButton.Alignment = RectAlignment.Absolute;
             scrollButton.Transparent = true;
             scrollButton.CaptureMouseClick = true;
-            scrollButton.Property["Color"] = Property.Get("Color");
+            scrollButton.Value["Color"] = Property["Color"];
             scrollButton.MouseDown += scrollButton_MouseDown;
             scrollButton.MouseMove += scrollButton_MouseMove;
             this.Add(scrollButton);
@@ -64,7 +64,7 @@ namespace VALib.Draw.Controls
             button2.Alignment = RectAlignment.Bottom;
             button2.Transparent = true;
             button2.Flat = true;
-            button2.Property["Color"] = Property.Get("Color");
+            button2.Value["Color"] = Property["Color"];
             this.Add(button2);
 
             this.Painters[0].Add(PaintBody, "body");
@@ -75,7 +75,7 @@ namespace VALib.Draw.Controls
 
         public void InitProperties()
         {
-            Property.Get("Align", Orientation.Vertical);
+            Align = Orientation.Vertical;
         }
 
         private DrawButton button1;
