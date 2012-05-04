@@ -41,7 +41,8 @@ namespace VALib.Draw.Controls
             button1.Alignment = RectAlignment.Top;
             button1.Transparent = true;
             button1.Flat = true;
-            button1.Value["Color"] = Property["Color"];
+            button1.TabStop = false;
+            button1.Value["CurrentColor"] = Property["Color"];
             this.Add(button1);
 
             scrollButton = new DrawButton();
@@ -52,9 +53,10 @@ namespace VALib.Draw.Controls
             scrollButton.Alignment = RectAlignment.Absolute;
             scrollButton.Transparent = true;
             scrollButton.CaptureMouseClick = true;
-            scrollButton.Value["Color"] = Property["Color"];
+            scrollButton.Value["CurrentColor"] = Property["Color"];
             scrollButton.MouseDown += scrollButton_MouseDown;
             scrollButton.MouseMove += scrollButton_MouseMove;
+            scrollButton.TabStop = false;
             this.Add(scrollButton);
 
             button2 = new DrawButton();
@@ -64,7 +66,8 @@ namespace VALib.Draw.Controls
             button2.Alignment = RectAlignment.Bottom;
             button2.Transparent = true;
             button2.Flat = true;
-            button2.Value["Color"] = Property["Color"];
+            button2.TabStop = false;
+            button2.Value["CurrentColor"] = Property["Color"];
             this.Add(button2);
 
             this.Painters[0].Add(PaintBody, "body");

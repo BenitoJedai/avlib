@@ -202,7 +202,7 @@ namespace AVLib.Draw.DrawRects.Painters
         }
     }
 
-    public static class Painters
+    public static class BasePainters
     {
         public static void Rect(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {

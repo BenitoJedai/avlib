@@ -11,6 +11,7 @@ namespace VALib.Draw.Controls
         private object m_value;
         public Func<object, object> Modifier;
         public event Action Changed;
+        public event Action RefChanged;
 
         private object Modify(object obj)
         {
@@ -45,9 +46,17 @@ namespace VALib.Draw.Controls
         {
             if (m_value != newValue)
             {
-                if (m_value != null && m_value is ControlProperty) ((ControlProperty)m_value).Changed -= DoChanged;
+                if (m_value != null && m_value is ControlProperty)
+                {
+                    ((ControlProperty)m_value).Changed -= DoRefChanged;
+                    ((ControlProperty)m_value).RefChanged -= DoRefChanged;
+                }
                 m_value = newValue;
-                if (m_value != null && m_value is ControlProperty) ((ControlProperty)m_value).Changed += DoChanged;
+                if (m_value != null && m_value is ControlProperty)
+                {
+                    ((ControlProperty)m_value).Changed += DoRefChanged;
+                    ((ControlProperty)m_value).RefChanged += DoRefChanged;
+                }
                 DoChanged();
                 return true;
             }
@@ -62,6 +71,11 @@ namespace VALib.Draw.Controls
         private void DoChanged()
         {
             if (Changed != null) Changed();
+        }
+
+        private void DoRefChanged()
+        {
+            if (RefChanged != null) RefChanged();
         }
 
         internal void Removed()

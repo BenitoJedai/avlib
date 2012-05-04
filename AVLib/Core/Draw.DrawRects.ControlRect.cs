@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using AVLib.Animations;
+using AVLib.Utils;
 
 namespace AVLib.Draw.DrawRects
 {
@@ -34,7 +35,6 @@ namespace AVLib.Draw.DrawRects
         public event KeyEventHandler KeyDown;
         public event KeyEventHandler KeyUp;
 
-        private bool m_enabled = true;
         private ControlRect m_lastMouseControl = null;
         private ControlRect m_captureControl = null;
         private static readonly Point InvalidPoint = new Point(-1, -1);
@@ -44,16 +44,8 @@ namespace AVLib.Draw.DrawRects
 
         public bool Enabled
         {
-            get { return m_enabled; }
-            set
-            {
-                if (m_enabled != value)
-                {
-                    m_enabled = value;
-                    if (EnabledChanged != null) EnabledChanged(this, new EventArgs());
-                    Invalidate();
-                }
-            }
+            get { return Value["Enabled"].AsBoolean(); }
+            set { Value["Enabled"] = value; }
         }
 
         public ControlRect(Control control, Point pos, int width, int height)
@@ -76,7 +68,7 @@ namespace AVLib.Draw.DrawRects
 
         protected virtual void InitializeControl()
         {
-
+            AddValidatedProperty("Enabled", true).Changed += () => { if (EnabledChanged != null) EnabledChanged(this, new EventArgs()); };
         }
 
         protected void Capture(ControlRect rect, bool value)
@@ -130,7 +122,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseMove(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseMove != null) MouseMove(this, e);
 
@@ -140,7 +132,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseEnter(EventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             if (m_lastMouseControl != null)
             {
                 m_lastMouseControl.OnMouseLeave(e);
@@ -151,7 +143,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseLeave(EventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             if (m_lastMouseControl != null)
             {
                 m_lastMouseControl.OnMouseLeave(e);
@@ -163,7 +155,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseDown(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseDown != null) MouseDown(this, e);
 
@@ -179,7 +171,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseUp(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseUp != null) MouseUp(this, e);
             if (m_captureControl != null) m_captureControl.OnMouseUp(e);
@@ -189,7 +181,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseClick(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseClick != null) MouseClick(this, e);
             if (Click != null) Click(this, e);
@@ -200,7 +192,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseDoubleClick(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseDoubleClick != null) MouseDoubleClick(this, e);
             if (DoubleClick != null) DoubleClick(this, e);
@@ -211,7 +203,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseHover(EventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             if (m_captureControl != null) m_captureControl.OnMouseHover(e);
             else
             {
@@ -226,7 +218,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnMouseWheel(MouseEventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseWheel != null) MouseWheel(this, e);
             if (m_captureControl != null) m_captureControl.OnMouseWheel(e);
@@ -236,7 +228,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnDragEnter(DragEventArgs drgevent)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
             if (DragEnter != null) DragEnter(this, drgevent);
             if (ch != null) ch.OnDragEnter(drgevent);
@@ -244,7 +236,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnDragLeave(EventArgs e)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             if (m_lastMouseControl != null)
             {
                 m_lastMouseControl.OnMouseLeave(e);
@@ -256,7 +248,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnDragDrop(DragEventArgs drgevent)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
             if (DragDrop != null) DragDrop(this, drgevent);
             if (ch != null) ch.OnDragDrop(drgevent);
@@ -264,7 +256,7 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnDragOver(DragEventArgs drgevent)
         {
-            if (!m_enabled) return;
+            if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
             if (DragOver != null) DragOver(this, drgevent);
             if (ch != null) ch.OnDragOver(drgevent);
@@ -289,9 +281,7 @@ namespace AVLib.Draw.DrawRects
             if (TabStop) Invalidate();
             if (Leave != null) Leave(this, new EventArgs());
         }
-
-
-
+        
 
         #region Focus
 

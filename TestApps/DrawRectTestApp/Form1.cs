@@ -44,11 +44,11 @@ namespace DrawRectTestApp
             topRect = rect.Add(RectAlignment.Top, 20);
             topRect.AnimeAlign = true;
             topRect.AddValidatedProperty("Color", Color.Red);
-            topRect.Painters[0].Add(Painters.FillRect).Value["Color"] = topRect.Property["Color"];
+            topRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = topRect.Property["Color"];
             {
                 var r2 = topRect.Add(RectAlignment.Right, 30);
                 r2.AddValidatedProperty("Color", Color.Indigo);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
 
                 controlRect = topRect.Add(RectAlignment.Right, 60);
                 TextBox txt = new TextBox();
@@ -57,50 +57,50 @@ namespace DrawRectTestApp
 
                 r2 = topRect.Add(RectAlignment.Left, 30);
                 r2.AddValidatedProperty("Color", Color.Aqua);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
                 r2 = topRect.Add(RectAlignment.Left, 30);
                 r2.AddValidatedProperty("Color", Color.Green);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
                 yellowRect = topRect.Add(RectAlignment.Left, 30);
                 yellowRect.AddValidatedProperty("Color", Color.Yellow);
-                yellowRect.Painters[0].Add(Painters.FillRect).Value["Color"] = yellowRect.Property["Color"];
+                yellowRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = yellowRect.Property["Color"];
                 r2 = topRect.Add(RectAlignment.Left, 30);
                 r2.AnimeAlign = true;
                 r2.AddValidatedProperty("Color", Color.LightSteelBlue);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
             }
             var r = rect.Add(RectAlignment.Bottom, 20);
             r.AddValidatedProperty("Color", Color.Green.BrightColor(40));
             r.AddValidatedProperty("Color2", Color.Green);
-            var p = r.Painters[0].Add(Painters.FillGradient);
+            var p = r.Painters[0].Add(BasePainters.FillGradient);
             p.Value["Color"] = r.Property["Color"];
             p.Value["Color2"] = r.Property["Color2"];
             {
                 var r2 = r.Add(RectAlignment.Left, 40);
                 r2.AddValidatedProperty("Color", Color.Aqua);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
                 r2 = r.Add(RectAlignment.Left, 40);
                 r2.AddValidatedProperty("Color", Color.Green);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
                 r2 = r.Add(RectAlignment.Left, 40);
                 r2.AddValidatedProperty("Color", Color.Yellow);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
                 r2 = r.Add(RectAlignment.Left, 40);
                 r2.AddValidatedProperty("Color", Color.LightSteelBlue);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
 
                 r2 = r.Add(RectAlignment.Right, 40);
                 r2.AddValidatedProperty("Color", Color.Indigo);
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
             }
             r = rect.Add(RectAlignment.Left, 20);
             r.AddValidatedProperty("Color", Color.Blue);
-            r.Painters[0].Add(Painters.FillRect).Value["Color"] = r.Property["Color"];
+            r.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r.Property["Color"];
             r = rect.Add(RectAlignment.Right, 20);
             r.AddValidatedProperty("Color", Color.Silver);
             r.AddValidatedProperty("Color2", Color.Gray);
             r.AddValidatedProperty("Direction", SimpleDirection.Horisontal);
-            p = r.Painters[0].Add(Painters.FillGradient);
+            p = r.Painters[0].Add(BasePainters.FillGradient);
             p.Value["Color"] = r.Property["Color"];
             p.Value["Color2"] = r.Property["Color2"];
             p.Value["Direction"] = r.Property["Direction"];
@@ -109,7 +109,7 @@ namespace DrawRectTestApp
             r.AddValidatedProperty("Color", Color.Maroon);
             r.AddValidatedProperty("Color2", Color.Maroon.BrightColor(40));
             r.AddValidatedProperty("Direction", SimpleDirection.Horisontal);
-            p = r.Painters[0].Add(Painters.FillGradient);
+            p = r.Painters[0].Add(BasePainters.FillGradient);
             p.Value["Color"] = r.Property["Color"];
             p.Value["Color2"] = r.Property["Color2"];
             p.Value["Direction"] = r.Property["Direction"];
@@ -118,21 +118,21 @@ namespace DrawRectTestApp
             backRect.BorderSize = 10;
             backRect.AddValidatedProperty("Color", Color.Sienna);
             backRect.AddValidatedProperty("BorderColor", Color.White);
-            backRect.Painters[0].Add(Painters.FillRect).Value["Color"] = backRect.Property["Color"];
-            backRect.Painters[1].Add(Painters.Rect).Value["Color"] = backRect.Property["BorderColor"];
+            backRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = backRect.Property["Color"];
+            backRect.Painters[1].Add(BasePainters.Rect).Value["Color"] = backRect.Property["BorderColor"];
 
             {
                 var r2 = backRect.Add(RectAlignment.Fill, 0);
                 r2.AddValidatedProperty("Color", Color.Green.BrightColor(60));
-                r2.Painters[0].Add(Painters.FillRect).Value["Color"] = r2.Property["Color"];
+                r2.Painters[0].Add(BasePainters.FillRect).Value["Color"] = r2.Property["Color"];
 
                 var locationRect = (ControlRect)r2.Add(new Point(70, 100), 80, 80);
                 locationRect.Transparent = true;
                 locationRect.BorderSize = 2;
                 locationRect.AddValidatedProperty("Color", Color.Red.BrightColor(40).Transparent(40));
                 locationRect.AddValidatedProperty("BorderColor", Color.Brown.DarkColor(20));
-                locationRect.Painters[0].Add(Painters.FillRect).Value["Color"] = locationRect.Property["Color"];
-                locationRect.Painters[0].Add(Painters.Rect).Value["Color"] = locationRect.Property["BorderColor"]; 
+                locationRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = locationRect.Property["Color"];
+                locationRect.Painters[0].Add(BasePainters.Rect).Value["Color"] = locationRect.Property["BorderColor"]; 
                 locationRect.AnimeEvent(true).MouseEnter().Change("ContainerRect", new Rectangle(170, 100, 150, 150));
                 locationRect.AnimeEventQueue().MouseLeave().Wait(Speed.Slow).Change("ContainerRect", new Rectangle(70, 100, 80, 80));
             }
@@ -141,10 +141,10 @@ namespace DrawRectTestApp
             mouseRect.Alignment = RectAlignment.Custom;
             mouseRect.Transparent = true;
             mouseRect.AddValidatedProperty("Color", Color.Blue.Transparent(50));
-            mouseRect.Painters[0].Add(Painters.FillRect, "r1").Value["Color"] = mouseRect.Property["Color"];
+            mouseRect.Painters[0].Add(BasePainters.FillRect, "r1").Value["Color"] = mouseRect.Property["Color"];
             mouseRect.BorderSize = 3;
             mouseRect.AddValidatedProperty("BorderColor", Color.Navy);
-            mouseRect.Painters[0].Add(Painters.Rect).Value["Color"] = mouseRect.Property["BorderColor"];
+            mouseRect.Painters[0].Add(BasePainters.Rect).Value["Color"] = mouseRect.Property["BorderColor"];
             mouseRect.AnimeEvent("color").MouseEnter().ChangeDec("Color", Color.Aqua.Transparent(20), Speed.Medium);
             mouseRect.AnimeEvent("size").MouseEnter().ChangeDec("Rect", new Rectangle(80, 10, 180, 180), Speed.Medium);
             mouseRect.AnimeEvent("color").MouseLeave().ChangeInc("Color", Color.Blue.Transparent(50), Speed.Medium);
@@ -161,8 +161,8 @@ namespace DrawRectTestApp
             transparentRect.BorderSize = 2;
             transparentRect.AddValidatedProperty("Color", Color.Green.Transparent(60));
             transparentRect.AddValidatedProperty("BorderColor", Color.Green);
-            transparentRect.Painters[0].Add(Painters.FillRect).Value["Color"] = transparentRect.Property["Color"];
-            transparentRect.Painters[0].Add(Painters.Rect).Value["Color"] = transparentRect.Property["BorderColor"];
+            transparentRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = transparentRect.Property["Color"];
+            transparentRect.Painters[0].Add(BasePainters.Rect).Value["Color"] = transparentRect.Property["BorderColor"];
             transparentRect.AnimeEvent("color").MouseEnter().Change("Color", Color.Blue.Transparent(80), Speed.Medium);
             transparentRect.AnimeEvent("color").MouseLeave().Change("Color", Color.Green.Transparent(60), Speed.Medium);
 
@@ -192,8 +192,8 @@ namespace DrawRectTestApp
             rect.Add(cr);
             cr.AddValidatedProperty("Color", Color.Red.BrightColor(40));
             cr.AddValidatedProperty("BorderColor", Color.Maroon);
-            cr.Painters[0].Add(Painters.FillRect).Value["Color"] = cr.Property["Color"];
-            cr.Painters[0].Add(Painters.Rect).Value["Color"] = cr.Property["BorderColor"];
+            cr.Painters[0].Add(BasePainters.FillRect).Value["Color"] = cr.Property["Color"];
+            cr.Painters[0].Add(BasePainters.Rect).Value["Color"] = cr.Property["BorderColor"];
             cr.TabIndex = 0;
             cr.TabStop = true;
             cr.BorderSize = 2;
@@ -205,8 +205,8 @@ namespace DrawRectTestApp
             rect.Add(cr);
             cr.AddValidatedProperty("Color", Color.Green.BrightColor(40));
             cr.AddValidatedProperty("BorderColor", Color.Green);
-            cr.Painters[0].Add(Painters.FillRect).Value["Color"] = cr.Property["Color"];
-            cr.Painters[0].Add(Painters.Rect).Value["Color"] = cr.Property["BorderColor"];
+            cr.Painters[0].Add(BasePainters.FillRect).Value["Color"] = cr.Property["Color"];
+            cr.Painters[0].Add(BasePainters.Rect).Value["Color"] = cr.Property["BorderColor"];
             cr.TabIndex = 1;
             cr.TabStop = true;
             cr.BorderSize = 2;
@@ -217,8 +217,8 @@ namespace DrawRectTestApp
             rect.Add(cr);
             cr.AddValidatedProperty("Color", Color.Blue.BrightColor(40));
             cr.AddValidatedProperty("BorderColor", Color.Navy);
-            cr.Painters[0].Add(Painters.FillRect).Value["Color"] = cr.Property["Color"];
-            cr.Painters[0].Add(Painters.Rect).Value["Color"] = cr.Property["BorderColor"];
+            cr.Painters[0].Add(BasePainters.FillRect).Value["Color"] = cr.Property["Color"];
+            cr.Painters[0].Add(BasePainters.Rect).Value["Color"] = cr.Property["BorderColor"];
             cr.TabIndex = 2;
             cr.TabStop = true;
             cr.BorderSize = 2;
@@ -236,7 +236,7 @@ namespace DrawRectTestApp
             bt.UseMouseOverColor = true;
             bt.BorderSize = 2;
             bt.CornerRadius = 2;
-            bt.Gradient = false;
+            bt.Gradient = true;
             bt.Transparent = true;
             bt.DrawFocus = true;
             bt.Switch = false;

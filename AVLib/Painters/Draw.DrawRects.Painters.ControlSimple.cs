@@ -34,9 +34,9 @@ namespace AVLib.Draw.DrawRects.Painters.ControlSimple
         public static void Body(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
             if (Params["Gradient"].AsBoolean())
-                Painters.FillGradient(Params, rect, graf);
+                BasePainters.FillGradient(Params, rect, graf);
             else
-                Painters.FillRect(Params, rect, graf);
+                BasePainters.FillRect(Params, rect, graf);
         }
 
         

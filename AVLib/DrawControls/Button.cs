@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using AVLib.Animations;
 using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
+using AVLib.Draw.DrawRects.Painters.ControlSimple;
 using AVLib.Utils;
 using VALib.Draw.Controls.Core;
 
@@ -15,36 +16,6 @@ namespace VALib.Draw.Controls
     public class DrawButton : BaseEventReaction
     {
         #region Properties
-
-        public bool Gradient
-        {
-            get { return Value["Gradient"].AsBoolean(); }
-            set { Value["Gradient"] = value; }
-        }
-
-        public bool Flat
-        {
-            get { return Value["Flat"].AsBoolean(); }
-            set { Value["Flat"] = value; }
-        }
-
-        public int CornerRadius
-        {
-            get { return Value["CornerRadius"].AsInteger(); }
-            set { Value["CornerRadius"] = value; }
-        }
-
-        public string Text
-        {
-            get { return Value["Text"].AsString(); }
-            set { Value["Text"] = value; }
-        }
-
-        public Color TextColor
-        {
-            get { return Value["TextColor"].AsColor(); }
-            set { Value["TextColor"] = value; }
-        }
 
         public bool Switch
         {
@@ -76,12 +47,6 @@ namespace VALib.Draw.Controls
             set { Value["HoldDownIfMouseLeave"] = value; }
         }
 
-        public Font Font
-        {
-            get { return Value["Font"].As<Font>(); }
-            set { Value["Font"] = value; }
-        }
-
         #endregion
 
         public event EventHandler Click;
@@ -92,26 +57,24 @@ namespace VALib.Draw.Controls
             base.InitializeControl();
             InitProperties();
 
+            ContentRect = new DrawRect(RectAlignment.Fill, 10);
+            ContentRect.Transparent = true;
+            this.Add(ContentRect);
+
+            MarkRect = new DrawRect(RectAlignment.Fill, 10);
+            MarkRect.Transparent = true;
+            //MarkRect.Painters[0].Add(PaintMarkRect, "mark");
+            this.Add(MarkRect);
+
+            InitPainters();
+
             TabStop = true;
             this.CaptureMouseClick = true;
-
-            this.Painters[0].Add(PaintBody, "body");
-            this.Painters[0].Add(PaintBorder, "border");
 
             this.MouseEnter += DrawButton_MouseEnter;
             this.MouseLeave += DrawButton_MouseLeave;
             this.MouseDown += DrawButton_MouseDown;
             this.MouseUp += DrawButton_MouseUp;
-
-            ContentRect = new DrawRect(RectAlignment.Fill, 10);
-            ContentRect.Transparent = true;
-            ContentRect.Painters[0].Add(PaintContent, "content");
-            this.Add(ContentRect);
-
-            MarkRect = new DrawRect(RectAlignment.Fill, 10);
-            MarkRect.Transparent = true;
-            MarkRect.Painters[0].Add(PaintMarkRect, "mark");
-            this.Add(MarkRect);
         }
 
         public void InitProperties()
@@ -139,9 +102,46 @@ namespace VALib.Draw.Controls
                                     if (Down && !MouseIsOver) Down = false;
                                 };
             AddValidatedProperty("Font", () => { return new Font("Arial", 8); });
+            TextAlignment = StringAlignment.Center;
+            DrawFocus = true;
+
+            Value["FlatIsNow"] = new Func<object>(() => { return Flat && !MouseIsOver && !Down; });
         }
         
+        public void InitPainters()
+        {
+            var body = Painters[0].Add(ControlSimpleDraw.Body, "body");
+            body.Value["Color", (c) => { return Gradient ? c.AsColor().BrightColor(40) : c; }] = Property["CurrentColor"];
+            body.Value["Gradient"] = Property["Gradient"];
+            body.Value["Color2", (c) => { return c.AsColor().DarkColor(10); }] = Property["CurrentColor"];
+            body.Value["Direction"] = Property["Direction"];
+            body.Value["CornerRadius"] = new Func<object>(() => { return Value["FlatIsNow"].AsBoolean() ? 0 : CornerRadius; }); 
 
+            var border = Painters[0].Add(ControlSimpleDraw.ButtonBorder, "border");
+            border.Value["Color"] = Property["CurrentColor"];
+            border.Value["Down"] = Property["Down"];
+            border.Value["CornerRadius"] = Property["CornerRadius"];
+            border.Value["Enabled"] = new Func<object>(() => { return !Value["FlatIsNow"].AsBoolean(); });
+
+            var content = ContentRect.Painters[0].Add(BasePainters.Text, "content");
+            content.Value["Text"] = Property["Text"];
+            content.Value["Font"] = Property["Font"];
+            content.Value["Alignment"] = Property["TextAlignment"];
+            content.Value["VertAlignment"] = Property["TextVertAlignment"];
+            content.Value["Offset"] = new Func<object>(() => { return Down ? new Point(0, 1) : new Point(0, 0); });
+            content.Value["Color"] = new Func<object>(() => { return Enabled ? TextColor : TextColor.BrightColor(50); }); 
+
+            var focus = MarkRect.Painters[0].Add(BasePainters.Rect, "focus");
+            focus.Value["Color", (c) => { return c.AsColor().Transparent(80); }] = Property["FocusColor"];
+            focus.Value["Width"] = 2;
+            //focus.Value["CornerRadius"] = Property["CornerRadius"];
+            focus.Value["Enabled"] = new Func<object>(() => { return DrawFocus && Focused && Enabled; });
+
+            var disabled = MarkRect.Painters[0].Add(BasePainters.FillRect, "disabled");
+            disabled.Value["Color"] = Color.Silver.Transparent(80);
+            disabled.Value["CornerRadius"] = Property["CornerRadius"];
+            disabled.Value["Enabled"] = new Func<object>(() => { return !Enabled; });
+        }
 
         private void DrawButton_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
@@ -171,64 +171,5 @@ namespace VALib.Draw.Controls
         {
             if (MouseIsDown && m_goDown && !HoldDownIfMouseLeave) Down = true;
         }
-
-        #region Painters
-        
-        private void PaintBorder(DrawRect rect, Graphics graf)
-        {
-            if (Flat && !MouseIsOver && !Down) return;
-
-            var drawRect = rect.Rect;
-
-            RectSides darkSides, brightSides;
-            if (Down)
-            {
-                brightSides = new RectSides() { right = true, bottom = true };
-                darkSides = new RectSides() { left = true, top = true };
-            }
-            else
-            {
-                darkSides = new RectSides() { right = true, bottom = true };
-                brightSides = new RectSides() { left = true, top = true };
-            }
-            DrawRectMethods.DrawRectangle(drawRect, graf, CurrentColor.DarkColor(40), BorderSize, CornerRadius, darkSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, CurrentColor.BrightColor(40), BorderSize, CornerRadius, brightSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, CurrentColor.DarkColor(60), 1, CornerRadius, darkSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, CurrentColor.DarkColor(30), 1, CornerRadius, brightSides);
-        }
-
-        private void PaintBody(DrawRect rect, Graphics graf)
-        {
-            if (Gradient)
-                DrawRectMethods.FillRectGradient(rect.Rect, graf, CurrentColor.BrightColor(40), CurrentColor.DarkColor(10), SimpleDirection.Vertical, CornerRadius);
-            else
-                DrawRectMethods.FillRect(rect.Rect, graf, CurrentColor, CornerRadius);
-        }
-
-        private void PaintMarkRect(DrawRect rect, Graphics graf)
-        {
-            if (DrawFocus && Focused && Enabled)
-                DrawRectMethods.DrawRectangle(rect.Rect, graf, FocusColor.Transparent(80), 2);
-
-            if (!Enabled)
-                DrawRectMethods.FillRect(rect.Rect, graf, Color.Silver.Transparent(80));
-        }
-
-        private void PaintContent(DrawRect rect, Graphics graf)
-        {
-            var sz = graf.MeasureString(Text, Font);
-            int x, y, dx, dy;
-            dx = (int) (rect.Rect.Width - sz.Width);
-            dy = (int) (rect.Rect.Height - sz.Height);
-            if (dx > 0) x = dx/2; else x = 1;
-            if (dy > 0) y = dy / 2; else y = 1;
-
-            if (Down) y++;
-
-            var clr = Enabled ? TextColor : TextColor.BrightColor(50);
-            graf.DrawString(Text, Font, new SolidBrush(clr), rect.Rect.X + x, rect.Rect.Y + y);
-        }
-
-        #endregion
     }
 }

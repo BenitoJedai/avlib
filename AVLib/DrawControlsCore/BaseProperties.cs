@@ -81,5 +81,53 @@ namespace VALib.Draw.Controls.Core
             get { return Value["CaptureMouseClick", false].AsBoolean(); }
             set { Value["CaptureMouseClick"] = value; }
         }
+
+        public bool Gradient
+        {
+            get { return Value["Gradient"].AsBoolean(); }
+            set { Value["Gradient"] = value; }
+        }
+
+        public bool Flat
+        {
+            get { return Value["Flat"].AsBoolean(); }
+            set { Value["Flat"] = value; }
+        }
+
+        public int CornerRadius
+        {
+            get { return Value["CornerRadius"].AsInteger(); }
+            set { Value["CornerRadius"] = value; }
+        }
+
+        public string Text
+        {
+            get { return Value["Text"].AsString(); }
+            set { Value["Text"] = value; }
+        }
+
+        public Color TextColor
+        {
+            get { return Value["TextColor"].AsColor(); }
+            set { Value["TextColor"] = value; }
+        }
+
+        public Font Font
+        {
+            get { return Value["Font"].As<Font>(); }
+            set { Value["Font"] = value; }
+        }
+
+        public StringAlignment TextAlignment
+        {
+            get { return Value["TextAlignment", StringAlignment.Near].As<StringAlignment>(); }
+            set { Value["TextAlignment"] = value; }
+        }
+
+        public StringAlignment TextVertAlignment
+        {
+            get { return Value["TextVertAlignment", StringAlignment.Center].As<StringAlignment>(); }
+            set { Value["TextVertAlignment"] = value; }
+        }
     }
 }

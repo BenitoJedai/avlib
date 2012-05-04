@@ -89,13 +89,22 @@ namespace AVLib.Draw.DrawRects
         {
             get { return m_properties; }
         }
-        public void AddValidatedProperty(string property, object initValue)
+
+        public bool InvalidateOnRefChange { get; set; }
+        
+        public ControlProperty AddValidatedProperty(string property, object initValue)
         {
-            Property[property, initValue].Changed += () => { Invalidate(); };
+            var p = Property[property, initValue];
+            p.Changed += () => { Invalidate(); };
+            p.RefChanged += () => { if (InvalidateOnRefChange) Invalidate(); };
+            return p;
         }
-        public void AddValidatedProperty(string property, Func<object> initValue)
+        public ControlProperty AddValidatedProperty(string property, Func<object> initValue)
         {
-            Property[property, initValue].Changed += () => { Invalidate(); };
+            var p = Property[property, initValue];
+            p.Changed += () => { Invalidate(); };
+            p.RefChanged += () => { if (InvalidateOnRefChange) Invalidate(); };
+            return p;
         }
 
         #region Constructors

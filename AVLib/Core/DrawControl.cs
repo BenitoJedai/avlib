@@ -29,7 +29,7 @@ namespace AVLib.Controls
 
             m_mainRect = new ControlRect(this, new Point(0, 0), Width, Height);
             m_mainRect.AddValidatedProperty("Color", SystemColors.Control);
-            m_mainRect.Painters[0].Add(Painters.FillRect).Value["Color"] = m_mainRect.Property["Color"];
+            m_mainRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = m_mainRect.Property["Color"];
             this.Resize += new EventHandler(DrawControl_Resize);
             this.Disposed += new EventHandler(DrawControl_Disposed);
 

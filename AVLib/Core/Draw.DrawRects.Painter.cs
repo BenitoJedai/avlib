@@ -12,7 +12,6 @@ namespace AVLib.Draw.DrawRects
 {
     public delegate void RectPaintHandler(IControlPropertiesValue Params, DrawRect rect, Graphics graf);
     public class RectPainter    {
-        #region Internal
 
         private ControlProperties m_properties = new ControlProperties();
         public IControlProperties Property
@@ -23,14 +22,6 @@ namespace AVLib.Draw.DrawRects
         {
             get { return m_properties; }
         }
-
-        public event ChangedHandler Changed;
-        public void DoChange()
-        {
-            if (Changed != null) Changed();
-        }
-
-        #endregion
 
         public string Name
         {
@@ -52,7 +43,7 @@ namespace AVLib.Draw.DrawRects
 
         public RectPainter()
         {
-            Property["Enabled", true].Changed += () => { DoChange(); };
+            Enabled = true;
         }
 
 
@@ -60,11 +51,7 @@ namespace AVLib.Draw.DrawRects
         public RectPaintHandler PaintMethod
         {
             get { return m_paintMethod; }
-            set
-            {
-                m_paintMethod = value;
-                DoChange();
-            }
+            set { m_paintMethod = value; }
         }
 
         public virtual void Paint(DrawRect rect, Graphics graf)
