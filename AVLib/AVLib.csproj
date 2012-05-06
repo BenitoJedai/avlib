@@ -42,8 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Draw.DrawRects.Painter.cs" />
-    <Compile Include="DrawControlsCore\BaseEventReaction.cs" />
-    <Compile Include="DrawControlsCore\BaseProperties.cs" />
+    <Compile Include="DrawControlsCore\BaseBehaviour.cs" />
+    <Compile Include="DrawControlsCore\BaseControl.cs" />
     <Compile Include="Core\Animation.Controller.cs" />
     <Compile Include="Core\Animation.cs" />
     <Compile Include="Core\Animation.Controller.ControlController.cs" />
@@ -54,6 +54,10 @@
     <Compile Include="Core\Draw.DrawRects.AnimeExternals.cs" />
     <Compile Include="Core\Draw.DrawRects.ControlRect.cs" />
     <Compile Include="Core\Draw.DrawRects.cs" />
+    <Compile Include="DrawControlsCore\BehaviourChecked.cs" />
+    <Compile Include="DrawControlsCore\BehaviourMouseDrag.cs" />
+    <Compile Include="DrawControlsCore\BehaviourProgress.cs" />
+    <Compile Include="DrawControlsCore\Behaviours.cs" />
     <Compile Include="Painters\Draw.DrawRects.Painters.ControlSimple.cs" />
     <Compile Include="Painters\Draw.DrawRects.Painters.cs" />
     <Compile Include="Core\DrawControl.cs">

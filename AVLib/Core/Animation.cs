@@ -140,6 +140,23 @@ namespace AVLib.Animations
             }
         }
 
+        public delegate void CustomAnimeHandler(AnimationControler.AnimatorState animator);
+        private class CustomThreadParam : AnimationControler.BaseThreadParam
+        {
+            public CustomAnimeHandler customMethod;
+            public int MaxIteration;
+            protected override AnimationControler.BaseThreadParam CreateClon()
+            {
+                return new CustomThreadParam();
+            }
+            protected override void CloneTo(AnimationControler.BaseThreadParam clon)
+            {
+                base.CloneTo(clon);
+                ((CustomThreadParam) clon).customMethod = customMethod;
+                ((CustomThreadParam) clon).MaxIteration = MaxIteration;
+            }
+        }
+
         private delegate void SetObjectPropertyDelegate(object ctrl, string path, object value);
         private static void SetPropertyForObject(object ctrl, string path, object value)
         {
@@ -151,6 +168,21 @@ namespace AVLib.Animations
         {
             for (int i = 0; i < objects.Length; i++)
                 objects[i].SetProperty(path, values[i]);
+        }
+
+        private static void CustomObjectMethod(object ctrl, AnimationControler.AnimatorState state, CustomAnimeHandler method)
+        {
+            if (ctrl is Control)
+            {
+                ((Control)ctrl).Invoke(new CustomAnimeHandler(method), state);
+                return;
+            }
+            if (ctrl is DrawRect)
+            {
+                ((DrawRect)ctrl).Invoke(new CustomAnimeHandler(method), state);
+                return;
+            }
+            method(state);
         }
 
         private static void SetObjectProperty(object ctrl, string path, object value)
@@ -582,6 +614,43 @@ namespace AVLib.Animations
             procesor.Start((d) => { if (td.animatorState.Canceled) d.Cancel = true; });
 
             td.controlState.AnimatorEnd(td.animatorState);
+        }
+
+        private static void Custom(object customThreadParam)
+        {
+            CustomThreadParam td = (CustomThreadParam) customThreadParam;
+            try
+            {
+                int i = 0;
+                while (!td.animatorState.Canceled)
+                {
+                    CustomObjectMethod(td.control, td.animatorState, td.customMethod);
+                    i++;
+                    if (i >= td.MaxIteration && td.MaxIteration > 0) break;
+                    Thread.Sleep(td.time);
+                }
+            }
+            finally
+            {
+                td.controlState.AnimatorEnd(td.animatorState);
+            }
+        }
+
+        internal static AnimationControler.AnimePacket AnimeCustomPacket(string queueName, int sleepTime, CustomAnimeHandler method, int maxIteration, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)
+        {
+            CustomThreadParam baseThreadParam = new CustomThreadParam();
+            baseThreadParam.time = sleepTime;
+            baseThreadParam.customMethod = method;
+            baseThreadParam.MaxIteration = maxIteration;
+            baseThreadParam.QueueLevel = queueLevel;
+            baseThreadParam.finalCallback = finalCallback;
+            baseThreadParam.queueName = queueName;
+            return new AnimationControler.AnimePacket() { isQueue = queue && queueLevel >= 0, queueOwner = qOwner, method = Custom, threadParam = baseThreadParam };
+        }
+
+        public static object AnimeCustom(Control ctrl, string queueName, int sleepTime, CustomAnimeHandler method, int maxIteration, bool queue, int queueLevel, object queueOwner, AnimationControler.FinalCallback finalCallback)
+        {
+            return AnimationControler.ProcessPacket(ctrl, AnimeCustomPacket(queueName, sleepTime, method, maxIteration, queue, queueLevel, queueOwner, finalCallback));
         }
 
         internal static AnimationControler.AnimePacket AnimeWaitPacket(string queueName, int time, bool queue, int queueLevel, object qOwner, AnimationControler.FinalCallback finalCallback)

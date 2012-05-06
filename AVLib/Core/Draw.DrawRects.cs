@@ -37,6 +37,7 @@ namespace AVLib.Draw.DrawRects
         public event ItemChangeHandler AlignmentChanged;
         public event ItemChangeHandler ItemAdded;
         public event ItemChangeHandler Resize;
+        public event ItemChangeHandler PosChanged;
 
         private class DrawRectChild
         {
@@ -57,8 +58,10 @@ namespace AVLib.Draw.DrawRects
             {
                 if (m_rect_internal != value)
                 {
+                    var old = m_rect_internal;
                     m_rect_internal = value;
-                    if (Resize != null) Resize(this);
+                    if (m_rect_internal.Size != old.Size && Resize != null) Resize(this);
+                    if (m_rect_internal.Location != old.Location && PosChanged != null) PosChanged(this);
                     ChildMoved(this);
                 }
             }

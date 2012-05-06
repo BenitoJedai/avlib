@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -142,13 +143,15 @@ namespace DrawRectTestApp
             mouseRect.Transparent = true;
             mouseRect.AddValidatedProperty("Color", Color.Blue.Transparent(50));
             mouseRect.Painters[0].Add(BasePainters.FillRect, "r1").Value["Color"] = mouseRect.Property["Color"];
-            mouseRect.BorderSize = 3;
+            mouseRect.BorderSize = 4;
             mouseRect.AddValidatedProperty("BorderColor", Color.Navy);
-            mouseRect.Painters[0].Add(BasePainters.Rect).Value["Color"] = mouseRect.Property["BorderColor"];
+            mouseRect.Painters[0].Add(BasePainters.Rect, "r2").Value["Color"] = mouseRect.Property["BorderColor"];
             mouseRect.AnimeEvent("color").MouseEnter().ChangeDec("Color", Color.Aqua.Transparent(20), Speed.Medium);
             mouseRect.AnimeEvent("size").MouseEnter().ChangeDec("Rect", new Rectangle(80, 10, 180, 180), Speed.Medium);
             mouseRect.AnimeEvent("color").MouseLeave().ChangeInc("Color", Color.Blue.Transparent(50), Speed.Medium);
             mouseRect.AnimeEvent("size").MouseLeave().ChangeDec("Rect", new Rectangle(80, 10, 60, 60), Speed.Medium);
+            mouseRect.Painters["r2"].Value["CornerRadius"] = 2;
+            mouseRect.Painters["r1"].Value["CornerRadius"] = 2;
 
             var ctrlRect = rect.Add(new Point(100, 100), 100, 20);
             var txt2 = new TextBox();
@@ -158,11 +161,14 @@ namespace DrawRectTestApp
             transparentRect = (ControlRect)rect.Add(new Point(40, 40), 80, 80);
             transparentRect.Alignment = RectAlignment.Custom;
             transparentRect.Transparent = true;
-            transparentRect.BorderSize = 2;
+            transparentRect.BorderSize = 4;
             transparentRect.AddValidatedProperty("Color", Color.Green.Transparent(60));
             transparentRect.AddValidatedProperty("BorderColor", Color.Green);
-            transparentRect.Painters[0].Add(BasePainters.FillRect).Value["Color"] = transparentRect.Property["Color"];
-            transparentRect.Painters[0].Add(BasePainters.Rect).Value["Color"] = transparentRect.Property["BorderColor"];
+            transparentRect.Painters[0].Add(BasePainters.FillRect, "r1").Value["Color"] = transparentRect.Property["Color"];
+            transparentRect.Painters[0].Add(BasePainters.Rect, "r2").Value["Color"] = transparentRect.Property["BorderColor"];
+            transparentRect.Painters["r2"].Value["CornerRadius"] = 5;
+            transparentRect.Painters["r1"].Value["CornerRadius"] = 5;
+
             transparentRect.AnimeEvent("color").MouseEnter().Change("Color", Color.Blue.Transparent(80), Speed.Medium);
             transparentRect.AnimeEvent("color").MouseLeave().Change("Color", Color.Green.Transparent(60), Speed.Medium);
 
@@ -212,6 +218,7 @@ namespace DrawRectTestApp
             cr.BorderSize = 2;
             cr.Enter += (s, arg) => { s.SetProperty("Color", Color.Green.BrightColor(80)); };
             cr.Leave += (s, arg) => { s.SetProperty("Color", Color.Green.BrightColor(40)); };
+            
 
             cr = new ControlRect(new Point(40, 120), 100, 20);
             rect.Add(cr);
@@ -240,10 +247,9 @@ namespace DrawRectTestApp
             bt.Transparent = true;
             bt.DrawFocus = true;
             bt.Switch = false;
-            bt.Flat = true;
+            bt.Flat = false;
             bt.Text = "Test";
             bt.TextColor = Color.Navy;
-            bt.HoldDownIfMouseLeave = true;
             rect.Add(bt);
 
 
@@ -251,10 +257,20 @@ namespace DrawRectTestApp
             scroll.Size = new Size(16, 16);
             scroll.Alignment = RectAlignment.Right;
             scroll.Align = Orientation.Vertical;
-            scroll.Color = Color.LightSalmon;
+            scroll.Color = Color.Blue.BrightColor(75);
+            scroll.MaxPosition = 100;
+            scroll.Property["Position"].AnyChanged += () => { bt.Text = scroll.Position + " %"; };
             //scroll.BorderSize = 1;
             rect.Add(scroll);
 
+
+            var crTxt = new TextBox();
+            tabDrawControl.Controls.Add(crTxt);
+            cr.Control = crTxt;
+            crTxt.KeyDown += (s, arg) =>
+                                 {
+                                     if (arg.KeyCode == Keys.Enter) scroll.Position = int.Parse(crTxt.Text);
+                                 };
         }
 
         private void button2_Click(object sender, EventArgs e)

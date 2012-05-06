@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -249,6 +250,32 @@ namespace AVLib.Draw.DrawRects
             return ctrlQ;
         }
 
+
+
+
+        public static DrawRectQueue Custom(this DrawRectQueue ctrlQ, int sleepTime, AnimationUtils.CustomAnimeHandler method)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeCustomPacket(ctrlQ.QueueName, sleepTime, method, 0, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            return ctrlQ;
+        }
+
+        public static DrawRectQueue Custom(this DrawRectQueue ctrlQ, int sleepTime, int maxIteration, AnimationUtils.CustomAnimeHandler method)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeCustomPacket(ctrlQ.QueueName, sleepTime, method, maxIteration, true, ctrlQ.queueLevel, ctrlQ.queueOwner, null));
+            return ctrlQ;
+        }
+
+        public static DrawRectQueue Custom(this DrawRectQueue ctrlQ, int sleepTime, AnimationUtils.CustomAnimeHandler method, AnimationControler.FinalCallback finalCallback)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeCustomPacket(ctrlQ.QueueName, sleepTime, method, 0, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            return ctrlQ;
+        }
+
+        public static DrawRectQueue Custom(this DrawRectQueue ctrlQ, int sleepTime, int maxIteration, AnimationUtils.CustomAnimeHandler method, AnimationControler.FinalCallback finalCallback)
+        {
+            ctrlQ.ProcessPacket(AnimationUtils.AnimeCustomPacket(ctrlQ.QueueName, sleepTime, method, maxIteration, true, ctrlQ.queueLevel, ctrlQ.queueOwner, finalCallback));
+            return ctrlQ;
+        }
 
 
         #region Height

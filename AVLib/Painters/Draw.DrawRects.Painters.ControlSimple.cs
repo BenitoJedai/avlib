@@ -25,10 +25,10 @@ namespace AVLib.Draw.DrawRects.Painters.ControlSimple
                 darkSides = new RectSides() { right = true, bottom = true };
                 brightSides = new RectSides() { left = true, top = true };
             }
-            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(40), rect.BorderSize, Params["CornerRadius"].AsInteger(), darkSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().BrightColor(40), rect.BorderSize, Params["CornerRadius"].AsInteger(), brightSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(60), 1, Params["CornerRadius"].AsInteger(), darkSides);
-            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(30), 1, Params["CornerRadius"].AsInteger(), brightSides);
+            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(20), rect.BorderSize, Params["CornerRadius"].AsInteger(), darkSides);
+            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().BrightColor(20), rect.BorderSize, Params["CornerRadius"].AsInteger(), brightSides);
+            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(40), 1, Params["CornerRadius"].AsInteger(), darkSides);
+            DrawRectMethods.DrawRectangle(drawRect, graf, Params["Color"].AsColor().DarkColor(10), 1, Params["CornerRadius"].AsInteger(), brightSides);
         }
 
         public static void Body(IControlPropertiesValue Params, DrawRect rect, Graphics graf)

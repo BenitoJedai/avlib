@@ -169,7 +169,7 @@ namespace AVLib.Animations
                 {
                     for (int i = 0; i < Animators.Count; i++)
                     {
-                        if (Animators[i].QueueMethodParam.QueueLevel == minQueueLevel)
+                        if (Animators[i].Animator == null && Animators[i].QueueMethodParam.QueueLevel == minQueueLevel)
                         {
                             Run(Animators[i]);
                             //Trace.Write(" queue+1");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ using VALib.Draw.Controls.Core;
 
 namespace VALib.Draw.Controls
 {
-    public class DrawButton : BaseEventReaction
+    public class DrawButton : BaseControl
     {
         #region Properties
 
@@ -21,6 +22,12 @@ namespace VALib.Draw.Controls
         {
             get { return Value["Switch"].AsBoolean(); }
             set { Value["Switch"] = value; }
+        }
+
+        public bool Checked
+        {
+            get { return Value["Checked"].AsBoolean(); }
+            set { Value["Checked"] = value; }
         }
 
         public bool Down
@@ -41,16 +48,10 @@ namespace VALib.Draw.Controls
             set { Value["ContentRect"] = value; }
         }
 
-        public bool HoldDownIfMouseLeave
-        {
-            get { return Value["HoldDownIfMouseLeave"].AsBoolean(); }
-            set { Value["HoldDownIfMouseLeave"] = value; }
-        }
-
         #endregion
 
-        public event EventHandler Click;
-        public event EventHandler OnOff;
+        
+        public event EventHandler CheckedChanged;
 
         protected override void InitializeControl()
         {
@@ -63,18 +64,16 @@ namespace VALib.Draw.Controls
 
             MarkRect = new DrawRect(RectAlignment.Fill, 10);
             MarkRect.Transparent = true;
-            //MarkRect.Painters[0].Add(PaintMarkRect, "mark");
             this.Add(MarkRect);
 
             InitPainters();
 
             TabStop = true;
-            this.CaptureMouseClick = true;
+            CaptureMouseClick = true;
 
-            this.MouseEnter += DrawButton_MouseEnter;
-            this.MouseLeave += DrawButton_MouseLeave;
-            this.MouseDown += DrawButton_MouseDown;
-            this.MouseUp += DrawButton_MouseUp;
+            this.KeyDown += DrawButton_KeyDown;
+            this.KeyUp += DrawButton_KeyUp;
+            this.Leave += DrawButton_Leave;
         }
 
         public void InitProperties()
@@ -84,28 +83,28 @@ namespace VALib.Draw.Controls
             AddValidatedProperty("CornerRadius", 0);
             AddValidatedProperty("Text", "");
             AddValidatedProperty("TextColor", Color.Navy);
+            AddValidatedProperty("MouseIsDown", false);
+            AddValidatedProperty("ControlKeyPressed", false);
             Property["Switch", false]
                 .Changed += () =>
                                 {
-                                    if (!Switch) Down = false;
+                                    if (Switch)
+                                        Behaviours.Add(Core.Behaviours.Checked(), "checked");
+                                    else
+                                        Behaviours.Remove("checked");
                                     Invalidate();
                                 };
-            Property["Down", false]
-                .Changed += () =>
-                                {
-                                    Invalidate();
-                                    if (OnOff != null) OnOff(this, new EventArgs());
-                                };
-            Property["HoldDownIfMouseLeave", false]
-                .Changed += () =>
-                                {
-                                    if (Down && !MouseIsOver) Down = false;
-                                };
-            AddValidatedProperty("Font", () => { return new Font("Arial", 8); });
+            Value["Down"] = new Func<object>(() => { return MouseIsDown || Checked || Value["ControlKeyPressed"].AsBoolean(); });
+
+            AddValidatedProperty("Font", new Font("Arial", 8)); 
             TextAlignment = StringAlignment.Center;
             DrawFocus = true;
-
             Value["FlatIsNow"] = new Func<object>(() => { return Flat && !MouseIsOver && !Down; });
+            Property["Checked", false].Changed += () =>
+                                                      {
+                                                          Invalidate();
+                                                          if (CheckedChanged != null) CheckedChanged(this, new EventArgs());
+                                                      };
         }
         
         public void InitPainters()
@@ -134,7 +133,6 @@ namespace VALib.Draw.Controls
             var focus = MarkRect.Painters[0].Add(BasePainters.Rect, "focus");
             focus.Value["Color", (c) => { return c.AsColor().Transparent(80); }] = Property["FocusColor"];
             focus.Value["Width"] = 2;
-            //focus.Value["CornerRadius"] = Property["CornerRadius"];
             focus.Value["Enabled"] = new Func<object>(() => { return DrawFocus && Focused && Enabled; });
 
             var disabled = MarkRect.Painters[0].Add(BasePainters.FillRect, "disabled");
@@ -143,33 +141,24 @@ namespace VALib.Draw.Controls
             disabled.Value["Enabled"] = new Func<object>(() => { return !Enabled; });
         }
 
-        private void DrawButton_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void DrawButton_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter)
+                Value["ControlKeyPressed"] = true;
+        }
+
+        private void DrawButton_Leave(object sender, EventArgs e)
+        {
+            Value["ControlKeyPressed"] = false;
+        }
+
+        private void DrawButton_KeyUp(object sender, KeyEventArgs e)
+        {
+            if ((e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) && Value["ControlKeyPressed"].AsBoolean())
             {
-                if (!Switch || !m_goDown) Down = false;
-                if (!Switch && MouseIsOver && Click != null) Click(this, new EventArgs());
+                Value["ControlKeyPressed"] = false;
+                DoClick();
             }
-        }
-
-        private bool m_goDown = false;
-        private void DrawButton_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                m_goDown = !Down;
-                if (!Down) Down = true;
-            }
-        }
-
-        private void DrawButton_MouseLeave(object sender, EventArgs e)
-        {
-            if (MouseIsDown && m_goDown && !HoldDownIfMouseLeave) Down = false;
-        }
-
-        private void DrawButton_MouseEnter(object sender, EventArgs e)
-        {
-            if (MouseIsDown && m_goDown && !HoldDownIfMouseLeave) Down = true;
         }
     }
 }

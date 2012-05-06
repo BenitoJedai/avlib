@@ -6,3 +6,4 @@ TestApps/WinFormAnimation/bin/Debug
 TestApps/WinFormAnimation/obj
 _ReSharper.AVLib
 AVLib.5.1.ReSharper.user
+*.vsp

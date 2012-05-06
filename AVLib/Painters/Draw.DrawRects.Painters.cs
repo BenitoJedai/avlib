@@ -61,6 +61,7 @@ namespace AVLib.Draw.DrawRects.Painters
             {
                 gfxPath.AddLine(rect.Right - radius, rect.Bottom, rect.X + radius, rect.Bottom);
                 gfxPath.AddLine(rect.X + radius, rect.Bottom, rect.X, rect.Bottom - radius);
+                gfxPath.AddLine(rect.X, rect.Bottom - radius, rect.X, rect.Bottom - radius - 1);
             }
             return gfxPath;
         }
@@ -91,7 +92,8 @@ namespace AVLib.Draw.DrawRects.Painters
         {
             if (width <= 0) return;
             int h = width / 2;
-            int h2 = (2 * h == width) ? 2 * h : 2 * h + 1;
+            int dz = (2 * h == width) ? 0 : 1;
+            int h2 = 2 * h + dz;
             var drawRect = new Rectangle(rect.Left + h, rect.Top + h, rect.Width - h2, rect.Height - h2);
             if (cornerRadius <= 0 && sides.Full)
             {
@@ -213,7 +215,8 @@ namespace AVLib.Draw.DrawRects.Painters
 
         public static void FillRect(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
         {
-            DrawRectMethods.FillRect(Params["Rect", rect.Rect].As<Rectangle>(), graf, Params["Color"].AsColor(), Params["CornerRadius"].AsInteger());
+            DrawRectMethods.FillRect(Params["Rect", rect.Rect].As<Rectangle>(), graf, Params["Color"].AsColor(),
+                                     Params["CornerRadius"].AsInteger());
         }
 
         public static void FillGradient(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
@@ -228,7 +231,10 @@ namespace AVLib.Draw.DrawRects.Painters
             var text = Params["Text"].AsString();
             if (text == "") return;
             var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
-            var font = Params["Font", () => { return new Font("Arial", 8); }].As<Font>();
+            var font = Params["Font", () =>
+                                          {
+                                              return new Font("Arial", 8);
+                                          }].As<Font>();
             var alignment = Params["Alignment", StringAlignment.Near].As<StringAlignment>();
             var vertAlignment = Params["VertAlignment", StringAlignment.Center].As<StringAlignment>();
 

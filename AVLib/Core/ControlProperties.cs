@@ -12,6 +12,7 @@ namespace VALib.Draw.Controls
         public Func<object, object> Modifier;
         public event Action Changed;
         public event Action RefChanged;
+        public event Action AnyChanged;
 
         private object Modify(object obj)
         {
@@ -44,10 +45,14 @@ namespace VALib.Draw.Controls
 
         public bool SetValue(object newValue)
         {
-            if (m_value != newValue)
+            if (!Equals(m_value, newValue))
             {
                 if (m_value != null && m_value is ControlProperty)
                 {
+                    if (!(newValue is ControlProperty) && !(newValue is Func<object>) && !(newValue is PropertyRef))
+                    {
+                        return ((ControlProperty)m_value).SetValue(newValue);
+                    }
                     ((ControlProperty)m_value).Changed -= DoRefChanged;
                     ((ControlProperty)m_value).RefChanged -= DoRefChanged;
                 }
@@ -71,11 +76,13 @@ namespace VALib.Draw.Controls
         private void DoChanged()
         {
             if (Changed != null) Changed();
+            if (AnyChanged != null) AnyChanged();
         }
 
         private void DoRefChanged()
         {
             if (RefChanged != null) RefChanged();
+            if (AnyChanged != null) AnyChanged();
         }
 
         internal void Removed()
