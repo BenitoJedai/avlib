@@ -18,8 +18,8 @@ namespace VALib.Draw.Controls
         {
             return (Modifier == null || obj == null) ? obj : Modifier(obj);
         }
-        
-        public ControlProperty() {}
+
+        public ControlProperty() { }
 
         public ControlProperty(object value) { m_value = value; }
 
@@ -131,7 +131,7 @@ namespace VALib.Draw.Controls
                 prop.Modifier = modifier;
                 return prop.SetValue(value);
             }
-            m_properties.Add(property, new ControlProperty(value){Modifier = modifier});
+            m_properties.Add(property, new ControlProperty(value) { Modifier = modifier });
             return true;
         }
 

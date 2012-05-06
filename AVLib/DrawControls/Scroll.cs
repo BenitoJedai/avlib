@@ -42,6 +42,18 @@ namespace VALib.Draw.Controls
             set { Value["MaxPosition"] = value; }
         }
 
+        public int SmallChange
+        {
+            get { return Value["SmallChange"].AsInteger(); }
+            set { Value["SmallChange"] = value; }
+        }
+
+        public int LargeChange
+        {
+            get { return Value["LargeChange"].AsInteger(); }
+            set { Value["LargeChange"] = value; }
+        }
+
         private int TranslatedPosition
         {
             get { return Value["TranslatedPosition"].AsInteger(); }
@@ -57,10 +69,12 @@ namespace VALib.Draw.Controls
         #endregion
 
         private BehaviourMouseDrag scrollButtonDragBehaviour;
+        private BehaviourProgress progressBehaviour;
         protected override void InitializeControl()
         {
             base.InitializeControl();
-            Behaviours.Add(Core.Behaviours.Progress(), "progress");
+            progressBehaviour = new BehaviourProgress();
+            Behaviours.Add(progressBehaviour, "progress");
 
             button1 = new DrawButton();
             button1.Size = Size;
@@ -109,20 +123,23 @@ namespace VALib.Draw.Controls
 
             this.Resize += DrawScroll_Resize;
             this.MouseWheel += DrawScroll_MouseWheel;
+            this.MouseDown += DrawScroll_MouseDown;
 
             button1.MouseDown += (s, e) =>
                                      {
-                                         Position--;
-                                         button1.AnimeQueue("pos").Wait(250).Custom(100, MaxPosition, (d) => { Position--; });
+                                         Position -= SmallChange;
+                                         button1.AnimeQueue("pos").Wait(250).Custom(100, MaxPosition, (d) => { Position -= SmallChange; });
                                      };
             button1.MouseUp += (s, e) => { button1.AnimeCancel("pos"); };
             button2.MouseDown += (s, e) =>
                                      {
-                                         Position++;
-                                         button2.AnimeQueue("pos").Wait(250).Custom(100, MaxPosition, (d) => { Position++; });
+                                         Position += SmallChange;
+                                         button2.AnimeQueue("pos").Wait(250).Custom(100, MaxPosition, (d) => { Position += SmallChange; });
                                      };
             button2.MouseUp += (s, e) => { button2.AnimeCancel("pos"); };
         }
+
+        
 
         public void InitProperties()
         {
@@ -151,6 +168,8 @@ namespace VALib.Draw.Controls
                                                              return SimpleDirection.Horisontal;
 
                                                          });
+            SmallChange = 1;
+            LargeChange = 10;
         }
 
         public void InitializePeinters()
@@ -198,6 +217,31 @@ namespace VALib.Draw.Controls
         private void DrawScroll_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             TranslatedPosition += -e.Delta / 120 * 5;
+        }
+
+        private void DrawScroll_MouseDown(object sender, MouseEventArgs e)
+        {
+            int dif = 0;
+            if (Align == Orientation.Vertical)
+            {
+                if (e.Y < scrollButton.Rect.Top) dif = e.Y - scrollButton.Rect.Top;
+                else
+                    if (e.Y > scrollButton.Rect.Bottom) dif = e.Y - scrollButton.Rect.Bottom;
+            }
+            else
+            {
+                if (e.X < scrollButton.Rect.Left) dif = e.X - scrollButton.Rect.Left;
+                else
+                    if (e.X > scrollButton.Rect.Right) dif = e.X - scrollButton.Rect.Right;
+            }
+
+            if (dif == 0) return;
+            int maxDif = progressBehaviour.PosToTranslated(LargeChange);
+
+            if (dif > 0)
+                TranslatedPosition += Math.Min(dif, maxDif);
+            else
+                TranslatedPosition += Math.Max(dif, -maxDif);
         }
 
         private void DrawScroll_Resize(DrawRect rect)

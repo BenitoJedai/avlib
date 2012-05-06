@@ -17,18 +17,18 @@ namespace VALib.Draw.Controls.Core
             m_translatedMaxPos = Math.Max(0, CurrentControl.Value["TranslatedMaxPosition"].AsInteger());
             Pos = CurrentControl.Value["Position"].AsInteger();
 
-            CurrentControl.Property["Position"].Changed += Pos_Changed;
-            CurrentControl.Property["MaxPosition"].Changed += MaxPos_Changed;
-            CurrentControl.Property["TranslatedPosition"].Changed += TranslatedPos_Changed;
-            CurrentControl.Property["TranslatedMaxPosition"].Changed += TranslatedMaxPos_Changed;
+            CurrentControl.Property["Position"].AnyChanged += Pos_Changed;
+            CurrentControl.Property["MaxPosition"].AnyChanged += MaxPos_Changed;
+            CurrentControl.Property["TranslatedPosition"].AnyChanged += TranslatedPos_Changed;
+            CurrentControl.Property["TranslatedMaxPosition"].AnyChanged += TranslatedMaxPos_Changed;
         }
 
         public override void UnApply()
         {
-            CurrentControl.Property["Position"].Changed -= Pos_Changed;
-            CurrentControl.Property["MaxPosition"].Changed -= MaxPos_Changed;
-            CurrentControl.Property["TranslatedPosition"].Changed -= TranslatedPos_Changed;
-            CurrentControl.Property["TranslatedMaxPosition"].Changed -= TranslatedMaxPos_Changed;
+            CurrentControl.Property["Position"].AnyChanged -= Pos_Changed;
+            CurrentControl.Property["MaxPosition"].AnyChanged -= MaxPos_Changed;
+            CurrentControl.Property["TranslatedPosition"].AnyChanged -= TranslatedPos_Changed;
+            CurrentControl.Property["TranslatedMaxPosition"].AnyChanged -= TranslatedMaxPos_Changed;
 
             base.UnApply();
         }
@@ -57,6 +57,15 @@ namespace VALib.Draw.Controls.Core
         private int m_maxPos;
         private int m_translatedPos;
         private int m_translatedMaxPos;
+
+        public int PosToTranslated(int pos)
+        {
+            if (m_translatedMaxPos != 0 && m_maxPos != 0)
+            {
+                return (int)(float)(pos / (m_maxPos / (float)m_translatedMaxPos));
+            }
+            return 0;
+        }
 
         private int Pos
         {
@@ -95,6 +104,15 @@ namespace VALib.Draw.Controls.Core
                 }
                 if (m_maxPos != value) CurrentControl.Value["MaxPosition"] = m_maxPos;
             }
+        }
+
+        public int TranslatedToPos(int translated)
+        {
+            if (m_translatedMaxPos != 0 && m_maxPos != 0)
+            {
+                return (int)(float)(translated * (m_maxPos / (float)m_translatedMaxPos));
+            }
+            return 0;
         }
 
         private int TranslatedPos

@@ -80,12 +80,21 @@ namespace AVLib.Draw.DrawRects
                 return;
             }
 
-            if (LockControl != null) LockControl.Capture = value;
+            if (LockControl != null)
+            {
+                LockControl.Capture = value;
 
-            if (value)
-                m_captureControl = rect;
-            else
-                m_captureControl = null;
+                if (value)
+                {
+                    m_captureControl = rect;
+                    MouseChild(LockControl.PointToClient(Control.MousePosition));
+                }
+                else
+                {
+                    m_captureControl = null;
+                    MouseChild(LockControl.PointToClient(Control.MousePosition));
+                }
+            }
 
         }
 
@@ -105,10 +114,15 @@ namespace AVLib.Draw.DrawRects
         internal ControlRect MouseChild(Point pt)
         {
             ControlRect ch;
-            if (pt.X < 0 || pt.Y < 0)
-                ch = null;
+            if (m_captureControl != null)
+                ch = m_captureControl;
             else
-                ch = GetChildControlEt(pt);
+            {
+                if (pt.X < 0 || pt.Y < 0)
+                    ch = null;
+                else
+                    ch = GetChildControlEt(pt);
+            }
 
             if (ch != m_lastMouseControl)
             {
@@ -125,9 +139,10 @@ namespace AVLib.Draw.DrawRects
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
             if (MouseMove != null) MouseMove(this, e);
-
-            if (m_captureControl != null) m_captureControl.OnMouseMove(e);
-            if (ch != null && ch != m_captureControl) ch.OnMouseMove(e);
+            if (ch != null) 
+                ch.OnMouseMove(e);
+            
+            
         }
 
         internal void OnMouseEnter(EventArgs e)
@@ -138,7 +153,8 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
-            if (MouseEnter != null) MouseEnter(this, e);
+            else
+                if (MouseEnter != null) MouseEnter(this, e);
         }
 
         internal void OnMouseLeave(EventArgs e)
@@ -149,70 +165,67 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
+            else
+                if (MouseLeave != null) MouseLeave(this, e);
             m_lastMousePos = InvalidPoint;
-            if (MouseLeave != null) MouseLeave(this, e);
         }
 
         internal void OnMouseDown(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseDown != null) MouseDown(this, e);
-
-            if (m_captureControl != null) m_captureControl.OnMouseDown(e);
-            else
-                if (ch != null)
+            if (ch != null)
                 {
                     if (ch != m_focusedControl && ch.CanSelect())
                         Select(ch);
                     ch.OnMouseDown(e);
                 }
+            else
+                if (MouseDown != null) MouseDown(this, e);
         }
 
         internal void OnMouseUp(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseUp != null) MouseUp(this, e);
-            if (m_captureControl != null) m_captureControl.OnMouseUp(e);
+            if (ch != null) ch.OnMouseUp(e);
             else
-                if (ch != null) ch.OnMouseUp(e);
+                if (MouseUp != null) MouseUp(this, e);
         }
 
         internal void OnMouseClick(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseClick != null) MouseClick(this, e);
-            if (Click != null) Click(this, e);
-            if (m_captureControl != null) m_captureControl.OnMouseClick(e);
+            if (ch != null) ch.OnMouseClick(e);
             else
-                if (ch != null) ch.OnMouseClick(e);
+            {
+                if (MouseClick != null) MouseClick(this, e);
+                if (Click != null) Click(this, e);
+            }
         }
 
         internal void OnMouseDoubleClick(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseDoubleClick != null) MouseDoubleClick(this, e);
-            if (DoubleClick != null) DoubleClick(this, e);
-            if (m_captureControl != null) m_captureControl.OnMouseDoubleClick(e);
+            if (ch != null) ch.OnMouseDoubleClick(e);
             else
-                if (ch != null) ch.OnMouseDoubleClick(e);
+            {
+                if (MouseDoubleClick != null) MouseDoubleClick(this, e);
+                if (DoubleClick != null) DoubleClick(this, e);
+            }
         }
 
         internal void OnMouseHover(EventArgs e)
         {
             if (!Enabled) return;
-            if (m_captureControl != null) m_captureControl.OnMouseHover(e);
+            
+            if (m_lastMouseControl != null)
+                m_lastMouseControl.OnMouseHover(e);
             else
             {
-                if (m_lastMouseControl != null)
-                    m_lastMouseControl.OnMouseHover(e);
-                else
-                {
-                    if (MouseHover != null) MouseHover(this, e);
-                }
+                if (MouseHover != null) MouseHover(this, e);
             }
         }
 
@@ -220,18 +233,18 @@ namespace AVLib.Draw.DrawRects
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseWheel != null) MouseWheel(this, e);
-            if (m_captureControl != null) m_captureControl.OnMouseWheel(e);
+            if (ch != null) ch.OnMouseWheel(e);
             else
-                if (ch != null) ch.OnMouseWheel(e);
+                if (MouseWheel != null) MouseWheel(this, e);
         }
 
         internal void OnDragEnter(DragEventArgs drgevent)
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (DragEnter != null) DragEnter(this, drgevent);
             if (ch != null) ch.OnDragEnter(drgevent);
+            else
+                if (DragEnter != null) DragEnter(this, drgevent);
         }
 
         internal void OnDragLeave(EventArgs e)
@@ -242,24 +255,27 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
+            else
+                if (DragLeave != null) DragLeave(this, e);
             m_lastMousePos = InvalidPoint;
-            if (DragLeave != null) DragLeave(this, e);
         }
 
         internal void OnDragDrop(DragEventArgs drgevent)
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (DragDrop != null) DragDrop(this, drgevent);
             if (ch != null) ch.OnDragDrop(drgevent);
+            else
+                if (DragDrop != null) DragDrop(this, drgevent);
         }
 
         internal void OnDragOver(DragEventArgs drgevent)
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (DragOver != null) DragOver(this, drgevent);
             if (ch != null) ch.OnDragOver(drgevent);
+            else
+                if (DragOver != null) DragOver(this, drgevent);
         }
 
         private bool m_focused = false;
@@ -430,8 +446,9 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnKeyDown(KeyEventArgs e)
         {
-            if (KeyDown != null) KeyDown(this, e);
             if (m_focusedControl != null) m_focusedControl.OnKeyDown(e);
+            else
+                if (KeyDown != null) KeyDown(this, e);
         }
 
         internal void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
@@ -459,8 +476,9 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnKeyUp(KeyEventArgs e)
         {
-            if (KeyUp != null) KeyUp(this, e);
             if (m_focusedControl != null) m_focusedControl.OnKeyUp(e);
+            else
+                if (KeyUp != null) KeyUp(this, e);
         }
 
         private void DisposeChild(DrawRect rect)
