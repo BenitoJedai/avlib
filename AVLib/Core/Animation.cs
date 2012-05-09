@@ -621,6 +621,7 @@ namespace AVLib.Animations
             CustomThreadParam td = (CustomThreadParam) customThreadParam;
             try
             {
+                if (td.MaxIteration <= 0) return;
                 int i = 0;
                 while (!td.animatorState.Canceled)
                 {

@@ -28,12 +28,33 @@ namespace AVLib.Draw.DrawRects
         public event EventHandler DragLeave;
         public event DragEventHandler DragDrop;
         public event DragEventHandler DragOver;
-        public event Func<object, EventArgs, bool> OnCanSelect;
-        public event EventHandler Enter;
-        public event EventHandler Leave;
 
         public event KeyEventHandler KeyDown;
         public event KeyEventHandler KeyUp;
+
+
+        public event MouseEventHandler PostMouseMove;
+        public event MouseEventHandler PostMouseDown;
+        public event MouseEventHandler PostMouseUp;
+        public event MouseEventHandler PostMouseClick;
+        public event EventHandler PostClick;
+        public event MouseEventHandler PostMouseDoubleClick;
+        public event EventHandler PostDoubleClick;
+        public event EventHandler PostMouseHover;
+        public event MouseEventHandler PostMouseWheel;
+        public event EventHandler PostEnabledChanged;
+        public event DragEventHandler PostDragEnter;
+        public event EventHandler PostDragLeave;
+        public event DragEventHandler PostDragDrop;
+        public event DragEventHandler PostDragOver;
+
+        public event KeyEventHandler PostKeyDown;
+        public event KeyEventHandler PostKeyUp;
+
+
+        public event Func<object, EventArgs, bool> OnCanSelect;
+        public event EventHandler Enter;
+        public event EventHandler Leave;
 
         private ControlRect m_lastMouseControl = null;
         private ControlRect m_captureControl = null;
@@ -87,7 +108,6 @@ namespace AVLib.Draw.DrawRects
                 if (value)
                 {
                     m_captureControl = rect;
-                    MouseChild(LockControl.PointToClient(Control.MousePosition));
                 }
                 else
                 {
@@ -95,7 +115,6 @@ namespace AVLib.Draw.DrawRects
                     MouseChild(LockControl.PointToClient(Control.MousePosition));
                 }
             }
-
         }
 
         protected override DrawRect CreateInstance()
@@ -115,14 +134,12 @@ namespace AVLib.Draw.DrawRects
         {
             ControlRect ch;
             if (m_captureControl != null)
-                ch = m_captureControl;
+                return m_captureControl;
+           
+            if (pt.X < 0 || pt.Y < 0)
+                ch = null;
             else
-            {
-                if (pt.X < 0 || pt.Y < 0)
-                    ch = null;
-                else
-                    ch = GetChildControlEt(pt);
-            }
+                ch = GetChildControlEt(pt);
 
             if (ch != m_lastMouseControl)
             {
@@ -138,11 +155,15 @@ namespace AVLib.Draw.DrawRects
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (MouseMove != null) MouseMove(this, e);
-            if (ch != null) 
+
+            if (ch != null)
+            {
                 ch.OnMouseMove(e);
-            
-            
+            }
+            else
+                if (MouseMove != null) MouseMove(this, e);
+
+            if (PostMouseMove != null) PostMouseMove(this, e);
         }
 
         internal void OnMouseEnter(EventArgs e)
@@ -153,8 +174,8 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
-            else
-                if (MouseEnter != null) MouseEnter(this, e);
+            
+            if (MouseEnter != null) MouseEnter(this, e);
         }
 
         internal void OnMouseLeave(EventArgs e)
@@ -165,8 +186,8 @@ namespace AVLib.Draw.DrawRects
                 m_lastMouseControl.OnMouseLeave(e);
                 m_lastMouseControl = null;
             }
-            else
-                if (MouseLeave != null) MouseLeave(this, e);
+            
+            if (MouseLeave != null) MouseLeave(this, e);
             m_lastMousePos = InvalidPoint;
         }
 
@@ -182,69 +203,102 @@ namespace AVLib.Draw.DrawRects
                 }
             else
                 if (MouseDown != null) MouseDown(this, e);
+
+            if (PostMouseDown != null) PostMouseDown(this, e);
         }
 
         internal void OnMouseUp(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (ch != null) ch.OnMouseUp(e);
+            if (ch != null)
+            {
+                ch.OnMouseUp(e);
+            }
             else
                 if (MouseUp != null) MouseUp(this, e);
+
+            if (PostMouseUp != null) PostMouseUp(this, e);
         }
 
         internal void OnMouseClick(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (ch != null) ch.OnMouseClick(e);
+            if (ch != null)
+            {
+                ch.OnMouseClick(e);
+            }
             else
             {
                 if (MouseClick != null) MouseClick(this, e);
                 if (Click != null) Click(this, e);
             }
+
+            if (PostMouseClick != null) PostMouseClick(this, e);
+            if (PostClick != null) PostClick(this, e);
         }
 
         internal void OnMouseDoubleClick(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (ch != null) ch.OnMouseDoubleClick(e);
+            if (ch != null)
+            {
+                ch.OnMouseDoubleClick(e);
+            }
             else
             {
                 if (MouseDoubleClick != null) MouseDoubleClick(this, e);
                 if (DoubleClick != null) DoubleClick(this, e);
             }
+
+            if (PostMouseDoubleClick != null) PostMouseDoubleClick(this, e);
+            if (PostDoubleClick != null) PostDoubleClick(this, e);
         }
 
         internal void OnMouseHover(EventArgs e)
         {
             if (!Enabled) return;
-            
+
             if (m_lastMouseControl != null)
+            {
                 m_lastMouseControl.OnMouseHover(e);
+            }
             else
             {
                 if (MouseHover != null) MouseHover(this, e);
             }
+
+            if (PostMouseHover != null) PostMouseHover(this, e);
         }
 
         internal void OnMouseWheel(MouseEventArgs e)
         {
             if (!Enabled) return;
             var ch = MouseChild(e.Location);
-            if (ch != null) ch.OnMouseWheel(e);
+            if (ch != null)
+            {
+                ch.OnMouseWheel(e);
+            }
             else
                 if (MouseWheel != null) MouseWheel(this, e);
+
+            if (PostMouseWheel != null) PostMouseWheel(this, e);
         }
 
         internal void OnDragEnter(DragEventArgs drgevent)
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (ch != null) ch.OnDragEnter(drgevent);
+            if (ch != null)
+            {
+                ch.OnDragEnter(drgevent);
+            }
             else
                 if (DragEnter != null) DragEnter(this, drgevent);
+
+            if (PostDragEnter != null) PostDragEnter(this, drgevent);
         }
 
         internal void OnDragLeave(EventArgs e)
@@ -257,6 +311,8 @@ namespace AVLib.Draw.DrawRects
             }
             else
                 if (DragLeave != null) DragLeave(this, e);
+
+            if (PostDragLeave != null) PostDragLeave(this, e);
             m_lastMousePos = InvalidPoint;
         }
 
@@ -264,18 +320,28 @@ namespace AVLib.Draw.DrawRects
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (ch != null) ch.OnDragDrop(drgevent);
+            if (ch != null)
+            {
+                ch.OnDragDrop(drgevent);
+            }
             else
                 if (DragDrop != null) DragDrop(this, drgevent);
+
+            if (PostDragDrop != null) PostDragDrop(this, drgevent);
         }
 
         internal void OnDragOver(DragEventArgs drgevent)
         {
             if (!Enabled) return;
             var ch = MouseChild(new Point(drgevent.X, drgevent.Y));
-            if (ch != null) ch.OnDragOver(drgevent);
+            if (ch != null)
+            {
+                ch.OnDragOver(drgevent);
+            }
             else
                 if (DragOver != null) DragOver(this, drgevent);
+
+            if (PostDragOver != null) PostDragOver(this, drgevent);
         }
 
         private bool m_focused = false;
@@ -446,9 +512,14 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnKeyDown(KeyEventArgs e)
         {
-            if (m_focusedControl != null) m_focusedControl.OnKeyDown(e);
+            if (m_focusedControl != null)
+            {
+                m_focusedControl.OnKeyDown(e);
+            }
             else
                 if (KeyDown != null) KeyDown(this, e);
+
+            if (PostKeyDown != null) PostKeyDown(this, e);
         }
 
         internal void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
@@ -476,9 +547,14 @@ namespace AVLib.Draw.DrawRects
 
         internal void OnKeyUp(KeyEventArgs e)
         {
-            if (m_focusedControl != null) m_focusedControl.OnKeyUp(e);
+            if (m_focusedControl != null)
+            {
+                m_focusedControl.OnKeyUp(e);
+            }
             else
                 if (KeyUp != null) KeyUp(this, e);
+
+            if (PostKeyUp != null) PostKeyUp(this, e);
         }
 
         private void DisposeChild(DrawRect rect)

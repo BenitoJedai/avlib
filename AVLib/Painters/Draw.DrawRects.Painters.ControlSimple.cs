@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using AVLib.Utils;
@@ -39,6 +40,76 @@ namespace AVLib.Draw.DrawRects.Painters.ControlSimple
                 BasePainters.FillRect(Params, rect, graf);
         }
 
-        
+        public static void ScrollArrowUp(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            var center = new Point(drawRect.Left + drawRect.Width/2, drawRect.Top + drawRect.Height/2);
+
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - 5, center.Y + 2),
+                                        new Point(center.X, center.Y - 3),
+                                        new Point(center.X + 5, center.Y + 2)
+                                    };
+
+            graf.FillPolygon(new LinearGradientBrush(new Point(center.X - 2, center.Y - 5), arrowUpPoints[2],
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(60),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(10)),
+                             arrowUpPoints);
+        }
+
+        public static void ScrollArrowDown(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            var center = new Point(drawRect.Left + drawRect.Width / 2, drawRect.Top + drawRect.Height / 2);
+
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - 5, center.Y - 2),
+                                        new Point(center.X + 5, center.Y - 2),
+                                        new Point(center.X, center.Y + 3)
+                                    };
+
+            graf.FillPolygon(new LinearGradientBrush(new Point(center.X - 6, center.Y - 3), arrowUpPoints[2],
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(60),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(10)),
+                             arrowUpPoints);
+        }
+
+        public static void ScrollArrowLeft(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            var center = new Point(drawRect.Left + drawRect.Width / 2, drawRect.Top + drawRect.Height / 2);
+
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - 4, center.Y),
+                                        new Point(center.X + 1, center.Y - 5),
+                                        new Point(center.X + 1, center.Y + 5)
+                                    };
+
+            graf.FillPolygon(new LinearGradientBrush(new Point(center.X - 5, center.Y - 1), arrowUpPoints[2],
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(60),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(10)),
+                             arrowUpPoints);
+        }
+
+        public static void ScrollArrowRight(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            var center = new Point(drawRect.Left + drawRect.Width / 2, drawRect.Top + drawRect.Height / 2);
+
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - 1, center.Y - 5),
+                                        new Point(center.X + 4, center.Y),
+                                        new Point(center.X - 1, center.Y + 5)
+                                    };
+
+            graf.FillPolygon(new LinearGradientBrush(arrowUpPoints[0], new Point(center.X + 5, center.Y + 1),
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(60),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(10)),
+                             arrowUpPoints);
+        }
     }
 }

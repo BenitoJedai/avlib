@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Draw.DrawRects.Painter.cs" />
+    <Compile Include="Core\NumericUtils.cs" />
     <Compile Include="DrawControlsCore\BaseBehaviour.cs" />
     <Compile Include="DrawControlsCore\BaseControl.cs" />
     <Compile Include="Core\Animation.Controller.cs" />

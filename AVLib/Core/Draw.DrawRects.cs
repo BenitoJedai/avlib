@@ -182,20 +182,41 @@ namespace AVLib.Draw.DrawRects
         {
             get
             {
-                return (m_LockControl == null) ? true : m_LockControl.InvokeRequired;
+                try
+                {
+                    return (m_LockControl == null) ? true : m_LockControl.InvokeRequired;
+                }
+                catch(Exception)
+                {
+                    return true;
+                }
             }
         }
 
         public object Invoke(Delegate method)
         {
             if (m_LockControl == null) return null;
-            return m_LockControl.Invoke(method);
+            try
+            {
+                return m_LockControl.Invoke(method);
+            }
+            catch(Exception)
+            {
+                return null;
+            }
         }
 
         public object Invoke(Delegate method, params Object[] args)
         {
             if (m_LockControl == null) return null;
-            return m_LockControl.Invoke(method, args);
+            try
+            {
+                return m_LockControl.Invoke(method, args);
+            }
+            catch(Exception)
+            {
+                return null;
+            }
         }
 
         #region Public
@@ -719,10 +740,13 @@ namespace AVLib.Draw.DrawRects
             {
                 for (int i = childIndex + 1; i < m_childs.Count; i++)
                 {
-                    if (m_childs[i].Child.Transparent && !withTransparent)
-                        m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent, true);
-                    else
-                        region.Exclude(m_childs[i].Child.Rect);
+                    if (m_childs[i].Child.Visible)
+                    {
+                        if (m_childs[i].Child.Transparent && !withTransparent)
+                            m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent, true);
+                        else
+                            region.Exclude(m_childs[i].Child.Rect);
+                    }
                 }
             }
             if (!skipParent) RemoveOverlapsFromRegion(region, withTransparent);

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using AVLib.Animations;
 using AVLib.Draw.DrawRects;
 using AVLib.Draw.DrawRects.Painters;
+using AVLib.Draw.DrawRects.Painters.ControlSimple;
 using AVLib.Utils;
 using VALib.Draw.Controls.Core;
 
@@ -85,6 +86,8 @@ namespace VALib.Draw.Controls
             button1.Flat = true;
             button1.TabStop = false;
             button1.Value["Color"] = Property["Color"];
+            button1.Value["MouseOverColor", (c) => { return c.AsColor().DarkColor(20); }] = Property["Color"];
+            button1.UseMouseOverColor = true;
             button1.Gradient = true;
             button1.Value["Direction"] = Property["Direction"];
             this.Add(button1);
@@ -98,6 +101,8 @@ namespace VALib.Draw.Controls
             scrollButton.Transparent = true;
             scrollButton.CaptureMouseClick = true;
             scrollButton.Value["Color"] = Property["Color"];
+            scrollButton.Value["MouseOverColor", (c) => { return c.AsColor().DarkColor(20); }] = Property["Color"];
+            scrollButton.UseMouseOverColor = true;
             scrollButton.TabStop = false;
             scrollButtonDragBehaviour = new BehaviourMouseDrag();
             scrollButton.Behaviours.Add(scrollButtonDragBehaviour, "drag");
@@ -114,6 +119,8 @@ namespace VALib.Draw.Controls
             button2.Flat = true;
             button2.TabStop = false;
             button2.Value["Color"] = Property["Color"];
+            button2.Value["MouseOverColor", (c) => { return c.AsColor().DarkColor(20); }] = Property["Color"];
+            button2.UseMouseOverColor = true;
             button2.Gradient = true;
             button2.Value["Direction"] = Property["Direction"];
             this.Add(button2);
@@ -122,8 +129,11 @@ namespace VALib.Draw.Controls
             InitializePeinters();
 
             this.Resize += DrawScroll_Resize;
-            this.MouseWheel += DrawScroll_MouseWheel;
+            this.PostMouseWheel += DrawScroll_MouseWheel;
             this.MouseDown += DrawScroll_MouseDown;
+            this.MouseUp += DrawScroll_MouseUp;
+            this.MouseEnter += (s, e) => { button1.Flat = false; button2.Flat = false; };
+            this.MouseLeave += (s, e) => { button1.Flat = true; button2.Flat = true; };
 
             button1.MouseDown += (s, e) =>
                                      {
@@ -138,7 +148,6 @@ namespace VALib.Draw.Controls
                                      };
             button2.MouseUp += (s, e) => { button2.AnimeCancel("pos"); };
         }
-
         
 
         public void InitProperties()
@@ -183,6 +192,22 @@ namespace VALib.Draw.Controls
             var border = this.Painters[0].Add(BasePainters.Rect, "border");
             border.Value["Color", (c) => { return c.AsColor().DarkColor(30); }] = Property["CurrentColor"];
             border.Value["CornerRadius"] = Property["CornerRadius"];
+
+            var btArrowUp = button1.Painters[0].Add(ControlSimpleDraw.ScrollArrowUp, "arrowup");
+            btArrowUp.Value["Color"] = new Func<object>(() => { return button1.MouseIsOver ? Color.Aqua : Color; });
+            btArrowUp.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Vertical; }] = Property["Align"];
+
+            var btArrowLeft = button1.Painters[0].Add(ControlSimpleDraw.ScrollArrowLeft, "arrowleft");
+            btArrowLeft.Value["Color"] = new Func<object>(() => { return button1.MouseIsOver ? Color.Aqua : Color; });
+            btArrowLeft.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Horizontal; }] = Property["Align"];
+
+            var btArrowDown = button2.Painters[0].Add(ControlSimpleDraw.ScrollArrowDown, "arrowdown");
+            btArrowDown.Value["Color"] = new Func<object>(() => { return button2.MouseIsOver ? Color.Aqua : Color; });
+            btArrowDown.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Vertical; }] = Property["Align"];
+
+            var btArrowRight = button2.Painters[0].Add(ControlSimpleDraw.ScrollArrowRight, "arrowright");
+            btArrowRight.Value["Color"] = new Func<object>(() => { return button2.MouseIsOver ? Color.Aqua : Color; });
+            btArrowRight.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Horizontal; }] = Property["Align"];
         }
 
         private DrawButton button1;
@@ -221,6 +246,8 @@ namespace VALib.Draw.Controls
 
         private void DrawScroll_MouseDown(object sender, MouseEventArgs e)
         {
+            this.AnimeCancel("scroll");
+
             int dif = 0;
             if (Align == Orientation.Vertical)
             {
@@ -237,11 +264,22 @@ namespace VALib.Draw.Controls
 
             if (dif == 0) return;
             int maxDif = progressBehaviour.PosToTranslated(LargeChange);
+            int to = TranslatedPosition + dif;
+            TranslatedPosition = TranslatedPosition.NearBy(to, maxDif);
+            
+            int n = TranslatedPosition.StepCount(to, maxDif);
 
-            if (dif > 0)
-                TranslatedPosition += Math.Min(dif, maxDif);
-            else
-                TranslatedPosition += Math.Max(dif, -maxDif);
+            
+            this.AnimeQueue("scroll").Wait(250).Custom(100, n + 1, (d) =>
+                                                                   {
+                                                                       if (d.Canceled) return;
+                                                                       TranslatedPosition = TranslatedPosition.NearBy(to, maxDif);
+                                                                   });
+        }
+
+        private void DrawScroll_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.AnimeCancel("scroll");
         }
 
         private void DrawScroll_Resize(DrawRect rect)
@@ -255,6 +293,8 @@ namespace VALib.Draw.Controls
                 button2.Size = new Size(size, size);
                 scrollButton.Size = Align == Orientation.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
                 scrollButton.Pos = Align == Orientation.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
+                button1.Alignment = Align == Orientation.Vertical ? RectAlignment.Top : RectAlignment.Left;
+                button2.Alignment = Align == Orientation.Vertical ? RectAlignment.Bottom : RectAlignment.Right;
             }
             finally
             {
