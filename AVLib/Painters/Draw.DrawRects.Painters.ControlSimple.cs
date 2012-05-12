@@ -111,5 +111,27 @@ namespace AVLib.Draw.DrawRects.Painters.ControlSimple
                                                      Params["Color", SystemColors.Control].AsColor().BrightColor(10)),
                              arrowUpPoints);
         }
+
+        public static void ScrollButtonVerticalBar(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            if (drawRect.Height < 16) return;
+            var center = new Point(drawRect.Left + drawRect.Width / 2, drawRect.Top + drawRect.Height / 2);
+
+            int sz = (drawRect.Height < 36) ? (drawRect.Height - 16)/2 : 10;
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - 2, center.Y - sz),
+                                        new Point(center.X, center.Y - sz - 2),
+                                        new Point(center.X + 2, center.Y - sz),
+                                        new Point(center.X + 2 , center.Y + sz),
+                                        new Point(center.X, center.Y + sz + 2),
+                                        new Point(center.X - 2, center.Y + sz) 
+                                    };
+            graf.FillPolygon(new LinearGradientBrush(arrowUpPoints[0], arrowUpPoints[2],
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(20),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(20)),
+                             arrowUpPoints);
+        }
     }
 }

@@ -67,6 +67,18 @@ namespace VALib.Draw.Controls
             set { Value["TranslatedMaxPosition"] = value; }
         }
 
+        public int ScrollButtonWidth
+        {
+            get { return Value["ScrollButtonWidth"].AsInteger(); }
+            set { Value["ScrollButtonWidth"] = value; }
+        }
+
+        public bool ScrollButtonAutoSize
+        {
+            get { return Value["ScrollButtonAutoSize"].AsBoolean(); }
+            set { Value["ScrollButtonAutoSize"] = value; }
+        }
+
         #endregion
 
         private BehaviourMouseDrag scrollButtonDragBehaviour;
@@ -179,6 +191,8 @@ namespace VALib.Draw.Controls
                                                          });
             SmallChange = 1;
             LargeChange = 10;
+            Property["ScrollButtonWidth", 12].AnyChanged += () => { SizeChanged(); };
+            Property["MaxPosition", 100].AnyChanged += () => { DoScrollButtonAutoSize(); };
         }
 
         public void InitializePeinters()
@@ -208,21 +222,22 @@ namespace VALib.Draw.Controls
             var btArrowRight = button2.Painters[0].Add(ControlSimpleDraw.ScrollArrowRight, "arrowright");
             btArrowRight.Value["Color"] = new Func<object>(() => { return button2.MouseIsOver ? Color.Aqua : Color; });
             btArrowRight.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Horizontal; }] = Property["Align"];
+
+            var btScrollVertical = scrollButton.Painters[0].Add(ControlSimpleDraw.ScrollButtonVerticalBar, "scrollbarvertical");
+            btScrollVertical.Value["Color"] = new Func<object>(() => { return MouseIsOver ? Color.Aqua : Color; });
+            btScrollVertical.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Vertical; }] = Property["Align"];
         }
 
         private DrawButton button1;
         private DrawButton button2;
         private DrawButton scrollButton;
 
-
-        private int m_scrollWidth = 10;
-
         private int ScrollMaxWay()
         {
             var sz = Align == Orientation.Vertical
                          ? Rect.Height - button1.Rect.Height - button2.Rect.Height
                          : Rect.Width - button1.Rect.Width - button2.Rect.Width;
-            sz -= m_scrollWidth;
+            sz -= ScrollButtonWidth;
             sz -= BorderSize * 2;
             return sz;
         }
@@ -282,8 +297,9 @@ namespace VALib.Draw.Controls
             this.AnimeCancel("scroll");
         }
 
-        private void DrawScroll_Resize(DrawRect rect)
+        private void SizeChanged()
         {
+            DoScrollButtonAutoSize();
             int size = (Align == Orientation.Vertical ? Rect.Width : Rect.Height) - BorderSize * 2;
 
             DisableInvalidate();
@@ -291,7 +307,7 @@ namespace VALib.Draw.Controls
             {
                 button1.Size = new Size(size, size);
                 button2.Size = new Size(size, size);
-                scrollButton.Size = Align == Orientation.Vertical ? new Size(size, m_scrollWidth) : new Size(m_scrollWidth, size);
+                scrollButton.Size = Align == Orientation.Vertical ? new Size(size, ScrollButtonWidth) : new Size(ScrollButtonWidth, size);
                 scrollButton.Pos = Align == Orientation.Vertical ? new Point(0, ScrollPos()) : new Point(ScrollPos(), 0);
                 button1.Alignment = Align == Orientation.Vertical ? RectAlignment.Top : RectAlignment.Left;
                 button2.Alignment = Align == Orientation.Vertical ? RectAlignment.Bottom : RectAlignment.Right;
@@ -302,6 +318,22 @@ namespace VALib.Draw.Controls
             }
 
             TranslatedMaxPosition = ScrollMaxWay();
+        }
+
+        const int scrollButtonMinWidth = 8;
+        private void DoScrollButtonAutoSize()
+        {
+            if (!ScrollButtonAutoSize) return;
+
+            int width = (Align == Orientation.Vertical ? Rect.Width : Rect.Height) - BorderSize * 2;
+            int height = (Align == Orientation.Horizontal ? Rect.Width : Rect.Height) - BorderSize * 2;
+
+            ScrollButtonWidth = Math.Max(scrollButtonMinWidth, height - 2*width - MaxPosition);
+        }
+
+        private void DrawScroll_Resize(DrawRect rect)
+        {
+            SizeChanged();
         }
     }
 }

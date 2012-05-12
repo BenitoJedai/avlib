@@ -254,12 +254,13 @@ namespace DrawRectTestApp
 
 
             var scroll = new DrawScroll();
-            scroll.Size = new Size(16, 16);
+            scroll.Size = new Size(14, 14);
             scroll.Alignment = RectAlignment.Right;
             scroll.Align = Orientation.Vertical;
             scroll.Color = Color.Blue.BrightColor(75);
             scroll.MaxPosition = 100;
             scroll.Property["Position"].AnyChanged += () => { bt.Text = scroll.Position + " %"; };
+            scroll.ScrollButtonAutoSize = true;
             //scroll.BorderSize = 1;
             rect.Add(scroll);
 
