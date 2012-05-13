@@ -168,18 +168,14 @@ namespace VALib.Draw.Controls
                 .AnyChanged += () => { scrollButtonDragBehaviour.DragDirection = Align == Orientation.Horizontal ? DragDirection.Horizontal : DragDirection.Vertical; };
             scrollButtonDragBehaviour.DragDirection = DragDirection.Vertical;
 
-            Property["TranslatedPosition"].AnyChanged +=
-                () =>
-                {
-                    scrollButton.Pos = Align == Orientation.Vertical
-                                           ? new Point(0, ScrollPos())
-                                           : new Point(ScrollPos(), 0);
-                };
             scrollButton.Value["PropX"] = Property["TranslatedPosition"];
             scrollButton.Value["PropY"] = Property["TranslatedPosition"];
 
             Property["TranslatedPosition"]
-                .AnyChanged += () => { SetScrollPos(); };
+                .AnyChanged += () =>
+                                   {
+                                       SetScrollPos();
+                                   };
 
             Property["Position"].AnyChanged += () => { if (PosChanged != null) PosChanged(this, new EventArgs()); };
             Value["Direction"] = new Func<object>(() =>
@@ -193,6 +189,7 @@ namespace VALib.Draw.Controls
             LargeChange = 10;
             Property["ScrollButtonWidth", 12].AnyChanged += () => { SizeChanged(); };
             Property["MaxPosition", 100].AnyChanged += () => { DoScrollButtonAutoSize(); };
+            ScrollButtonAutoSize = true;
         }
 
         public void InitializePeinters()
@@ -226,6 +223,10 @@ namespace VALib.Draw.Controls
             var btScrollVertical = scrollButton.Painters[0].Add(ControlSimpleDraw.ScrollButtonVerticalBar, "scrollbarvertical");
             btScrollVertical.Value["Color"] = new Func<object>(() => { return MouseIsOver ? Color.Aqua : Color; });
             btScrollVertical.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Vertical; }] = Property["Align"];
+
+            var btScrollHorisontal = scrollButton.Painters[0].Add(ControlSimpleDraw.ScrollButtonHorisontalBar, "scrollbarhorisontal");
+            btScrollHorisontal.Value["Color"] = new Func<object>(() => { return MouseIsOver ? Color.Aqua : Color; });
+            btScrollHorisontal.Value["Enabled", (a) => { return a.As<Orientation>() == Orientation.Horizontal; }] = Property["Align"];
         }
 
         private DrawButton button1;

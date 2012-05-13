@@ -142,7 +142,7 @@ namespace AVLib.Draw.DrawRects.Painters
                     p1 = new Point(rect.X + cornerRadius, rect.Y + cornerRadius);
                     break;
                 default:
-                    p1 = new Point(rect.X, rect.Y + rect.Width/2);
+                    p1 = new Point(rect.X - 1, rect.Y + rect.Height/2);
                     break;
             }
 
@@ -159,7 +159,7 @@ namespace AVLib.Draw.DrawRects.Painters
                     p2 = new Point(rect.Right - cornerRadius, rect.Bottom - cornerRadius);
                     break;
                 default:
-                    p2 = new Point(rect.Right, rect.Y + rect.Width/2);
+                    p2 = new Point(rect.Right + 1, rect.Y + rect.Height/2);
                     break;
             }
 

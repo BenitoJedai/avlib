@@ -133,5 +133,27 @@ namespace AVLib.Draw.DrawRects.Painters.ControlSimple
                                                      Params["Color", SystemColors.Control].AsColor().BrightColor(20)),
                              arrowUpPoints);
         }
+
+        public static void ScrollButtonHorisontalBar(IControlPropertiesValue Params, DrawRect rect, Graphics graf)
+        {
+            var drawRect = Params["Rect", rect.Rect].As<Rectangle>();
+            if (drawRect.Width < 16) return;
+            var center = new Point(drawRect.Left + drawRect.Width / 2, drawRect.Top + drawRect.Height / 2);
+
+            int sz = (drawRect.Width < 36) ? (drawRect.Width - 16) / 2 : 10;
+            var arrowUpPoints = new Point[]
+                                    {
+                                        new Point(center.X - sz, center.Y + 2),
+                                        new Point(center.X - sz - 2, center.Y),
+                                        new Point(center.X - sz, center.Y - 3),
+                                        new Point(center.X + sz , center.Y - 2),
+                                        new Point(center.X + sz + 2, center.Y),
+                                        new Point(center.X + sz, center.Y + 2) 
+                                    };
+            graf.FillPolygon(new LinearGradientBrush(arrowUpPoints[2], arrowUpPoints[0],
+                                                     Params["Color", SystemColors.Control].AsColor().DarkColor(20),
+                                                     Params["Color", SystemColors.Control].AsColor().BrightColor(20)),
+                             arrowUpPoints);
+        }
     }
 }

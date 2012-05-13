@@ -66,6 +66,8 @@ namespace AVLib.Draw.DrawRects
                 }
             }
         }
+
+        private Point m_ApperLeftAlignPoint = new Point(0, 0);
         private Rectangle m_freeRect;
         private Region m_clipReg = new Region();
         private DrawRect m_Parent;
@@ -120,7 +122,7 @@ namespace AVLib.Draw.DrawRects
             m_pos = pos;
             m_size = new Size(width, height);
             m_rect = new Rectangle(pos.X, pos.Y, width, height);
-            m_freeRect = m_rect;
+            m_freeRect = GetClientRect();
             m_invalidateRegion = new Region();
         }
 
@@ -276,6 +278,19 @@ namespace AVLib.Draw.DrawRects
             }
         }
 
+        public Point ApperLeftAlignPoint
+        {
+            get { return m_ApperLeftAlignPoint; }
+            set
+            {
+                if (m_ApperLeftAlignPoint != value)
+                {
+                    m_ApperLeftAlignPoint = value;
+                    RealignChilds(false);
+                }
+            }
+        }
+
         public Rectangle ContainerRect
         {
             get
@@ -414,7 +429,18 @@ namespace AVLib.Draw.DrawRects
             get { return m_Parent; }
         }
 
+        public int ParentIndex
+        {
+            get { return m_ParentIndex; }
+        }
+
         public object Target;
+
+        public string Name
+        {
+            get { return Value["Name"].AsString(); }
+            set { Value["Name"] = value; }
+        }
 
         public int Count
         {
@@ -424,6 +450,38 @@ namespace AVLib.Draw.DrawRects
         public DrawRect this[int index]
         {
             get { return m_childs == null ? null : m_childs[index].Child; }
+        }
+
+        public DrawRect this[string name]
+        {
+            get
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    if (m_childs[i].Child.Name == name)
+                    {
+                        return m_childs[i].Child;
+                    }
+                }
+                return null;
+            }
+        }
+
+        public DrawRect Find(string name)
+        {
+            var rect = this[name];
+            if (rect != null) return rect;
+            for (int i = 0; i < Count; i++)
+            {
+                rect = m_childs[i].Child.Find(name);
+                if (rect != null) return rect;
+            }
+            return null;
+        }
+
+        public virtual DrawRect Container
+        {
+            get { return this; }
         }
 
         public void Clear()
@@ -448,12 +506,34 @@ namespace AVLib.Draw.DrawRects
             return null;
         }
 
+        public void Insert(int position, DrawRect rect)
+        {
+            int pos = position < 0 ? 0 : position > Count ? Count : position;
+            if (pos == Count)
+            {
+                Add(rect);
+                return;
+            }
+
+            DrawRectChild child = new DrawRectChild();
+            child.Child = rect;
+            rect.LockControl = m_LockControl;
+            rect.m_Parent = this;
+            rect.m_ParentIndex = pos;
+            m_childs.Insert(pos, child);
+            m_childs[pos].RectForChild = m_childs[pos + 1].RectForChild;
+            for (int i = pos + 1; i < Count; i++) m_childs[i].Child.m_ParentIndex = i;
+            RealignChilds(pos, false);
+
+            DoItemAdded(rect);
+        }
+
         public void Add(DrawRect rect)
         {
             if (m_childs == null)
             {
                 m_childs = new List<DrawRectChild>();
-                m_freeRect = RectWithoutBorder();
+                m_freeRect = GetClientRect();
             }
 
             DrawRectChild child = new DrawRectChild();
@@ -745,7 +825,7 @@ namespace AVLib.Draw.DrawRects
                         if (m_childs[i].Child.Transparent && !withTransparent)
                             m_childs[i].Child.RemoveOverlapsFromRegion(region, -1, withTransparent, true);
                         else
-                            region.Exclude(m_childs[i].Child.Rect);
+                            region.Exclude(m_childs[i].Child.ClipReg);
                     }
                 }
             }
@@ -824,8 +904,9 @@ namespace AVLib.Draw.DrawRects
                 switch (child.Child.m_alignment)
                 {
                     case RectAlignment.Absolute:
-                        newRect = new Rectangle(m_rect.X + m_BorderSize + child.Child.m_pos.X,
-                                                           m_rect.Y + m_BorderSize + child.Child.m_pos.Y, child.Child.Size.Width,
+                        var r = GetClientRect();
+                        newRect = new Rectangle(r.X + child.Child.m_pos.X,
+                                                           r.Y + child.Child.m_pos.Y, child.Child.Size.Width,
                                                            child.Child.Size.Height);
                         break;
                     case RectAlignment.Center:
@@ -916,8 +997,8 @@ namespace AVLib.Draw.DrawRects
 
             DisableInvalidate();
 
-            if (fromIndex == 0)
-                m_freeRect = RectWithoutBorder();
+            if (fromIndex <= 0)
+                m_freeRect = GetClientRect();
             else
                 m_freeRect = m_childs[fromIndex].RectForChild;
 
@@ -950,6 +1031,15 @@ namespace AVLib.Draw.DrawRects
             EnableInvalidate();
         }
 
+        private Rectangle GetClientRect()
+        {
+            var r = RectWithoutBorder();
+            var w = (m_ApperLeftAlignPoint.X < 0) ? -m_ApperLeftAlignPoint.X : 0;
+            var h = (m_ApperLeftAlignPoint.Y < 0) ? -m_ApperLeftAlignPoint.Y : 0;
+            r = new Rectangle(r.X + m_ApperLeftAlignPoint.X, r.Y + m_ApperLeftAlignPoint.Y, r.Width + w, r.Height + h);
+            return r;
+        }
+
         //------------------------------------------
 
         #endregion
@@ -968,7 +1058,7 @@ namespace AVLib.Draw.DrawRects
             {
                 var old = m_rect;
                 m_rect = new Rectangle(m_pos, m_size);
-                m_freeRect = RectWithoutBorder();
+                m_freeRect = GetClientRect();
                 DisableInvalidate();
                 if (isRect) RealignChilds(false);
                 InvalidateChildRect(old, this);

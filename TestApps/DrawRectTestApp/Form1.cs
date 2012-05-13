@@ -36,6 +36,18 @@ namespace DrawRectTestApp
             button1.Visible = false;
         }
 
+        private DrawRect CreateSimple(Point pos, int width, int height, Color color)
+        {
+            var cr = new DrawRect(pos, width, height);
+            cr.AddValidatedProperty("Color", color);
+            cr.AddValidatedProperty("BorderColor", color.DarkColor(50));
+            cr.Painters[0].Add(BasePainters.FillRect).Value["Color"] = cr.Property["Color"];
+            cr.Painters[0].Add(BasePainters.Rect).Value["Color"] = cr.Property["BorderColor"];
+            cr.Alignment = RectAlignment.Absolute;
+            cr.BorderSize = 2;
+            return cr;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             var rect = TestControl.MainRect;
@@ -272,6 +284,46 @@ namespace DrawRectTestApp
                                  {
                                      if (arg.KeyCode == Keys.Enter) scroll.Position = int.Parse(crTxt.Text);
                                  };
+
+
+
+
+
+
+
+
+
+
+
+            //--------- Scrollable
+            Scrollable sRect = new Scrollable();
+            sRect.Alignment = RectAlignment.Fill;
+            ScrollableContainer.MainRect.Add(sRect);
+            sRect.ScrollHeight = 400;
+            sRect.ScrollWidth = 400;
+            sRect.Transparent = true;
+            sRect.VirtualScroll = false;
+
+            sRect.Container.Add(CreateSimple(new Point(50, 50), 80, 23, Color.Lime));
+            sRect.Container.Add(CreateSimple(new Point(100, 100), 80, 23, Color.Aqua));
+            sRect.Container.Add(CreateSimple(new Point(250, 250), 80, 23, Color.Yellow));
+            sRect.Container.Add(CreateSimple(new Point(300, 300), 80, 23, Color.Blue.BrightColor(30)));
+
+            var top = CreateSimple(new Point(0, 0), 20, 20, Color.Orange);
+            top.Alignment = RectAlignment.Top;
+            sRect.Container.Add(top);
+
+            var bottom = CreateSimple(new Point(0, 0), 20, 20, Color.Green);
+            bottom.Alignment = RectAlignment.Bottom;
+            sRect.Container.Add(bottom);
+
+            var right = CreateSimple(new Point(0, 0), 20, 20, Color.Blue);
+            right.Alignment = RectAlignment.Right;
+            sRect.Container.Add(right);
+
+            var left = CreateSimple(new Point(0, 0), 20, 20, Color.Silver);
+            left.Alignment = RectAlignment.Left;
+            sRect.Container.Add(left);
         }
 
         private void button2_Click(object sender, EventArgs e)

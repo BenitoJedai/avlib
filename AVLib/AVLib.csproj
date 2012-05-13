@@ -8,8 +8,8 @@
     <ProjectGuid>{AF8E6938-FDD3-4922-832B-6AF24B04793B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VALib</RootNamespace>
-    <AssemblyName>VALib</AssemblyName>
+    <RootNamespace>AVLib</RootNamespace>
+    <AssemblyName>AVLib</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Data.Core.cs" />
+    <Compile Include="Core\Data.TableView.cs" />
     <Compile Include="Core\Draw.DrawRects.Painter.cs" />
     <Compile Include="Core\NumericUtils.cs" />
     <Compile Include="DrawControlsCore\BaseBehaviour.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="DrawControlsCore\BehaviourMouseDrag.cs" />
     <Compile Include="DrawControlsCore\BehaviourProgress.cs" />
     <Compile Include="DrawControlsCore\Behaviours.cs" />
+    <Compile Include="DrawControls\Scrollable.cs" />
     <Compile Include="Painters\Draw.DrawRects.Painters.ControlSimple.cs" />
     <Compile Include="Painters\Draw.DrawRects.Painters.cs" />
     <Compile Include="Core\DrawControl.cs">

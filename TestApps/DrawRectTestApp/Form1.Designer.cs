@@ -44,10 +44,13 @@
             this.TestControl = new AVLib.Controls.DrawControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabDrawControl = new AVLib.Controls.DrawControl();
+            this.tabScrollable = new System.Windows.Forms.TabPage();
+            this.ScrollableContainer = new AVLib.Controls.DrawControl();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabScrollable.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -181,6 +184,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabScrollable);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -228,6 +232,26 @@
             this.tabDrawControl.TabIndex = 0;
             this.tabDrawControl.Text = "drawControl1";
             // 
+            // tabScrollable
+            // 
+            this.tabScrollable.Controls.Add(this.ScrollableContainer);
+            this.tabScrollable.Location = new System.Drawing.Point(4, 22);
+            this.tabScrollable.Name = "tabScrollable";
+            this.tabScrollable.Padding = new System.Windows.Forms.Padding(3);
+            this.tabScrollable.Size = new System.Drawing.Size(438, 328);
+            this.tabScrollable.TabIndex = 2;
+            this.tabScrollable.Text = "tabPage3";
+            this.tabScrollable.UseVisualStyleBackColor = true;
+            // 
+            // ScrollableContainer
+            // 
+            this.ScrollableContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ScrollableContainer.Location = new System.Drawing.Point(3, 3);
+            this.ScrollableContainer.Name = "ScrollableContainer";
+            this.ScrollableContainer.Size = new System.Drawing.Size(432, 322);
+            this.ScrollableContainer.TabIndex = 0;
+            this.ScrollableContainer.Text = "drawControl1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -242,6 +266,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
+            this.tabScrollable.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -264,6 +289,8 @@
         private AVLib.Controls.DrawControl tabDrawControl;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.TabPage tabScrollable;
+        private AVLib.Controls.DrawControl ScrollableContainer;
 
     }
 }

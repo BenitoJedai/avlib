@@ -80,8 +80,8 @@ namespace VALib.Draw.Controls.Core
                         m_translatedPos = (int)(float)(m_pos / (m_maxPos / (float)m_translatedMaxPos));
                         CurrentControl.Value["TranslatedPosition"] = m_translatedPos;
                     }
+                    CurrentControl.Value["Position"] = m_pos;
                 }
-                if (m_pos != value) CurrentControl.Value["Position"] = m_pos;
             }
         }
 
@@ -101,8 +101,8 @@ namespace VALib.Draw.Controls.Core
                             m_translatedPos = (int)(float)(m_pos / (m_maxPos / (float)m_translatedMaxPos));
                             CurrentControl.Value["TranslatedPosition"] = m_translatedPos;
                         }
+                    CurrentControl.Value["MaxPosition"] = m_maxPos;
                 }
-                if (m_maxPos != value) CurrentControl.Value["MaxPosition"] = m_maxPos;
             }
         }
 
@@ -128,8 +128,8 @@ namespace VALib.Draw.Controls.Core
                         m_pos = (int)(float)(m_translatedPos * (m_maxPos / (float)m_translatedMaxPos));
                         CurrentControl.Value["Position"] = m_pos;
                     }
+                    CurrentControl.Value["TranslatedPosition"] = m_translatedPos;
                 }
-                if (m_translatedPos != value) CurrentControl.Value["TranslatedPosition"] = m_translatedPos;
             }
         }
 
@@ -149,8 +149,8 @@ namespace VALib.Draw.Controls.Core
                             m_translatedPos = (int)(float)(m_pos / (m_maxPos / (float)m_translatedMaxPos));
                             CurrentControl.Value["TranslatedPosition"] = m_translatedPos;
                         }
+                    CurrentControl.Value["TranslatedMaxPosition"] = m_translatedMaxPos;
                 }
-                if (m_translatedMaxPos != value) CurrentControl.Value["TranslatedMaxPosition"] = m_translatedMaxPos;
             }
         }
     }
