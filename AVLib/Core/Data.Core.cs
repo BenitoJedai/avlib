@@ -139,7 +139,7 @@ namespace AVLib.Data
             }
 
             m_canGet = (fGet != null) && (m_child == null || m_child.CanGet);
-            m_canSet = (fSet != null && m_child == null) || (m_child != null && m_child.CanSet);
+            m_canSet = (fSet != null && m_child == null) || (m_canGet && m_child != null && m_child.CanSet);
             m_Path = propertyPath;
 
             return m_initialized;
