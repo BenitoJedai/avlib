@@ -172,6 +172,226 @@ namespace AVLib.Data
         }
     }
 
+    public class DataRow
+    {
+        private DataRows m_owner = null;
+        private object m_value = null;
+        private int m_DataIndex = -1;
+        private bool m_Expanded = false;
+        private DataRow m_Parent = null;
+        private DataRows m_childs = null;
+
+        public DataRows Owner
+        {
+            get { return m_owner; }
+            internal set { m_owner = value; }
+        }
+        public DataRows Childs
+        {
+            get { return m_childs; }
+            internal set { m_childs = value; }
+        }
+        public object Value
+        {
+            get { return m_value; }
+            internal set { m_value = value; }
+        }
+        public int DataIndex
+        {
+            get { return m_DataIndex; }
+            internal set { m_DataIndex = value; }
+        }
+        public bool Expanded
+        {
+            get { return m_Expanded; }
+            set { m_Expanded = value; }
+        }
+        public DataRow Parent
+        {
+            get { return m_Parent; }
+            internal set { m_Parent = value; }
+        }
+        public int Count
+        {
+            get { return m_childs == null ? 0 : m_childs.Count; }
+        }
+        public int ExpandedCount
+        {
+            get { return (m_Expanded && m_childs != null) ? m_childs.Count : 0; }
+        }
+        public DataRow this[int index]
+        {
+            get { return m_childs[index]; }
+        }
+        public int Level
+        {
+            get
+            {
+                var rez = 0;
+                var p = m_Parent;
+                while (p != null)
+                {
+                    p = p.Parent;
+                    rez++;
+                }
+                return rez;
+            }
+        }
+    }
+
+    public interface IHidenAccessor
+    {
+        object this[int col, int row] { get; set; }
+        object this[string col, int row] { get; set; }
+    }
+
+    public class DataRows : IEnumerable<DataRow>, IHidenAccessor
+    {
+        private DataView m_owner = null;
+        private DataViewColumns m_columns = null;
+        private List<DataRow> m_visible = new List<DataRow>();
+        private List<DataRow> m_hiden = new List<DataRow>();
+
+        public DataView Owner
+        {
+            get { return m_owner; }
+            internal set { m_owner = value; }
+        }
+
+        internal DataViewColumns Columns
+        {
+            get { return m_columns; }
+            set { m_columns = value; }
+        }
+
+        public IEnumerator<DataRow> GetEnumerator()
+        {
+            return m_visible.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return m_visible.GetEnumerator();
+        }
+
+        public int Count
+        {
+            get { return m_visible.Count; }
+        }
+
+        public DataRow this[int index]
+        {
+            get { return m_visible[index]; }
+        }
+
+        public List<DataRow> VisibleRows
+        {
+            get { return m_visible; }
+        }
+
+        public List<DataRow> HidenRows
+        {
+            get { return m_hiden; }
+        }
+
+        public IHidenAccessor Hiden
+        {
+            get { return this; }
+        }
+
+        public void Clear()
+        {
+            m_visible.Clear();
+            m_hiden.Clear();
+        }
+
+        public void Add(DataRow row)
+        {
+            row.Owner = this;
+            m_visible.Add(row);
+        }
+
+        public void Hide(int index)
+        {
+            m_hiden.Add(m_visible[index]);
+            m_visible.RemoveAt(index);
+        }
+
+        public void UnHide(int hidenIndex)
+        {
+            m_visible.Add(m_hiden[hidenIndex]);
+            m_hiden.RemoveAt(hidenIndex);
+        }
+
+        public void Delete(int index, bool setDeleted)
+        {
+            if (setDeleted && m_owner != null)
+                m_owner.SetDeleted(m_visible[index]);
+            m_visible.RemoveAt(index);
+        }
+
+        public void Delete(int index)
+        {
+            Delete(index, false);
+        }
+
+        public object this[int col, int row]
+        {
+            get
+            {
+                if (m_columns == null) return null;
+                return m_columns[col][m_visible[row].Value];
+            }
+            set
+            {
+                if (m_columns == null) return;
+                m_columns[col][m_visible[row].Value] = value;
+            }
+        }
+
+        public object this[string col, int row]
+        {
+            get
+            {
+                if (m_columns == null) return null;
+                return m_columns[col][m_visible[row].Value];
+            }
+            set
+            {
+                if (m_columns == null) return;
+                m_columns[col][m_visible[row].Value] = value;
+            }
+        }
+
+        object IHidenAccessor.this[int col, int row]
+        {
+            get
+            {
+                if (m_columns == null) return null;
+                return m_columns[col][m_hiden[row].Value];
+            }
+            set
+            {
+                if (m_columns == null) return;
+                m_columns[col][m_hiden[row].Value] = value;
+            }
+        }
+
+        object IHidenAccessor.this[string col, int row]
+        {
+            get
+            {
+                if (m_columns == null) return null;
+                return m_columns[col][m_hiden[row].Value];
+            }
+            set
+            {
+                if (m_columns == null) return;
+                m_columns[col][m_hiden[row].Value] = value;
+            }
+        }
+    }
+
     public class DataView 
     {
         public DataView(Type itemType)
@@ -185,7 +405,11 @@ namespace AVLib.Data
         public IList DataSet
         {
             get { return m_DataSet; }
-            set { m_DataSet = value; }
+            set
+            {
+                m_DataSet = value;
+                ReadDataSet();
+            }
         }
 
         DataViewColumns m_columns = null;
@@ -198,6 +422,65 @@ namespace AVLib.Data
         public Type ItemType
         {
             get { return m_itemType; }
+        }
+
+        private bool m_IsTree = false;
+        DataRows m_rows = new DataRows();
+        DataRows m_tree = new DataRows();
+        DataRows m_deleted = new DataRows();
+
+        public DataRows VisibleRows
+        {
+            get { return m_rows; }
+        }
+
+        public DataRows Rows
+        {
+            get { return m_IsTree ? m_tree : m_rows; }
+        }
+
+        public DataRows Deleted
+        {
+            get { return m_deleted; }
+        }
+
+        private void ClearDataRows()
+        {
+            m_rows.Clear();
+            m_tree.Clear();
+            m_deleted.Clear();
+        }
+
+        public void Clear()
+        {
+            ClearDataRows();
+            m_DataSet.Clear();
+        }
+
+        private void ReadDataSet()
+        {
+            ClearDataRows();
+            if (m_DataSet == null) return;
+            for (int i = 0; i < m_DataSet.Count; i++)
+            {
+                var r = new DataRow();
+                r.Value = m_DataSet[i];
+                r.DataIndex = i;
+                m_rows.Add(r);
+            }
+        }
+
+        internal void SetDeleted(DataRow row)
+        {
+            if (row.Childs != null)
+            {
+                for (int i = 0; i < row.Childs.VisibleRows.Count - 1; i++)
+                    SetDeleted(row.Childs.VisibleRows[i]);
+                for (int i = 0; i < row.Childs.HidenRows.Count - 1; i++)
+                    SetDeleted(row.Childs.HidenRows[i]);
+                row.Childs = null;
+            }
+            if (row.DataIndex >= 0) m_deleted.Add(row);
         }
     }
 }
